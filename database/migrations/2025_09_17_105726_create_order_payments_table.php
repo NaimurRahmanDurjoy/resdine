@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_payments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_master_id')->constrained('orders');
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('order_master_id');
             $table->tinyInteger('method')->comment('1=cash,2=card,3=mobile banking,4=wallet');
             $table->decimal('cash_amount', 10, 2);
             $table->decimal('card_amount', 10, 2);
@@ -21,6 +21,8 @@ return new class extends Migration
             $table->decimal('collect_amount', 10, 2);
             $table->decimal('due_amount', 10, 2);
             $table->timestamps();
+
+            $table->foreign('order_master_id')->references('id')->on('order_master')->onDelete('cascade');
         });
     }
 

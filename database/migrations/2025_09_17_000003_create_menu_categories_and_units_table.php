@@ -12,9 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('menu_categories', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->string('name');
-            $table->text('description')->nullable();
+            $table->tinyInteger('status')->default(1);
+            $table->timestamps();
+        });
+
+        Schema::create('units', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name'); // pcs, kg, liter
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }
@@ -25,5 +32,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('menu_categories');
+        Schema::dropIfExists('units');
     }
 };
