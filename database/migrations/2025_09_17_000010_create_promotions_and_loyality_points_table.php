@@ -49,6 +49,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stocks_master');
+        Schema::dropIfExists('promotions');
+        Schema::dropIfExists('promotion_items');
+        Schema::dropIfExists('loyalty_points');
     }
 };
