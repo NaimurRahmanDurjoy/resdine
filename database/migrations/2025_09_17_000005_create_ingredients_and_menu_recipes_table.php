@@ -32,7 +32,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
-            $table->foreign('ingredient_id')->references('id')->on('ingrediants')->onDelete('cascade');
+            $table->foreign('ingredient_id')->references('id')->on('ingredients')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('menu_items')->onDelete('cascade');
         });
     }
