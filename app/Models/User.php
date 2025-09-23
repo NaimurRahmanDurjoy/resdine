@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
@@ -17,22 +18,15 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+ 
+    protected $fillable = ['name', 'email', 'password', 'role_id'];
 
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
+    protected $hidden = ['password', 'remember_token'];
     /**
      * Get the attributes that should be cast.
      *
@@ -45,4 +39,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relationship to Role
+    public function role()
+    {
+        return $this->belongsTo(Role::class)->withDefault([
+            'name' => 'guest',
+        ]);
+    }
+
+    // Redirect based on role
+public function redirectToDashboard()
+{
+    $roleName = $this->role->name ?? null;
+
+    if ($roleName === 'admin') return route('admin.dashboard');
+    if ($roleName === 'cashier') return route('cashier.dashboard');
+    if ($roleName === 'customer') return route('home');
+
+    return route('login');
+}
+
+
 }
