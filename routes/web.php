@@ -31,7 +31,8 @@ Route::middleware(['web'])
     });
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/debug-middleware', function () {
-    return app('router')->getMiddleware();
-});
+
+Route::get('/test-middleware', function () {
+    return "Middleware loaded!";
+})->middleware('role:admin');
 

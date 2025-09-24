@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,28 +9,12 @@ use App\Models\Role;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
- 
     protected $fillable = ['name', 'email', 'password', 'role_id'];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = ['password', 'remember_token'];
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+
     protected function casts(): array
     {
         return [
@@ -48,17 +31,16 @@ class User extends Authenticatable
         ]);
     }
 
-    // Redirect based on role
-public function redirectToDashboard()
-{
-    $roleName = $this->role->name ?? null;
+    // Redirect user based on role
+    public function redirectToDashboard(): string
+    {
+        $roleName = $this->role->name ?? null;
 
-    if ($roleName === 'admin') return route('admin.dashboard');
-    if ($roleName === 'cashier') return route('cashier.dashboard');
-    if ($roleName === 'customer') return route('home');
-
-    return route('login');
-}
-
-
+        return match($roleName) {
+            'admin' => route('admin.dashboard'),
+            'cashier' => route('cashier.dashboard'),
+            'customer' => route('home'),
+            default => route('login'),
+        };
+    }
 }

@@ -12,11 +12,11 @@ class RedirectIfAuthenticated
     {
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect()->route('dashboard'); // change to your route
+                // Redirect based on role if already logged in
+                return redirect()->to(Auth::user()->redirectToDashboard());
             }
         }
 
         return $next($request);
     }
 }
-
