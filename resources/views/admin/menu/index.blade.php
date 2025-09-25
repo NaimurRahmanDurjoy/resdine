@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('page-title', 'Menu Management')
+
 @section('content')
 <div class="flex justify-between mb-4">
     <h2 class="text-xl font-bold">Menu Items</h2>
