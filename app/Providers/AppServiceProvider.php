@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('layouts.sidebar', function ($view) {
+            $menus = [];
+
+            if (Auth::check()) { // Make sure user is logged in
+                $menus = Cache::remember('user_menus_' . Auth::id(), 3600, function () {
+                    return Auth::user()->accessibleMenus();
+                });
+            }
+
+            $view->with('menus', $menus);
+        });
+
+        
     }
 }

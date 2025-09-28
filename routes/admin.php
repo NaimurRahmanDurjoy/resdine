@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\MenuCategoryController;
+use App\Http\Controllers\Admin\MenuVariantsController;
 use App\Http\Controllers\Admin\ComboItemController;
 use App\Http\Controllers\Admin\ComplementaryItemController;
 use App\Http\Controllers\Admin\StockController;
@@ -26,8 +28,11 @@ Route::middleware(['web', 'auth', 'role:admin'])->name('admin.')->group(function
     Route::resource('users', UserController::class);
 
     // Menu management
-    Route::resource('menu', MenuController::class);
-
+    Route::prefix('menu')->name('menu.')->group(function () {
+        Route::resource('categories', MenuCategoryController::class)->names('categories');
+        Route::resource('items', MenuController::class)->names('items');
+        Route::resource('variants', MenuVariantsController::class)->names('variants');
+    });
     // Combo Items
     // Route::resource('combo-items', ComboItemController::class);
 

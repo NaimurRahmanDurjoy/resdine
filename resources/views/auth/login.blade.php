@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<h2 class="text-2xl font-bold text-center mb-6">Login to ShopNest POS</h2>
+<h2 class="text-2xl font-bold text-center mb-6">Login to Resdine</h2>
 
 @if(session('error'))
     <div class="bg-red-100 text-red-600 p-3 rounded mb-4">
