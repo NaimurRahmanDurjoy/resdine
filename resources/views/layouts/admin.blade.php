@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +9,33 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar-link.active { background-color: rgba(99, 102, 241, 0.1); border-right: 3px solid #6366f1; color: #6366f1; }
-        .stat-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-link.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-right: 3px solid #6366f1;
+            color: #6366f1;
+        }
+
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
+
 <body class="bg-gray-50 flex font-sans">
+
+    <!--  Global Toast Notifications -->
+    <x-toast />
 
     <!-- Sidebar -->
     @include('layouts.sidebar')
@@ -52,10 +72,38 @@
 
         <!-- Page Content -->
         <main class="flex-1 p-6 bg-gray-50">
+            <x-validation-toast />
             @yield('content')
         </main>
     </div>
 
     @yield('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.datatable').each(function() {
+                let $table = $(this);
+                let nonOrderableCols = $table.data('nonorderable-columns') || [];
+
+                $table.DataTable({
+                    paging: true,
+                    ordering: true,
+                    info: true,
+                    autoWidth: false,
+                    columnDefs: [{
+                        orderable: false,
+                        targets: nonOrderableCols
+                    }],
+                    language: {
+                        search: "Filter records:",
+                        lengthMenu: "Show _MENU_ entries"
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
+
 </html>

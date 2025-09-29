@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ✅ Tailwind-friendly DataTables styles scoped to .datatable-wrapper
+@layer utilities {
+  .datatable-wrapper table.dataTable thead th {
+    @apply bg-gray-50 text-gray-500 font-semibold uppercase tracking-wide rounded-tl-lg rounded-tr-lg;
+    border-bottom: none !important;
+    padding: 0.75rem 1rem;
+  }
+
+  .datatable-wrapper table.dataTable tbody tr:hover {
+    @apply bg-indigo-100;
+  }
+
+  .datatable-wrapper .dataTables_filter input {
+    @apply border border-gray-300 rounded-md px-3 py-2 text-sm w-64;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .datatable-wrapper .dataTables_filter input:focus {
+    @apply outline-none border-indigo-500 shadow-[0_0_0_3px_rgba(99,102,241,0.5)];
+  }
+
+  .datatable-wrapper .dataTables_wrapper {
+    @apply font-sans bg-white rounded-lg shadow-sm p-4;
+  }
+
+  .datatable-wrapper .dataTables_length select,
+  .datatable-wrapper .dataTables_paginate button {
+    @apply border border-gray-300 rounded-md px-3 py-1 text-sm hover:bg-indigo-50;
+  }
+} */

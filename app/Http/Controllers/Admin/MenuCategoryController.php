@@ -15,147 +15,103 @@ class MenuCategoryController extends Controller
 {
     public function index()
     {
-        $items = MenuItem::with(['category','unit','department'])->get();
-        return view('admin.menu.index', compact('items'));
+        $categories = MenuCategory::all();
+        $nonSortableColumns = [1, 3]; // Disable sorting on Image and Actions columns // works Array index
+
+        return view('admin.menus.category.index', compact('categories','nonSortableColumns'));
     }
 
     public function create()
     {
         $categories = MenuCategory::all();
-        $units = Unit::all();
-        $departments = ResDepartment::all();
-        $menuItems = MenuItem::where('type', 1)->where('status', 1)->get(); // Get regular menu items for combo
-        return view('admin.menu.create', compact('categories', 'menuItems','units','departments'));
+        return view('admin.menus.category.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:1,2,3', // 1=regular, 2=combo, 3=complementary
-            'category_id' => 'required|exists:menu_categories,id',
-            'price' => 'required|numeric|min:0',
-            'menu_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'required|boolean',
-            'combo_items' => 'required_if:type,2|array', // Required only for combo type
-            'combo_items.*.item_id' => 'required_if:type,2|exists:menu_items,id',
-            'combo_items.*.quantity' => 'required_if:type,2|integer|min:1'
+            'category_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'status' => 'nullable|boolean',
         ]);
 
-        // Create the main menu item
-        $menuItem = new MenuItem();
-        $menuItem->name = $request->name;
-        $menuItem->type = $request->type;
-        $menuItem->category_id = $request->category_id;
-        $menuItem->price = $request->price;
-        $menuItem->status = $request->status;
+        $imagePath = null;
 
-        // Handle image upload
-        if ($request->hasFile('menu_img')) {
-            $imagePath = $request->file('menu_img')->store('menu-images', 'public');
-            $menuItem->menu_img = $imagePath;
-        }
+        if ($request->hasFile('category_img')) {
+            $file = $request->file('category_img');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $destination = public_path('uploads/menu_category_img');
 
-        $menuItem->save();
-
-        // Handle combo items if type is combo (2)
-        if ($request->type == 2 && $request->has('combo_items')) {
-            foreach ($request->combo_items as $comboItem) {
-                ComboItemDetail::create([
-                    'combo_id' => $menuItem->id,
-                    'item_id' => $comboItem['item_id'],
-                    'quantity' => $comboItem['quantity']
-                ]);
+            // Create folder if not exists
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
             }
+
+            $file->move($destination, $filename);
+            $imagePath = 'uploads/menu_category_img/' . $filename;
         }
 
-        return redirect()->route('admin.menu.index')->with('success', 'Menu item created successfully.');
-    }
-
-    public function edit(MenuItem $menu)
-    {
-        $categories = MenuCategory::all();
-        $menuItems = MenuItem::where('type', 1)->where('status', 1)->get();
-        
-        // Get existing combo items if editing a combo
-        $comboItems = [];
-        if ($menu->type == 2) {
-            $comboItems = ComboItemDetail::with('menuItem')->where('combo_id', $menu->id)->get();
-        }
-        
-        return view('admin.menu.edit', compact('menu', 'categories', 'menuItems', 'comboItems'));
-    }
-
-    public function update(Request $request, MenuItem $menu)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:1,2,3',
-            'category_id' => 'required|exists:menu_categories,id',
-            'price' => 'required|numeric|min:0',
-            'menu_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'required|boolean',
-            'combo_items' => 'required_if:type,2|array',
-            'combo_items.*.item_id' => 'required_if:type,2|exists:menu_items,id',
-            'combo_items.*.quantity' => 'required_if:type,2|integer|min:1'
+        MenuCategory::create([
+            'name' => $validated['name'],
+            'status' => $request->has('status') ? 1 : 0,
+            'image' => $imagePath,
         ]);
 
-        // Update the main menu item
-        $menu->name = $request->name;
-        $menu->type = $request->type;
-        $menu->category_id = $request->category_id;
-        $menu->price = $request->price;
-        $menu->status = $request->status;
-
-        // Handle image upload
-        if ($request->hasFile('menu_img')) {
-            // Delete old image
-            if ($menu->menu_img) {
-                Storage::disk('public')->delete($menu->menu_img);
-            }
-            
-            $imagePath = $request->file('menu_img')->store('menu-images', 'public');
-            $menu->menu_img = $imagePath;
-        }
-
-        $menu->save();
-
-        // Handle combo items - delete existing and create new ones
-        if ($menu->type == 2) {
-            // Delete existing combo items
-            ComboItemDetail::where('combo_id', $menu->id)->delete();
-            
-            // Add new combo items
-            if ($request->has('combo_items')) {
-                foreach ($request->combo_items as $comboItem) {
-                    ComboItemDetail::create([
-                        'combo_id' => $menu->id,
-                        'item_id' => $comboItem['item_id'],
-                        'quantity' => $comboItem['quantity']
-                    ]);
-                }
-            }
-        } else {
-            // If changing from combo to another type, remove combo items
-            ComboItemDetail::where('combo_id', $menu->id)->delete();
-        }
-
-        return redirect()->route('admin.menu.index')->with('success', 'Menu item updated successfully.');
+        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category created successfully.');
     }
 
-    public function destroy(MenuItem $menu)
+
+    public function edit(MenuCategory $category)
+    {
+        $categories = MenuCategory::where('status', 1)->get();
+        
+        return view('admin.menus.category.edit', compact('category'));
+    }
+
+    public function update(Request $request, MenuCategory $category)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'status' => 'nullable|boolean',
+        ]);
+
+        $data = [
+            'name' => $validated['name'],
+            'status' => $request->has('status') ? 1 : 0,
+        ];
+
+        if ($request->hasFile('category_img')) {
+            // Delete old image if it exists
+            if ($category->image && file_exists(public_path($category->image))) {
+                unlink(public_path($category->image));
+            }
+
+            $file = $request->file('category_img');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $destination = public_path('uploads/menu_category_img');
+
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            $file->move($destination, $filename);
+            $data['image'] = 'uploads/menu_category_img/' . $filename;
+        }
+
+        $category->update($data);
+
+        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category updated successfully.');
+    }
+
+
+    public function destroy(MenuCategory $category)
     {
         // Delete associated image
-        if ($menu->menu_img) {
-            Storage::disk('public')->delete($menu->menu_img);
+        if ($category->image && file_exists(public_path($category->image))) {
+            unlink(public_path($category->image));
         }
-
-        // Delete combo items if exists
-        if ($menu->type == 2) {
-            ComboItemDetail::where('combo_id', $menu->id)->delete();
-        }
-
-        $menu->delete();
-        return redirect()->route('admin.menu.index')->with('success', 'Menu item deleted successfully.');
+        $category->delete();
+        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category deleted successfully.');
     }
 }
