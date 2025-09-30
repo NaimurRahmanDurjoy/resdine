@@ -13,12 +13,18 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = MenuCategory::all();
-        $nonSortableColumns = [1, 3]; // Disable sorting on Image and Actions columns // works Array index
+        $search = $request->get('search');
+        $sort = $request->get('sort', 'created_at');
+        $direction = $request->get('direction', 'desc');
 
-        return view('admin.menus.category.index', compact('categories','nonSortableColumns'));
+        $categories = MenuCategory::query()
+            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+            ->orderBy($sort, $direction)
+            ->paginate(10);
+
+        return view('admin.menus.category.index', compact('categories', 'search', 'sort', 'direction'));
     }
 
     public function create()
