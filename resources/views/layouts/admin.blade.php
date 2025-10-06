@@ -56,6 +56,8 @@
         </main>
     </div>
 
+    <x-modal />
+
     @yield('scripts')
 
     <!-- JS Libraries -->

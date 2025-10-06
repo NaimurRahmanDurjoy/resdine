@@ -45,14 +45,14 @@ class User extends Authenticatable
     }
 
     // Get menus the user has access to
+    public function softwareMenus()
+    {
+        return $this->belongsToMany(SoftwareMenu::class, 'user_id');
+    }
+
     public function accessibleMenus()
     {
-        return \App\Models\SoftwareMenu::whereHas('users', fn($q) => $q->where('user_id', $this->id))
-            ->where('is_active', true)
-            ->whereNull('parent_id')
-            ->orderBy('order')
-            ->with('childrenRecursive') // eager load nested children
-            ->get();
+        return app(\App\Services\MenuService::class)->getForUser($this);
     }
 
 

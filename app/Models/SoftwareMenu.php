@@ -10,7 +10,7 @@ class SoftwareMenu extends Model
 
     public function children()
     {
-        return $this->hasMany(SoftwareMenu::class, 'parent_id')->orderBy('order')->with('children');
+        return $this->hasMany(SoftwareMenu::class, 'parent_id')->orderBy('order');
     }
 
     // Recursive children
