@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('page-title', 'Menu Category')
+@section('page-title', 'Menu Items')
 
 @section('content')
 <!-- Modern Container -->
@@ -9,19 +9,19 @@
     <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold text-gray-800">Menu Category</h1>
-                <p class="text-gray-600 text-sm mt-1">Manage your restaurant menu categories</p>
+                <h1 class="text-2xl font-bold text-gray-800">Menu Items</h1>
+                <p class="text-gray-600">Manage your restaurant menu items</p>
             </div>
         </div>
     </div>
 
     <!-- Table -->
     <div class="m-4 flex justify-between items-center">
-        <form method="GET" action="{{ route('admin.menu.categories.index') }}" class="flex space-x-2">
+        <form method="GET" action="{{ route('admin.menu.items.index') }}" class="flex space-x-2">
             <input
                 type="text"
                 name="search"
-                placeholder="Search categories..."
+                placeholder="Search items..."
                 value="{{ old('search', $search) }}"
                 class="border px-2 py-1 rounded w-48 text-sm focus:outline-none focus:ring" />
 
@@ -30,40 +30,43 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.menu.categories.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
-            <span class="material-icons text-sm ">add</span>Add Category
+        <a href="{{ route('admin.menu.items.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
+            <span class="material-icons text-sm ">add</span>Add Items
         </a>
     </div>
 
     <x-list-table
-        :headers="['Name', 'Image', 'Status', 'Actions']"
-        :items="$categories"
-        :pagination="$categories">
+        :headers="['Category', 'Name', 'Type', 'Image', 'Price', 'Status', 'Actions']"
+        :items="$items"
+        :pagination="$items">
         <x-slot:rows>
-            @foreach ($categories as $category)
+            @foreach ($items as $item)
             <tr class="hover:bg-indigo-50 transition">
-                <td class="px-6 py-1 font-medium text-gray-900">{{ $category->name }}</td>
+                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->category->name }}</td>
+                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->name }}</td>
+                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->type }}</td>
+
                 <td class="px-6 py-1">
-                    @if ($category->image)
-                    <img src="{{ asset($category->image) }}" alt="{{ $category->name }}" class="w-12 h-12 rounded-md object-cover border border-gray-200" />
+                    @if ($item->image)
+                    <img src="{{ asset($item->image) }}" alt="{{ $item->name }}" class="w-12 h-12 rounded-md object-cover border border-gray-200" />
                     @else
                     <span class="text-gray-400 italic">No image</span>
                     @endif
                 </td>
                 <td class="px-6 py-1">
                     <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
-                        {{ $category->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                        {{ $category->status ? 'Active' : 'Inactive' }}
+                        {{ $item->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                        {{ $item->status ? 'Active' : 'Inactive' }}
                     </span>
                 </td>
                 <td class="px-6 py-1 whitespace-nowrap">
                     <div class="flex items-center space-x-4 text-base text-gray-600">
                         <!-- Edit -->
-                        <a href="{{ route('admin.menu.categories.edit', $category->id) }}" title="Edit" class="hover:text-indigo-600 transition">
+                        <a href="{{ route('admin.menu.items.edit', $item->id) }}" title="Edit" class="hover:text-indigo-600 transition">
                             <span class="material-icons text-indigo-600" style="font-size: 20px;">edit</span>
                         </a>
                         <!-- Delete -->
-                        <form action="{{ route('admin.menu.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
+                        <form action="{{ route('admin.menu.items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" title="Delete" class="hover:text-red-600 transition bg-transparent border-0 p-0">
@@ -78,12 +81,12 @@
 
         <x-slot:empty>
             <div class="flex flex-col items-center space-y-2">
-                <span class="material-icons text-gray-300 text-6xl">category</span>
-                <h3 class="text-lg font-semibold text-gray-700">No categories found</h3>
-                <p class="text-gray-500 text-sm">Start by adding a new category to your menu.</p>
-                <a href="{{ route('admin.menu.categories.create') }}"
+            <span class="material-icons text-gray-400 text-6xl mb-4">restaurant_menu</span>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No menu items found</h3>
+            <p class="text-gray-600 mb-4">Get started by creating your first menu item.</p>
+                <a href="{{ route('admin.menu.items.create') }}"
                     class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-                    + Add Category
+                    + Add Menu Items
                 </a>
             </div>
         </x-slot:empty>
@@ -93,10 +96,10 @@
                 <td colspan="4" class="px-6 py-2 text-sm text-gray-500">
                     <div class="flex justify-between items-center w-full">
                         <span>
-                            Showing {{ $categories->firstItem() ?? 0 }} to {{ $categories->lastItem() ?? 0 }} categories
+                            Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} Items
                         </span>
                         <span>
-                            From {{ $categories->total() }} categories
+                            From {{ $items->total() }} Items
                         </span>
                     </div>
                 </td>

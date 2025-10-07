@@ -42,7 +42,7 @@
 
     <!-- Pagination -->
     @if ($pagination)
-        <div class="px-6 py-4 bg-indigo-50 border-t border-indigo-100 rounded-b-lg">
+        <div class="px-5 py-2 bg-indigo-50 border-t border-indigo-100 rounded-b-lg">
             {{ $pagination->withQueryString()->links() }}
         </div>
     @endif

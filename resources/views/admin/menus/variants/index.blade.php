@@ -30,7 +30,7 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.menu.categories.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2" view-type="modal">
+        <a href="{{ route('admin.menu.variants.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2" view-type="modal">
             <span class="material-icons text-sm ">add</span>Add Variants
         </a>
     </div>
