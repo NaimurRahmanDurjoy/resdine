@@ -44,7 +44,7 @@ class MenuController extends Controller
             'type' => 'required|in:1,2,3',
             'category_id' => 'required|exists:menu_categories,id',
             'price' => 'required|numeric|min:0',
-            'cost_price' => 'nullable|numeric|min:0',
+            // 'cost_price' => 'nullable|numeric|min:0',
             'unit_id' => 'required|exists:units,id',
             'department_id' => 'required|exists:res_departments,id',
             'description' => 'nullable|string',
@@ -52,8 +52,8 @@ class MenuController extends Controller
             'status' => 'boolean',
             'is_featured' => 'boolean',
             'combo_items' => 'required_if:type,2|array',
-            'combo_discount' => 'nullable|numeric|min:0|max:100',
-            'combo_final_price' => 'nullable|numeric|min:0'
+            // 'combo_discount' => 'nullable|numeric|min:0|max:100',
+            // 'combo_final_price' => 'nullable|numeric|min:0'
         ]);
 
         // Handle image upload with Storage
@@ -103,8 +103,8 @@ class MenuController extends Controller
             'status' => 'boolean',
             'is_featured' => 'boolean',
             'combo_items' => 'required_if:type,2|array',
-            'combo_discount' => 'nullable|numeric|min:0|max:100',
-            'combo_final_price' => 'nullable|numeric|min:0'
+            // 'combo_discount' => 'nullable|numeric|min:0|max:100',
+            // 'combo_final_price' => 'nullable|numeric|min:0'
         ]);
 
         // Handle menu image upload to menu-images folder

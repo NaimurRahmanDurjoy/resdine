@@ -47,12 +47,13 @@
                 <td class="px-6 py-1 font-medium text-gray-900">{{ $item->type }}</td>
 
                 <td class="px-6 py-1">
-                    @if ($item->image)
-                    <img src="{{ asset($item->image) }}" alt="{{ $item->name }}" class="w-12 h-12 rounded-md object-cover border border-gray-200" />
+                    @if ($item->menu_img)
+                    <img src="{{ Storage::url($item->menu_img) }}" alt="{{ $item->name }}" class="w-12 h-12 rounded-md object-cover border border-gray-200" />
                     @else
                     <span class="text-gray-400 italic">No image</span>
                     @endif
                 </td>
+                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->price }}</td>
                 <td class="px-6 py-1">
                     <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
                         {{ $item->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -93,7 +94,7 @@
 
         <x-slot:footer>
             <tr>
-                <td colspan="4" class="px-6 py-2 text-sm text-gray-500">
+                <td colspan="7" class="px-6 py-2 text-sm text-gray-500">
                     <div class="flex justify-between items-center w-full">
                         <span>
                             Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} Items
