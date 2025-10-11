@@ -2,23 +2,47 @@
     'headers' => [],
     'pagination' => null,
     'items' => [],
+    'sortable' => [],
 ])
+
+@php
+    $currentSort = request('sort', 'created_at');
+    $currentDirection = request('direction', 'desc');
+@endphp
 
 <div class="m-4 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 text-sm text-gray-700">
-            <!-- Table Head -->
             <thead class="bg-indigo-100 text-indigo-700 uppercase text-sm font-semibold tracking-wide">
                 <tr>
-                    @foreach ($headers as $header)
+                    @foreach ($headers as $key => $header)
+                        @php
+                            $isSortable = isset($sortable[$key]);
+                            $sortField = $sortable[$key] ?? null;
+                            $isActive = $isSortable && $currentSort === $sortField;
+                            $newDirection = $isActive && $currentDirection === 'asc' ? 'desc' : 'asc';
+                            $sortUrl = $isSortable ? request()->fullUrlWithQuery([
+                                'sort' => $sortField, 
+                                'direction' => $newDirection
+                            ]) : '#';
+                        @endphp
+
                         <th class="px-6 py-3 text-left">
-                            {{ $header }}
+                            @if($isSortable)
+                                <a href="{{ $sortUrl }}" class="flex items-center space-x-1 hover:text-indigo-900 transition">
+                                    <span>{{ $header }}</span>
+                                    <span class="material-icons text-sm {{ $isActive ? '' : 'text-gray-400' }}">
+                                        {{ $isActive ? ($currentDirection === 'asc' ? 'arrow_drop_up' : 'arrow_drop_down') : 'unfold_more' }}
+                                    </span>
+                                </a>
+                            @else
+                                {{ $header }}
+                            @endif
                         </th>
                     @endforeach
                 </tr>
             </thead>
 
-            <!-- Table Body -->
             <tbody class="bg-white divide-y divide-gray-100">
                 @if ($items->count())
                     {{ $rows }}
@@ -31,7 +55,6 @@
                 @endif
             </tbody>
 
-            <!-- Optional Footer -->
             @if (isset($footer))
                 <tfoot class="bg-gray-50">
                     {{ $footer }}
@@ -40,11 +63,9 @@
         </table>
     </div>
 
-    <!-- Pagination -->
     @if ($pagination)
         <div class="px-5 py-2 bg-indigo-50 border-t border-indigo-100 rounded-b-lg">
             {{ $pagination->withQueryString()->links() }}
         </div>
     @endif
-
 </div>

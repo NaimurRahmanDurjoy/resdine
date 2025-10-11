@@ -38,13 +38,14 @@
     <x-list-table
         :headers="['Category', 'Name', 'Type', 'Image', 'Price', 'Status', 'Actions']"
         :items="$items"
-        :pagination="$items">
+        :pagination="$items"
+        :sortable="[0 => 'category_id', 1 => 'name', 2 => 'type', 4 => 'price', ]">
         <x-slot:rows>
             @foreach ($items as $item)
             <tr class="hover:bg-indigo-50 transition">
                 <td class="px-6 py-1 font-medium text-gray-900">{{ $item->category->name }}</td>
                 <td class="px-6 py-1 font-medium text-gray-900">{{ $item->name }}</td>
-                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->type }}</td>
+                <td class="px-6 py-1 font-medium text-gray-900">{{ $item->type == 1 ? 'Regular' : ($item->type == 2 ? 'Combo' : ($item->type == 3 ? 'Comp.' : 'Unknown')) }}</td>
 
                 <td class="px-6 py-1">
                     @if ($item->menu_img)
@@ -82,9 +83,9 @@
 
         <x-slot:empty>
             <div class="flex flex-col items-center space-y-2">
-            <span class="material-icons text-gray-400 text-6xl mb-4">restaurant_menu</span>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No menu items found</h3>
-            <p class="text-gray-600 mb-4">Get started by creating your first menu item.</p>
+                <span class="material-icons text-gray-400 text-6xl mb-4">restaurant_menu</span>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No menu items found</h3>
+                <p class="text-gray-600 mb-4">Get started by creating your first menu item.</p>
                 <a href="{{ route('admin.menu.items.create') }}"
                     class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
                     + Add Menu Items

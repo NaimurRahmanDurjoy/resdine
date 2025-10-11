@@ -38,7 +38,8 @@
     <x-list-table
         :headers="['Name', 'Image', 'Status', 'Actions']"
         :items="$categories"
-        :pagination="$categories">
+        :pagination="$categories"
+        :sortable="[0 => 'name']">
         <x-slot:rows>
             @foreach ($categories as $category)
             <tr class="hover:bg-indigo-50 transition">

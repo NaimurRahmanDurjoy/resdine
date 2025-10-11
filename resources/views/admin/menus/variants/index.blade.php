@@ -30,7 +30,7 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.menu.variants.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2" view-type="modal">
+        <a href="{{ route('admin.menu.variants.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
             <span class="material-icons text-sm ">add</span>Add Variants
         </a>
     </div>
@@ -38,12 +38,13 @@
     <x-list-table
         :headers="['Name', 'Item', 'Price', 'Actions']"
         :items="$variants"
-        :pagination="$variants">
+        :pagination="$variants"
+        :sortable="[0 => 'name', 1 => 'item_id', 2 => 'price',]">
         <x-slot:rows>
             @foreach ($variants as $variant)
             <tr class="hover:bg-indigo-50 transition">
                 <td class="px-6 py-4 font-medium text-gray-900">{{ $variant->name }}</td>
-                <td class="px-6 py-4 font-medium text-gray-900">{{ $variant->item_id }}</td>
+                <td class="px-6 py-4 font-medium text-gray-900">{{ $variant->menuItem->name }}</td>
                 <td class="px-6 py-4 font-medium text-gray-900">{{ $variant->price }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center space-x-4 text-base text-gray-600">
@@ -79,8 +80,15 @@
 
         <x-slot:footer>
             <tr>
-                <td colspan="4" class="px-6 py-2 text-right text-sm text-gray-500">
-                    Showing {{ $variants->firstItem() ?? 0 }} to {{ $variants->lastItem() ?? 0 }} of {{ $variants->total() }} variants
+                <td colspan="4" class="px-6 py-2 text-sm text-gray-500">
+                    <div class="flex justify-between items-center w-full">
+                        <span>
+                            Showing {{ $variants->firstItem() ?? 0 }} to {{ $variants->lastItem() ?? 0 }} variants
+                        </span>
+                        <span>
+                            From {{ $variants->total() }} variants
+                        </span>
+                    </div>
                 </td>
             </tr>
         </x-slot:footer>

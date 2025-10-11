@@ -8,6 +8,7 @@ use App\Http\Requests\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\MenuItem\UpdateMenuItemRequest;
 use App\Models\MenuItem;
 use App\Models\MenuCategory;
+use App\Models\ComboItemDetail;
 use App\Models\Unit;
 use App\Models\ResDepartment;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\Storage;
 class MenuController extends Controller
 {
     public function index(Request $request)
-    {
+
+    {    
         $search = $request->get('search');
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
@@ -24,8 +26,11 @@ class MenuController extends Controller
         $items = MenuItem::with(['category', 'unit', 'department'])
             ->when($search, function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhere('res_department', 'like', "%{$search}%");
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhereHas('department', function ($departmentQuery) use ($search) {
+                          $departmentQuery->where('name', 'like', "%{$search}%");
+                      });
+
             })
             ->orderBy($sort, $direction)
             ->paginate(10);
@@ -46,21 +51,18 @@ class MenuController extends Controller
     public function store(StoreMenuItemRequest $request)
     {
         $validated = $request->validated();
-
-        // Remove combo_items from the validated data before creating MenuItem
         $comboItems = $request->input('combo_items', []);
 
         if ($request->hasFile('menu_img')) {
             $validated['menu_img'] = $request->file('menu_img')->store('menu-images', 'public');
         }
 
-        // Remove combo_items to prevent mass assignment error
-        unset($validated['combo_items']);
+        unset($validated['combo_items']); // Remove from main table data
 
         DB::transaction(function () use ($validated, $comboItems) {
             $menuItem = MenuItem::create($validated);
 
-            if ($menuItem->type == 2 && !empty($comboItems)) {
+            if ($menuItem->type == 2) {
                 $this->syncComboItems($menuItem, $comboItems);
             }
         });
@@ -80,48 +82,41 @@ class MenuController extends Controller
         return view('admin.menus.items.edit', compact('item', 'categories', 'menuItems', 'departments', 'units'));
     }
 
-    public function update(UpdateMenuItemRequest $request, MenuItem $menu)
+    public function update(UpdateMenuItemRequest $request, MenuItem $item)
     {
-        // dd($request->input('combo_items'));
         $validated = $request->validated();
-
         $comboItems = $request->input('combo_items', []);
 
         if ($request->hasFile('menu_img')) {
-            if ($menu->menu_img) {
-                Storage::disk('public')->delete($menu->menu_img);
+            if ($item->menu_img) {
+                Storage::disk('public')->delete($item->menu_img);
             }
             $validated['menu_img'] = $request->file('menu_img')->store('menu-images', 'public');
         }
 
         unset($validated['combo_items']);
 
-        DB::transaction(function () use ($menu, $validated, $comboItems) {
-            $menu->update($validated);
+        DB::transaction(function () use ($item, $validated, $comboItems) {
+            $item->update($validated);
 
-        $type = $validated['type'] ?? $menu->type;
-
-        if ($type == 2) {
-            $this->syncComboItems($menu, $comboItems);
-        } else {
-            $menu->comboItems()->delete();
-        }
-
+            if ($item->type == 2) {
+                $this->syncComboItems($item, $comboItems);
+            } else {
+                $item->comboItems()->delete();
+            }
         });
-
 
         return redirect()->route('admin.menu.items.index')->with('success', 'Menu item updated successfully.');
     }
-
-    public function destroy(MenuItem $menu)
+    public function destroy(MenuItem $item)
     {
-        if ($menu->menu_img) {
-            Storage::disk('public')->delete($menu->menu_img);
+        if ($item->menu_img) {
+            Storage::disk('public')->delete($item->menu_img);
         }
 
-        DB::transaction(function () use ($menu) {
-            $menu->comboItems()->delete();
-            $menu->delete();
+        DB::transaction(function () use ($item) {
+            $item->comboItems()->delete();
+            $item->delete();
         });
 
         return redirect()->route('admin.menu.items.index')->with('success', 'Menu item deleted successfully.');
@@ -134,20 +129,20 @@ class MenuController extends Controller
      * @param array $comboItems
      * @return void
      */
-private function syncComboItems(MenuItem $menuItem, array $comboItems): void
-{
-    \Log::info('Syncing combo items', ['menu_item_id' => $menuItem->id, 'combo_items' => $comboItems]);
+    private function syncComboItems(MenuItem $menuItem, array $comboItems): void
+    {
+        $menuItem->comboItems()->delete();
 
-    $menuItem->comboItems()->delete();
+        $comboItemsData = array_map(function ($itemId) use ($menuItem) {
+            return [
+                'combo_id' => $menuItem->id,
+                'item_id' => $itemId,
+                'quantity' => 1,
+            ];
+        }, array_filter($comboItems));
 
-    $comboItemsData = collect($comboItems)->map(function ($itemId) {
-        return ['item_id' => $itemId, 'quantity' => 1];
-    })->toArray();
-
-    \Log::info('Combo items data prepared', $comboItemsData);
-
-    $menuItem->comboItems()->createMany($comboItemsData);
-}
-
-
+        if (!empty($comboItemsData)) {
+            ComboItemDetail::insert($comboItemsData);
+        }
+    }
 }

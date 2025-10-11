@@ -16,8 +16,14 @@ class MenuVariantsController extends Controller
         $direction = $request->get('direction', 'desc');
 
         $variants = MenuVariant::with('MenuItem')
-            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
-            ->when($search, fn($q) => $q->where('item', 'like', "%$search%"))
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhereHas('menuItem', function ($q2) use ($search) {
+                            $q2->where('name', 'like', "%$search%");
+                        });
+                });
+            })
             ->orderBy($sort, $direction)
             ->paginate(10);
 
@@ -28,7 +34,7 @@ class MenuVariantsController extends Controller
     {
         $variants = MenuVariant::with('MenuItem')->get();
         $menuItems = MenuItem::all();
-        return view('admin.menus.variants.create', compact('variants','menuItems'));
+        return view('admin.menus.variants.create', compact('variants', 'menuItems'));
     }
 
     public function store(Request $request)
@@ -49,12 +55,12 @@ class MenuVariantsController extends Controller
     }
 
     public function edit(MenuVariant $variant)
-    { 
+    {
         $menuItems = MenuItem::all();
-        return view('admin.menus.variants.edit', compact('variant','menuItems'));
+        return view('admin.menus.variants.edit', compact('variant', 'menuItems'));
     }
 
-    public function update(Request $request, MenuVariant $variants)
+    public function update(Request $request, MenuVariant $variant)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -62,7 +68,7 @@ class MenuVariantsController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
-        $variants -> update([
+        $variant->update([
             'name' => $validated['name'],
             'item_id' => $validated['item_id'],
             'price' => $validated['price'],
@@ -71,9 +77,9 @@ class MenuVariantsController extends Controller
         return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants updated successfully.');
     }
 
-    public function destroy(MenuVariant $variants)
+    public function destroy(MenuVariant $variant)
     {
-        $variants->delete();
+        $variant->delete();
         return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants deleted successfully.');
     }
 }
