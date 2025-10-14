@@ -9,7 +9,7 @@ use App\Http\Controllers\DevAdmin\SettingsController;
 // devAdmin Panel Routes
 // ----------------------
 
-Route::prefix('devAdmin')->name('devAdmin.')->group(function () {
+Route::name('devAdmin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('devAdmin.login');
     })->name('home');
