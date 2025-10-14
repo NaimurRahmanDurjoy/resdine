@@ -16,7 +16,7 @@
     <nav class="mt-6 px-4">
         <div class="space-y-2">
             <!-- Dashboard -->
-            <a href="{{ route('admin.dashboard') }}" 
+            <a href="{{ route('devAdmin.dashboard') }}" 
                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400' : '' }}">
                 <i class="fas fa-tachometer-alt w-5 mr-3"></i>
                 <span>Dashboard</span>

@@ -17,7 +17,9 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, string $role)
     {
-        $user = Auth::user();
+        // Try admin guard first (for devAdmin), fallback to default
+        $user = Auth::guard('admin')->user() ?? Auth::user();
+
 
         // Make sure user is logged in
         if (!$user) {
