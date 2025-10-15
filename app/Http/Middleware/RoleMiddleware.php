@@ -15,20 +15,26 @@ class RoleMiddleware
      * @param  string  $role
      * @return mixed
      */
+
     public function handle($request, Closure $next, string $role)
     {
-        // Try admin guard first (for devAdmin), fallback to default
         $user = Auth::guard('admin')->user() ?? Auth::user();
 
-
-        // Make sure user is logged in
         if (!$user) {
             return redirect()->route('login')->with('error', 'You must be logged in.');
         }
 
-        // Check if role exists and matches
-        if (!$user->role || $user->role->name !== $role) {
-            abort(403, 'Unauthorized: Requires ' . $role . ' role.');
+        // If role is a string (Admin)
+        if (is_string($user->role)) {
+            if ($user->role !== $role) {
+                abort(403, 'Unauthorized: Requires ' . $role . ' role.');
+            }
+        }
+        // If role is an object/relationship (User)
+        else {
+            if (!$user->role || $user->role->name !== $role) {
+                abort(403, 'Unauthorized: Requires ' . $role . ' role.');
+            }
         }
 
         return $next($request);

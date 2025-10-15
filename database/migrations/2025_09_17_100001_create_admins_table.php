@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('user_name')->unique();
             $table->string('password');
+            $table->string('role')->default('developer'); // roles: developer, admin, superadmin
             $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
     }
