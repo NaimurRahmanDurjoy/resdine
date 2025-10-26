@@ -71,12 +71,12 @@
                 <div x-show="open"
                     @click.away="open = false"
                     class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                    <a href="{{ route('admin.profile') }}"
+                    <a href="#"
                         class="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <i class="fas fa-user w-4 mr-3"></i>
                         Profile
                     </a>
-                    <a href="{{ route('admin.settings') }}"
+                    <a href="#"
                         class="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <i class="fas fa-cog w-4 mr-3"></i>
                         Settings

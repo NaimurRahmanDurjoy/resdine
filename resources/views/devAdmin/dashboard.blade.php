@@ -82,22 +82,22 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
             <div class="grid grid-cols-2 gap-4">
-                <a href="{{ route('admin.system.cache') }}" 
+                <a href="#" 
                    class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <i class="fas fa-bolt text-blue-600 mr-3"></i>
                     <span class="text-sm font-medium">Clear Cache</span>
                 </a>
-                <a href="{{ route('admin.system.logs') }}" 
+                <a href="#" 
                    class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <i class="fas fa-file-alt text-green-600 mr-3"></i>
                     <span class="text-sm font-medium">View Logs</span>
                 </a>
-                <a href="{{ route('admin.database') }}" 
+                <a href="#" 
                    class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <i class="fas fa-database text-purple-600 mr-3"></i>
                     <span class="text-sm font-medium">Database</span>
                 </a>
-                <a href="{{ route('admin.users.create') }}" 
+                <a href="#" 
                    class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <i class="fas fa-plus text-red-600 mr-3"></i>
                     <span class="text-sm font-medium">Add User</span>

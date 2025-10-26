@@ -42,7 +42,7 @@
                     <div class="text-gray-700 font-medium">Hi, {{ auth()->user()->name }}</div>
                 </div>
                 <!-- Logout -->
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center transition-colors">
                         <span class="material-icons mr-1 text-sm">logout</span> Logout

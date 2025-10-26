@@ -40,7 +40,7 @@ class User extends Authenticatable
             'admin' => route('admin.dashboard'),
             'cashier' => route('cashier.dashboard'),
             'customer' => route('home'),
-            default => route('login'),
+            default => route('home'),
         };
     }
 

@@ -22,15 +22,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/menu', [OrderController::class, 'menu'])->name('menu');
 // Route::post('/order', [OrderController::class, 'store'])->name('order.store');
 
-// Auth routes
-
-Route::middleware(['web'])
-    ->group(function () {
-        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('login', [AuthController::class, 'login']);
-    });
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 
 Route::get('/test-middleware', function () {
     return "Middleware loaded!";

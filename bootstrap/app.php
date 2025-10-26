@@ -10,7 +10,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::prefix('admin')->middleware(['web', 'auth', 'role:admin'])->group(base_path('routes/admin.php'));
+            Route::prefix('admin')->group(base_path('routes/admin.php'));
             Route::prefix('devAdmin')->group(base_path('routes/devAdmin.php'));
         }
     )

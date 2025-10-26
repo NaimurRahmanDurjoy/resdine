@@ -21,7 +21,15 @@ class RoleMiddleware
         $user = Auth::guard('admin')->user() ?? Auth::user();
 
         if (!$user) {
-            return redirect()->route('login')->with('error', 'You must be logged in.');
+            $routeName = $request->route() ? $request->route()->getName() : null;
+            if ($routeName && str_starts_with($routeName, 'admin.')) {
+                return redirect()->route('admin.login')->with('error', 'You must be logged in.');
+            }
+            if ($routeName && str_starts_with($routeName, 'devAdmin.')) {
+                return redirect()->route('devAdmin.login')->with('error', 'You must be logged in.');
+            }
+            // fallback
+            return redirect()->route('admin.login')->with('error', 'You must be logged in.');
         }
 
         // If role is a string (Admin)

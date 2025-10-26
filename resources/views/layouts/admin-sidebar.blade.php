@@ -59,17 +59,17 @@
                 </button>
                 
                 <div x-show="open" x-collapse class="ml-4 mt-2 space-y-1">
-                    <a href="{{ route('admin.system.logs') }}" 
+                    <a href="#" 
                        class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-blue-50 dark:hover:bg-gray-700">
                         <i class="fas fa-file-alt w-4 mr-2"></i>
                         Logs
                     </a>
-                    <a href="{{ route('admin.system.queue') }}" 
+                    <a href="#" 
                        class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-blue-50 dark:hover:bg-gray-700">
                         <i class="fas fa-tasks w-4 mr-2"></i>
                         Queue Monitor
                     </a>
-                    <a href="{{ route('admin.system.cache') }}" 
+                    <a href="#" 
                        class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-blue-50 dark:hover:bg-gray-700">
                         <i class="fas fa-bolt w-4 mr-2"></i>
                         Cache Management
@@ -78,14 +78,14 @@
             </div>
 
             <!-- Database -->
-            <a href="{{ route('admin.database') }}" 
+            <a href="#" 
                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">
                 <i class="fas fa-database w-5 mr-3"></i>
                 <span>Database</span>
             </a>
 
             <!-- Settings -->
-            <a href="{{ route('admin.settings') }}" 
+            <a href="#" 
                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors">
                 <i class="fas fa-cog w-5 mr-3"></i>
                 <span>Settings</span>
