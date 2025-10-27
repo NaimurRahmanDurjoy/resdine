@@ -17,7 +17,9 @@
     @stack('styles')
 </head>
 <body class="bg-gray-50" x-data="{ sidebarOpen: false, darkMode: false }" :class="{ 'dark': darkMode }">
-    <!-- Sidebar Backdrop -->
+    <!-- Global Toast Notifications -->
+    <x-toast />  
+<!-- Sidebar Backdrop -->
     <div x-show="sidebarOpen" 
          x-transition:enter="transition ease-in-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -45,8 +47,8 @@
                 <p class="text-gray-600 dark:text-gray-400 mt-2">@yield('page-description')</p>
             </div>
 
-            <!-- Notifications -->
-            @if(session('success'))
+
+            <!-- @if(session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
                     {{ session('success') }}
                 </div>
@@ -60,7 +62,7 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif
+            @endif -->
 
             <!-- Page Content -->
             @yield('content')

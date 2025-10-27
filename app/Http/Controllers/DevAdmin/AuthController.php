@@ -13,17 +13,22 @@ class AuthController extends Controller
         return view('devAdmin.login');
     }
 
+
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
         ]);
 
-        // Use the 'admin' guard for devAdmin authentication
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $request->session()->regenerate();
+        $loginValue = $request->input('email');
+        $password = $request->input('password');
 
+        // Determine if the input is an email or username automatically
+        $loginField = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        if (Auth::guard('admin')->attempt([$loginField => $loginValue, 'password' => $password])) {
+            $request->session()->regenerate();
             return redirect()->intended(route('devAdmin.dashboard'));
         }
 

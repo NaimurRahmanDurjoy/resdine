@@ -15,7 +15,7 @@
         <form method="POST" action="{{ route('devAdmin.login.submit') }}">
             @csrf
             <div class="mb-4">
-                <label for="email" class="block text-gray-700 mb-2">Email/UserName</label>
+                <label for="email" class="block text-gray-700 mb-2">Email / Username</label>
                 <input type="email" name="email" id="email" required autofocus
                        class="w-full px-3 py-2 border rounded focus:outline-none focus:ring"
                        value="{{ old('email') }}">
