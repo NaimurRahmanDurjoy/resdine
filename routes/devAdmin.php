@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DevAdmin\AuthController;
 use App\Http\Controllers\DevAdmin\DashboardController;
 use App\Http\Controllers\DevAdmin\SettingsController;
+use App\Http\Controllers\DevAdmin\SoftwareMenuController;
 use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
 
@@ -32,7 +33,7 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             });
 
             Route::prefix('software')->name('software.')->group(function () {
-                Route::get('/menu', [SettingsController::class, 'softwareMenu'])->name('menu');
+                Route::resource('/menu', SoftwareMenuController::class);
                 Route::get('/internal-link', [SettingsController::class, 'softwareInternalLink'])->name('internalLink');
                 Route::get('/menu-sorting', [SettingsController::class, 'softwareMenuSorting'])->name('menuSorting');
             });

@@ -10,7 +10,13 @@ class AdminMenu extends Model
 
     public function children()
     {
-        return $this->hasMany(AdminMenu::class, 'parent_id')->orderBy('order');
+        return $this->hasMany(AdminMenu::class, 'parent_id')->where('is_active', 1)->orderBy('order');
+    }
+
+    // Recursive children
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
     }
 
     public function parent()
