@@ -40,9 +40,9 @@ class SoftwareMenuController extends Controller
         ]);
 
         SoftwareMenu::create($request->all());
-        $this->menuService->clearAllCache();
+        // $this->menuService->clearAllCache();
 
-        return redirect()->route('systemConfig.software.menu.index')->with('success', 'Menu created successfully.');
+        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu created successfully.');
     }
 
     public function edit(SoftwareMenu $menu)
@@ -63,15 +63,15 @@ class SoftwareMenuController extends Controller
         ]);
 
         $menu->update($request->all());
-        $this->menuService->clearAllCache();
+        // $this->menuService->clearAllCache();
 
-        return redirect()->route('systemConfig.software.menu.index')->with('success', 'Menu updated successfully.');
+        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu updated successfully.');
     }
 
     public function destroy(SoftwareMenu $menu)
     {
         $menu->delete();
-        $this->menuService->clearAllCache();
+        // $this->menuService->clearAllCache();
 
         return redirect()->back()->with('success', 'Menu deleted successfully.');
     }

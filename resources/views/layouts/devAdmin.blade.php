@@ -32,7 +32,7 @@
     </div>
 
     <!-- Sidebar -->
-    @include('layouts.admin-sidebar')
+    <x-dev-admin.sidebar />
 
     <!-- Main Content -->
     <div class="lg:ml-64">

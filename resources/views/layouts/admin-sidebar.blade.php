@@ -129,8 +129,8 @@
                         </button>
 
                         <div x-show="openSub" x-collapse class="ml-4 mt-2 space-y-1">
-                            <a href="{{ route('devAdmin.systemConfig.software.menu') }}"
-                                class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-blue-50 dark:hover:bg-gray-700 {{ request()->routeIs('devAdmin.systemConfig.software.menu') ? 'text-blue-600 dark:text-blue-400' : '' }}">
+                            <a href="{{ route('devAdmin.systemConfig.software.menu.index') }}"
+                                class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-blue-50 dark:hover:bg-gray-700 {{ request()->routeIs('devAdmin.systemConfig.software.menu.*') ? 'text-blue-600 dark:text-blue-400' : '' }}">
                                 <span class="material-symbols-outlined w-4 mr-2">menu</span> Menu
                             </a>
                             <a href="{{ route('devAdmin.systemConfig.software.internalLink') }}"
