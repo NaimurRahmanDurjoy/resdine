@@ -19,7 +19,7 @@ class SoftwareMenu extends Model
         return $this->children()->with('childrenRecursive');
     }
 
-    public function users()
+    public function access()
     {
         return $this->belongsToMany(User::class, 'software_menu_access', 'menu_id', 'user_id');
     }

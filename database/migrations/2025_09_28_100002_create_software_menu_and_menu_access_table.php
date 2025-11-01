@@ -42,7 +42,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('software_menus');
         Schema::dropIfExists('software_menu_access');
+        Schema::dropIfExists('software_menus');
     }
 };

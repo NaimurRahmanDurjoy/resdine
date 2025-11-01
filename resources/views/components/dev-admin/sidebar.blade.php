@@ -1,4 +1,5 @@
-<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
+<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg
+       transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
        :class="{ '-translate-x-full': !sidebarOpen }"
        x-cloak>
 
@@ -13,14 +14,12 @@
     </div>
 
     <!-- Navigation -->
-   <nav class="mt-6 px-4">
-        {{-- temporary debug: --}}
-        {{-- @dump($menus->pluck('name')) --}}
-        <ul class="space-y-2">
-            @foreach ($menus as $menu)
-                @include('components.dev-admin.sidebar-item', ['menu' => $menu])
+    <nav class="mt-6 px-4">
+        <div class="space-y-2">
+            @foreach($menus as $menu)
+                <x-dev-admin.sidebar-item :menu="$menu" />
             @endforeach
-        </ul>
+        </div>
     </nav>
 
     <!-- Bottom Info -->
