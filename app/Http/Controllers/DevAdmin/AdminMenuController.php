@@ -4,14 +4,14 @@ namespace App\Http\Controllers\DevAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminMenu;
-use App\Services\DevMenuService;
+use App\Services\DevAdminMenuService;
 use Illuminate\Http\Request;
 
 class AdminMenuController extends Controller
 {
-    protected DevMenuService $menuService;
+    protected DevAdminMenuService $menuService;
 
-    public function __construct(DevMenuService $menuService)
+    public function __construct(DevAdminMenuService $menuService)
     {
         $this->menuService = $menuService;
     }

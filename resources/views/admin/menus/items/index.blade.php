@@ -31,7 +31,7 @@
         </form>
 
         <a href="{{ route('admin.menu.items.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
-            <span class="material-icons text-sm ">add</span>Add Items
+            <span class="material-symbols-outlined text-sm ">add</span>Add Items
         </a>
     </div>
 
@@ -65,14 +65,14 @@
                     <div class="flex items-center space-x-4 text-base text-gray-600">
                         <!-- Edit -->
                         <a href="{{ route('admin.menu.items.edit', $item->id) }}" title="Edit" class="hover:text-indigo-600 transition">
-                            <span class="material-icons text-indigo-600" style="font-size: 20px;">edit</span>
+                            <span class="material-symbols-outlined text-indigo-600" style="font-size: 20px;">edit</span>
                         </a>
                         <!-- Delete -->
                         <form action="{{ route('admin.menu.items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" title="Delete" class="hover:text-red-600 transition bg-transparent border-0 p-0">
-                                <span class="material-icons text-red-600" style="font-size: 20px;">delete</span>
+                                <span class="material-symbols-outlined text-red-600" style="font-size: 20px;">delete</span>
                             </button>
                         </form>
                     </div>
@@ -83,7 +83,7 @@
 
         <x-slot:empty>
             <div class="flex flex-col items-center space-y-2">
-                <span class="material-icons text-gray-400 text-6xl mb-4">restaurant_menu</span>
+                <span class="material-symbols-outlined text-gray-400 text-6xl mb-4">restaurant_menu</span>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">No menu items found</h3>
                 <p class="text-gray-600 mb-4">Get started by creating your first menu item.</p>
                 <a href="{{ route('admin.menu.items.create') }}"
@@ -98,10 +98,10 @@
                 <td colspan="7" class="px-6 py-2 text-sm text-gray-500">
                     <div class="flex justify-between items-center w-full">
                         <span>
-                            Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} Items
+                            Showing {{ $items->firstItem() ?? 0 }} to {{ $items->lastItem() ?? 0 }} of {{ $items->total() }} Items
                         </span>
                         <span>
-                            From {{ $items->total() }} Items
+                            Page {{ $items->currentPage() }} of {{ $items->lastPage() }}
                         </span>
                     </div>
                 </td>

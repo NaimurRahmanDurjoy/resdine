@@ -22,9 +22,9 @@
                     <select name="category_id" class="w-full border rounded-lg px-4 py-2" required>
                         <option value="">Select Category</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id', $item->category_id) == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
+                        <option value="{{ $category->id }}" {{ old('category_id', $item->category_id) == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -81,9 +81,9 @@
                     <select name="unit_id" class="w-full border rounded-lg px-4 py-2" required>
                         <option value="">Select Unit</option>
                         @foreach($units as $unit)
-                            <option value="{{ $unit->id }}" {{ old('unit_id', $item->unit_id) == $unit->id ? 'selected' : '' }}>
-                                {{ $unit->name }}
-                            </option>
+                        <option value="{{ $unit->id }}" {{ old('unit_id', $item->unit_id) == $unit->id ? 'selected' : '' }}>
+                            {{ $unit->name }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -93,9 +93,9 @@
                     <select name="department_id" class="w-full border rounded-lg px-4 py-2" required>
                         <option value="">Select Res. Dept</option>
                         @foreach($departments as $department)
-                            <option value="{{ $department->id }}" {{ old('department_id', $item->department_id) == $department->id ? 'selected' : '' }}>
-                                {{ $department->name }}
-                            </option>
+                        <option value="{{ $department->id }}" {{ old('department_id', $item->department_id) == $department->id ? 'selected' : '' }}>
+                            {{ $department->name }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -116,13 +116,13 @@
                 <div>
                     <select name="combo_items[]" multiple class="combo-items-select w-full border rounded">
                         @foreach($menuItems as $menuItem)
-                            <option value="{{ $menuItem->id }}"
-                                {{ in_array($menuItem->id, old('combo_items', $item->comboItems->pluck('item_id')->toArray() ?? [])) ? 'selected' : '' }}>
-                                {{ $menuItem->name }} - ${{ number_format($menuItem->price, 2) }}
-                            </option>
+                        <option value="{{ $menuItem->id }}"
+                            {{ in_array($menuItem->id, old('combo_items', $item->comboItems->pluck('item_id')->toArray() ?? [])) ? 'selected' : '' }}>
+                            {{ $menuItem->name }} - ${{ number_format($menuItem->price, 2) }}
+                        </option>
                         @endforeach
                     </select>
-                 </div>
+                </div>
                 <!-- Right Column: Combo Discount & Final Price -->
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Combo Discount -->
@@ -153,7 +153,7 @@
         <!-- Actions -->
         <div class="mt-8 flex space-x-3">
             <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
-                <span class="material-icons mr-2 text-sm">save</span> Update Item
+                <span class="material-symbols-outlined mr-2 text-sm">save</span> Update Item
             </button>
             <a href="{{ route('admin.menu.items.index') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
                 Cancel
@@ -165,7 +165,7 @@
 
 @section('scripts')
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('.combo-items-select').select2({
             placeholder: "Select items for combo meal",
             allowClear: true,

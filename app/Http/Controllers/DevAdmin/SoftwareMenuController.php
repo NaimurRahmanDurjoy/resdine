@@ -16,11 +16,27 @@ class SoftwareMenuController extends Controller
         $this->menuService = $menuService;
     }
 
-    public function index()
-    {
-        $menus = SoftwareMenu::with('children')->whereNull('parent_id')->orderBy('order')->get();
-        return view('devAdmin.systemConfig.softwareMenu.index', compact('menus'));
-    }
+public function index(Request $request)
+{
+    $search = $request->get('search');
+    $sort = $request->get('sort', 'created_at');
+    $direction = $request->get('direction', 'desc');
+
+    $menus = SoftwareMenu::with('children')
+        ->when($search, function ($q) use ($search) {
+            $q->where(function($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('route', 'like', "%{$search}%");
+            });
+        })
+        ->whereNull('parent_id')
+        ->orderBy('order')
+        ->orderBy($sort, $direction)
+        ->paginate(10);
+
+    return view('devAdmin.systemConfig.softwareMenu.index', compact('menus', 'search', 'sort', 'direction'));
+}
+
 
     public function create()
     {

@@ -185,7 +185,7 @@
         <div class="mt-8 flex space-x-3">
             <button type="submit"
                 class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center">
-                <span class="material-icons mr-2 text-sm">save</span> Save Item
+                <span class="material-symbols-outlined mr-2 text-sm">save</span> Save Item
             </button>
             <a href="{{ route('admin.menu.items.index') }}"
                 class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">

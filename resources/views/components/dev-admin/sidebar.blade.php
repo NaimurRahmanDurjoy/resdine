@@ -1,4 +1,4 @@
-<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
+<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-100 dark:bg-gray-800 shadow-lg transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
     :class="{ '-translate-x-full': !sidebarOpen }"
     x-cloak>
 

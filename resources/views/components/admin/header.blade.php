@@ -1,4 +1,4 @@
-<header class="bg-white shadow-sm px-6 h-16 flex justify-between items-center border-b border-gray-200">
+<header class="bg-slate-100 shadow-sm px-6 h-16 flex justify-between items-center border-b border-gray-200">
     <button class="lg:hidden pr-4 rounded-md" @click="sidebarOpen = true">
         <span class="material-symbols-outlined">menu</span>
     </button>
