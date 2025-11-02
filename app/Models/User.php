@@ -52,7 +52,7 @@ class User extends Authenticatable
 
     public function accessibleMenus()
     {
-        return app(\App\Services\MenuService::class)->getForUser($this);
+        return app(\App\Services\MenuService::class)->getMenusFor($this);
     }
 
 

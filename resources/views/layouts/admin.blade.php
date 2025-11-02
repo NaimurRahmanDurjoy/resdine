@@ -6,52 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Resdine POS Admin')</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <!-- Replace Material Icons with Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-50 flex font-sans">
+<body class="bg-gray-50 flex font-sans" x-data="{ sidebarOpen: false }">
 
     <!-- Global Toast Notifications -->
     <x-toast />
+    <div x-show="sidebarOpen"
+        x-transition:enter="transition ease-in-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in-out duration-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
+        @click="sidebarOpen = false">
+    </div>
 
     <!-- Sidebar -->
-    @include('layouts.sidebar')
+    <x-admin.sidebar class="flex-shrink-0" />
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-h-screen">
+    <div class="flex-1 flex flex-col min-h-screen lg:ml-64 transition-all duration-300">
         <!-- Topbar -->
-        <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b border-gray-200">
-            <div class="text-xl font-semibold text-gray-800">
-                @yield('page-title', 'Dashboard')
-            </div>
-            <div class="flex items-center space-x-4">
-                <!-- Notifications -->
-                <div class="relative">
-                    <span class="material-icons text-gray-500">notifications</span>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">3</span>
-                </div>
-                <!-- User info -->
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <span class="material-icons text-indigo-600 text-sm">person</span>
-                    </div>
-                    <div class="text-gray-700 font-medium">Hi, {{ auth()->user()->name }}</div>
-                </div>
-                <!-- Logout -->
-                <form method="POST" action="{{ route('admin.logout') }}">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center transition-colors">
-                        <span class="material-icons mr-1 text-sm">logout</span> Logout
-                    </button>
-                </form>
-            </div>
-        </header>
+        <x-admin.header />
 
-        <!-- Page Content -->
+        <!-- Page content -->
         <main class="flex-1 p-6 bg-gray-50">
             <x-validation-toast />
             @yield('content')
@@ -65,9 +52,6 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     @yield('scripts')
-    
-    <script>
-    </script>
 
 </body>
 

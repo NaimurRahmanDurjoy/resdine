@@ -1,7 +1,6 @@
-<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg
-       transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
-       :class="{ '-translate-x-full': !sidebarOpen }"
-       x-cloak>
+<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
+    :class="{ '-translate-x-full': !sidebarOpen }"
+    x-cloak>
 
     <!-- Logo -->
     <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">

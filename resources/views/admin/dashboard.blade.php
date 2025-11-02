@@ -13,11 +13,11 @@
                 <div class="text-2xl font-bold mt-2">${{ number_format($totalSales, 2) }}</div>
             </div>
             <div class="bg-indigo-100 p-3 rounded-full">
-                <span class="material-icons text-indigo-600">payments</span>
+                <span class="material-symbols-outlined text-indigo-600">payments</span>
             </div>
         </div>
         <div class="mt-4 text-xs text-green-500 flex items-center">
-            <span class="material-icons text-sm mr-1">trending_up</span>
+            <span class="material-symbols-outlined text-sm mr-1">trending_up</span>
             <span>12% increase from yesterday</span>
         </div>
     </div>
@@ -30,11 +30,11 @@
                 <div class="text-2xl font-bold mt-2">42</div>
             </div>
             <div class="bg-green-100 p-3 rounded-full">
-                <span class="material-icons text-green-600">receipt</span>
+                <span class="material-symbols-outlined text-green-600">receipt</span>
             </div>
         </div>
         <div class="mt-4 text-xs text-green-500 flex items-center">
-            <span class="material-icons text-sm mr-1">trending_up</span>
+            <span class="material-symbols-outlined text-sm mr-1">trending_up</span>
             <span>5% increase from yesterday</span>
         </div>
     </div>
@@ -47,11 +47,11 @@
                 <div class="text-2xl font-bold mt-2">$24.50</div>
             </div>
             <div class="bg-blue-100 p-3 rounded-full">
-                <span class="material-icons text-blue-600">attach_money</span>
+                <span class="material-symbols-outlined text-blue-600">attach_money</span>
             </div>
         </div>
         <div class="mt-4 text-xs text-red-500 flex items-center">
-            <span class="material-icons text-sm mr-1">trending_down</span>
+            <span class="material-symbols-outlined text-sm mr-1">trending_down</span>
             <span>3% decrease from yesterday</span>
         </div>
     </div>
@@ -65,7 +65,7 @@
                 <div class="text-sm text-gray-500 mt-1">28 sold today</div>
             </div>
             <div class="bg-purple-100 p-3 rounded-full">
-                <span class="material-icons text-purple-600">local_fire_department</span>
+                <span class="material-symbols-outlined text-purple-600">local_fire_department</span>
             </div>
         </div>
     </div>
@@ -92,7 +92,7 @@
         <div class="bg-white p-6 rounded-xl shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <div class="text-lg font-semibold text-gray-800">Low Stock Alerts</div>
-                <span class="material-icons text-amber-500">warning</span>
+                <span class="material-symbols-outlined text-amber-500">warning</span>
             </div>
             <ul class="space-y-3">
                 @forelse($lowStock as $stock)
@@ -101,7 +101,7 @@
                         <div class="font-medium">{{ $stock->ingredient_name }}</div>
                         <div class="text-xs text-gray-500">Only {{ $stock->quantity }} left</div>
                     </div>
-                    <span class="material-icons text-amber-500 text-sm">arrow_forward</span>
+                    <span class="material-symbols-outlined text-amber-500 text-sm">arrow_forward</span>
                 </li>
                 @empty
                 <li class="text-center text-gray-500 py-4">No low stock items</li>

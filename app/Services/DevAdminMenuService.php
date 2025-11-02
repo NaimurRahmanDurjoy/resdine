@@ -13,3 +13,4 @@ class DevAdminMenuService extends BaseMenuService
         $this->cachePrefix = 'devadmin_menu';
     }
 }
+ 

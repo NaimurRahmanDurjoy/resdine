@@ -38,7 +38,7 @@
     <!-- Main Content -->
     <div class="lg:ml-64">
         <!-- Top Navigation -->
-        @include('layouts.admin-header')
+        <x-dev-admin.header />
 
         <!-- Page Content -->
         <main class="p-6">

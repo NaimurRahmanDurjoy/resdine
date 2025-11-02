@@ -7,41 +7,31 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  $role
-     * @return mixed
-     */
-
     public function handle($request, Closure $next, string $role)
     {
-        $user = Auth::guard('admin')->user() ?? Auth::user();
+        // Determine which guard to use based on the role
+        $guard = $role === 'developer' ? 'admin' : 'web';
+        $user = Auth::guard($guard)->user();
 
+        // If not logged in, redirect to the appropriate login
         if (!$user) {
-            $routeName = $request->route() ? $request->route()->getName() : null;
-            if ($routeName && str_starts_with($routeName, 'admin.')) {
-                return redirect()->route('admin.login')->with('error', 'You must be logged in.');
-            }
-            if ($routeName && str_starts_with($routeName, 'devAdmin.')) {
-                return redirect()->route('devAdmin.login')->with('error', 'You must be logged in.');
-            }
-            // fallback
-            return redirect()->route('admin.login')->with('error', 'You must be logged in.');
+            return match ($role) {
+                'developer' => redirect()->route('devAdmin.login')->with('error', 'You must be logged in.'),
+                'admin' => redirect()->route('admin.login')->with('error', 'You must be logged in.'),
+                default => redirect()->route('login')->with('error', 'You must be logged in.'),
+            };
         }
 
-        // If role is a string (Admin)
-        if (is_string($user->role)) {
-            if ($user->role !== $role) {
-                abort(403, 'Unauthorized: Requires ' . $role . ' role.');
+        // ---- ROLE CHECK ----
+        if ($guard === 'web') {
+            // For "users" table (role_id + relation)
+            if (!$user->role || strtolower($user->role->name) !== strtolower($role)) {
+                abort(403, "Unauthorized: Requires {$role} role.");
             }
-        }
-        // If role is an object/relationship (User)
-        else {
-            if (!$user->role || $user->role->name !== $role) {
-                abort(403, 'Unauthorized: Requires ' . $role . ' role.');
+        } else {
+            // For "admins" table (direct role field)
+            if (strtolower($user->role) !== strtolower($role)) {
+                abort(403, "Unauthorized: Requires {$role} role.");
             }
         }
 

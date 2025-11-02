@@ -25,15 +25,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useTailwind();
-        View::composer('layouts.sidebar', function ($view) {
-            $menus = [];
-
-            if (Auth::check()) {
-                $menus = app(MenuService::class)->getForUser(Auth::user());
-            }
-
-            $view->with('menus', $menus);
-        });
         
     }
 }

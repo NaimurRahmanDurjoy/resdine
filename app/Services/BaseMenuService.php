@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
@@ -30,5 +31,47 @@ abstract class BaseMenuService
     public function clearCache(Model $entity): void
     {
         Cache::forget("{$this->cachePrefix}_{$entity->id}");
+    }
+
+    /**
+     * Common URL logic for all menu types
+     */
+    public function getUrl($menu): string
+    {
+        return $menu->route ? route($menu->route) : '#';
+    }
+
+    /**
+     * Common active state logic for all menu types
+     */
+    public function isActive($menu): bool
+    {
+        if ($menu->route && request()->routeIs($menu->route . '.*')) {
+            return true;
+        }
+
+        foreach ($menu->children as $child) {
+            if ($this->isActive($child)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Prepare menu data for view (common for all menu types)
+     */
+    public function prepareForView($menus)
+    {
+        return $menus->map(function ($menu) {
+            return [
+                'model' => $menu,
+                'url' => $this->getUrl($menu),
+                'isActive' => $this->isActive($menu),
+                'hasChildren' => $menu->children->count() > 0,
+                'children' => $this->prepareForView($menu->children)
+            ];
+        });
     }
 }
