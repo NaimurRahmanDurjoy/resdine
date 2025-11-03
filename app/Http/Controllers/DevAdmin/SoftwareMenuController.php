@@ -22,7 +22,7 @@ public function index(Request $request)
     $sort = $request->get('sort', 'created_at');
     $direction = $request->get('direction', 'desc');
 
-    $menus = SoftwareMenu::with('children')
+    $menus = SoftwareMenu::with('childrenRecursive')
         ->when($search, function ($q) use ($search) {
             $q->where(function($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
@@ -56,7 +56,7 @@ public function index(Request $request)
         ]);
 
         SoftwareMenu::create($request->all());
-        // $this->menuService->clearAllCache();
+        $this->menuService->clearAllCache();
 
         return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu created successfully.');
     }
@@ -79,7 +79,7 @@ public function index(Request $request)
         ]);
 
         $menu->update($request->all());
-        // $this->menuService->clearAllCache();
+        $this->menuService->clearAllCache();
 
         return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu updated successfully.');
     }
@@ -87,7 +87,7 @@ public function index(Request $request)
     public function destroy(SoftwareMenu $menu)
     {
         $menu->delete();
-        // $this->menuService->clearAllCache();
+        $this->menuService->clearAllCache();
 
         return redirect()->back()->with('success', 'Menu deleted successfully.');
     }

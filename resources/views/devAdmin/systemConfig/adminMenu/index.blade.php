@@ -1,6 +1,6 @@
 @extends('layouts.devAdmin')
 
-@section('page-title', 'Software Menu')
+@section('page-title', 'Admin Menu')
 
 @section('content')
 
@@ -8,14 +8,13 @@
 $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
 @endphp
 <!-- Modern Container -->
-<!-- Modern Container -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <!-- Header -->
     <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold text-gray-800">Software Menu List</h1>
-                <p class="text-gray-600 text-sm mt-1">Manage your software menu list</p>
+                <h1 class="text-xl font-bold text-gray-800">Admin Menu List</h1>
+                <p class="text-gray-600 text-sm mt-1">Manage your admin menu list</p>
             </div>
         </div>
     </div>

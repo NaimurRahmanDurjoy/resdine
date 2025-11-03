@@ -1,16 +1,21 @@
 @extends('layouts.devAdmin')
 
-@section('title', 'Software Menus')
-@section('page-title', 'Software Menu List')
-@section('page-description', 'Check current database table sizes and usage.')
+@section('page-title', 'Software Menu Edit')
 
 @section('content')
 @php
     $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
 @endphp
 
-<div class="p-6">
-    <h1 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Edit Menu</h1>
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Update Menu</h1>
+                <p class="text-gray-600 text-sm mt-1">Update menu for your software</p>
+            </div>
+        </div>
+    </div>
     <form action="{{ route($baseRoute . '.update', $menu->id) }}" method="POST" class="bg-white dark:bg-gray-800 shadow p-6 rounded-lg space-y-6">
         @csrf
         @method('PUT')

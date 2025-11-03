@@ -30,6 +30,11 @@ class User extends Authenticatable
             'name' => 'guest',
         ]);
     }
+    // Relationship to Branch
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     // Redirect user based on role
     public function redirectToDashboard(): string

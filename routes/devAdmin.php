@@ -8,6 +8,8 @@ use App\Http\Controllers\DevAdmin\SoftwareMenuController;
 use App\Http\Controllers\DevAdmin\SoftwareMenuSortingController;
 use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
+use App\Http\Controllers\DevAdmin\AdminController;
+use App\Http\Controllers\DevAdmin\AdminMenuController;
 
 // ----------------------
 // devAdmin Panel Routes
@@ -29,9 +31,10 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
         // System routes
         Route::prefix('system-config')->name('systemConfig.')->group(function () {
             Route::prefix('admin-panel')->name('adminPanel.')->group(function () {
-                Route::get('/menu', [SettingsController::class, 'adminMenu'])->name('menu');
-                Route::get('/internal-link', [SettingsController::class, 'adminInternalLink'])->name('internalLink');
-                Route::get('/menu-sorting', [SettingsController::class, 'adminMenuSorting'])->name('menuSorting');
+                Route::resource('menu', AdminMenuController::class);
+                Route::get('internal-link', [AdminMenuController::class, 'adminInternalLink'])->name('internalLink');
+                Route::get('menu-sorting', [AdminMenuController::class, 'adminMenuSorting'])->name('menuSorting');
+                Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
 
             Route::prefix('software')->name('software.')->group(function () {

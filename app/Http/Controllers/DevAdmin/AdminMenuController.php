@@ -16,16 +16,29 @@ class AdminMenuController extends Controller
         $this->menuService = $menuService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $menus = AdminMenu::with('children')->whereNull('parent_id')->orderBy('order')->get();
-        return view('devAdmin.systemConfig.admin-menu.index', compact('menus'));
+        $search = $request->get('search');
+    $sort = $request->get('sort', 'created_at');
+    $direction = $request->get('direction', 'desc');
+        $menus = AdminMenu::with('childrenRecursive')
+        ->when($search, function ($q) use ($search) {
+            $q->where(function($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('route', 'like', "%{$search}%");
+            });
+        })
+        ->whereNull('parent_id')
+        ->orderBy('order')
+        ->orderBy($sort, $direction)
+        ->paginate(10);
+        return view('devAdmin.systemConfig.adminMenu.index', compact('menus','search', 'sort', 'direction'));
     }
 
     public function create()
     {
         $parents = AdminMenu::whereNull('parent_id')->get();
-        return view('devAdmin.systemConfig.admin-menu.create', compact('parents'));
+        return view('devAdmin.systemConfig.adminMenu.create', compact('parents'));
     }
 
     public function store(Request $request)
@@ -42,13 +55,13 @@ class AdminMenuController extends Controller
         AdminMenu::create($request->all());
         $this->menuService->clearAllCache(); // optional method to clear all cached menus
 
-        return redirect()->route('systemConfig.adminPanel.menu.index')->with('success', 'Menu created successfully.');
+        return redirect()->route('devAdmin.systemConfig.adminPanel.menu.index')->with('success', 'Menu created successfully.');
     }
 
     public function edit(AdminMenu $menu)
     {
         $parents = AdminMenu::whereNull('parent_id')->where('id', '!=', $menu->id)->get();
-        return view('devAdmin.systemConfig.admin-menu.edit', compact('menu', 'parents'));
+        return view('devAdmin.systemConfig.adminMenu.edit', compact('menu', 'parents'));
     }
 
     public function update(Request $request, AdminMenu $menu)

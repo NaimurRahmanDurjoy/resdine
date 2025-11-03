@@ -1,12 +1,12 @@
 @extends('layouts.devAdmin')
 
-
+@section('page-title', 'Software Menu Add')
 @section('content')
 @php
 $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
 @endphp
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+    <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-bold text-gray-800">Add Menu</h1>
