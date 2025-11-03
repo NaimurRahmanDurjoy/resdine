@@ -5,6 +5,7 @@ use App\Http\Controllers\DevAdmin\AuthController;
 use App\Http\Controllers\DevAdmin\DashboardController;
 use App\Http\Controllers\DevAdmin\SettingsController;
 use App\Http\Controllers\DevAdmin\SoftwareMenuController;
+use App\Http\Controllers\DevAdmin\SoftwareMenuSortingController;
 use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
 
@@ -21,6 +22,7 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        Route::resource('admins', AdminController::class);
         Route::resource('users', UserController::class);
 
 
@@ -33,9 +35,10 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             });
 
             Route::prefix('software')->name('software.')->group(function () {
-                Route::resource('/menu', SoftwareMenuController::class);
-                Route::get('/internal-link', [SettingsController::class, 'softwareInternalLink'])->name('internalLink');
-                Route::get('/menu-sorting', [SettingsController::class, 'softwareMenuSorting'])->name('menuSorting');
+                Route::resource('menu', SoftwareMenuController::class);
+                Route::get('internal-link', [SettingsController::class, 'softwareInternalLink'])->name('internalLink');
+                Route::get('menu-sorting', [softwareMenuSortingController::class, 'index'])->name('menuSorting');
+                Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
         });
 
