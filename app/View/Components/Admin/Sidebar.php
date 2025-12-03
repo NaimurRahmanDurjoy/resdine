@@ -13,12 +13,8 @@ class Sidebar extends Component
     public function __construct(MenuService $menuService, $sidebarOpen = false)
     {
         $user = Auth::user();
-
         // Get menus and prepare them for view
-        $this->menus = $user
-            ? $menuService->prepareForView($menuService->getMenusFor($user))
-            : collect();
-
+        $this->menus = $user ? $menuService->prepareForView($menuService->getMenusFor($user)) : collect();
         $this->sidebarOpen = $sidebarOpen;
     }
 

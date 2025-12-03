@@ -8,7 +8,8 @@
 @if($hasChildren)
     <div x-data="{ open: {{ $isActive ? 'true' : 'false' }} }">
         <button @click="open = !open"
-                class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {{ $isActive ? 'bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400' : '' }}">
+                class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {{ $isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200' }}"
+>
             <div class="flex items-center">
                 @if($menu['model']->icon)
                     <span class="material-symbols-outlined w-5 mr-3">{{ $menu['model']->icon }}</span>
@@ -26,7 +27,8 @@
     </div>
 @else
     <a href="{{ $menu['url'] }}"
-       class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors {{ $isActive ? 'bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400' : '' }}">
+       class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors
+       {{ $isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200' }}">
         @if($menu['model']->icon)
             <span class="material-symbols-outlined w-5 mr-3">{{ $menu['model']->icon }}</span>
         @endif

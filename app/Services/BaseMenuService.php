@@ -44,10 +44,29 @@ abstract class BaseMenuService
     /**
      * Common active state logic for all menu types
      */
+    // public function isActive($menu): bool
+    // {
+    //     if ($menu->route && request()->routeIs($menu->route . '.*')) {
+    //         return true;
+    //     }
+
+    //     foreach ($menu->children as $child) {
+    //         if ($this->isActive($child)) {
+    //             return true;
+    //         }
+    //     }
+
+    //     return false;
+    // }
     public function isActive($menu): bool
     {
-        if ($menu->route && request()->routeIs($menu->route . '.*')) {
-            return true;
+        if ($menu->route) {
+            if (
+                request()->routeIs($menu->route) ||
+                request()->routeIs($menu->route . '.*')
+            ) {
+                return true;
+            }
         }
 
         foreach ($menu->children as $child) {
@@ -58,6 +77,7 @@ abstract class BaseMenuService
 
         return false;
     }
+
 
     /**
      * Prepare menu data for view (common for all menu types)

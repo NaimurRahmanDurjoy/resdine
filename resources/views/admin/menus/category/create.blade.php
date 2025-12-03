@@ -10,16 +10,6 @@
         <p class="text-gray-600">Create a new menu category for your restaurant</p>
     </div>
 
-    <!-- @if($errors->any())
-        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif -->
-
     <form action="{{ route('admin.menu.categories.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -56,7 +46,7 @@
                 <span class="material-symbols-outlined mr-2 text-sm">save</span> Save Category
             </button>
             <a href="{{ route('admin.menu.categories.index') }}"
-                class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition" data-ajax-link>
                 Cancel
             </a>
         </div>

@@ -70,7 +70,7 @@ $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
                         @endif
                     </td>
                     <td class="px-6 py-1 text-gray-600">-</td>
-                    <td class="px-6 py-1 text-gray-600">{{ $menu->order }}</td>
+                    <td class="px-6 py-1 text-gray-600">P - {{ $menu->order }}</td>
                     <td class="px-6 py-1 text-center">
                         <span class="px-2 py-1 text-xs rounded {{ $menu->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                             {{ $menu->is_active ? 'Yes' : 'No' }}
@@ -98,7 +98,7 @@ $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
                 <!-- Child Rows -->
                 @foreach ($menu->children as $child)
                 <tr class="hover:bg-gray-50 bg-gray-50">
-                    <td class="px-10 py-1 text-gray-700">
+                    <td class="px-6 py-1 text-gray-700">
                         {{ $child->name }}
                     </td>
                     <td class="px-6 py-1 text-gray-600">{{ $child->route ?? '-' }}</td>
@@ -110,7 +110,7 @@ $baseRoute = Str::beforeLast(Route::currentRouteName(), '.');
                         @endif
                     </td>
                     <td class="px-6 py-1 text-gray-600">{{ $menu->name }}</td>
-                    <td class="px-6 py-1 text-gray-600">{{ $child->order }}</td>
+                    <td class="px-6 py-1 text-gray-600">C - {{ $child->order }}</td>
                     <td class="px-6 py-1 text-center">
                         <span class="px-2 py-1 text-xs rounded {{ $child->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                             {{ $child->is_active ? 'Yes' : 'No' }}

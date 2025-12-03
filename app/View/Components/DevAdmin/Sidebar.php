@@ -14,7 +14,7 @@ class Sidebar extends Component
     {
         // Simplified guard check
         $admin = Auth::guard('admin')->user();
-        $this->menus = $admin ? $menuService->getMenusFor($admin) : collect();
+        $this->menus = $admin ? $menuService->prepareForView($menuService->getMenusFor($admin)) : collect();
         $this->sidebarOpen = $sidebarOpen;
     }
 

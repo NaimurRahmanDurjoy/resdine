@@ -28,29 +28,5 @@ class AdminMenu extends Model
     {
         return $this->belongsToMany(Admin::class, 'admin_menu_access', 'menu_id', 'admin_id');
     }
-
-        public function getUrl()
-    {
-        if ($this->route) {
-            return route($this->route);
-        }
-        
-        return '#';
-    }
-
-    public function isActive()
-    {
-        if ($this->route && request()->routeIs($this->route . '.*')) {
-            return true;
-        }
-        
-        foreach ($this->children as $child) {
-            if ($child->isActive()) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
     
 }

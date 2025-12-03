@@ -10,6 +10,7 @@ use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
 use App\Http\Controllers\DevAdmin\AdminController;
 use App\Http\Controllers\DevAdmin\AdminMenuController;
+use App\Http\Controllers\DevAdmin\AdminMenuSortingController;
 
 // ----------------------
 // devAdmin Panel Routes
@@ -33,8 +34,8 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             Route::prefix('admin-panel')->name('adminPanel.')->group(function () {
                 Route::resource('menu', AdminMenuController::class);
                 Route::get('internal-link', [AdminMenuController::class, 'adminInternalLink'])->name('internalLink');
-                Route::get('menu-sorting', [AdminMenuController::class, 'adminMenuSorting'])->name('menuSorting');
-                Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
+                Route::get('menu-sorting', [AdminMenuSortingController::class, 'index'])->name('menuSorting');
+                Route::post('menu-sorting/update-order', [AdminMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
 
             Route::prefix('software')->name('software.')->group(function () {

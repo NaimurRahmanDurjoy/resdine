@@ -24,6 +24,8 @@ class MenuCategoryController extends Controller
             ->orderBy($sort, $direction)
             ->paginate(10);
 
+            
+
         return view('admin.menus.category.index', compact('categories', 'search', 'sort', 'direction'));
     }
 

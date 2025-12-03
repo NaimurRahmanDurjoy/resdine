@@ -26,6 +26,7 @@ $currentDirection = request('direction', 'desc');
                             $sortUrl = $isSortable ? request()->fullUrlWithQuery([
                                 'sort' => $sortField,
                                 'direction' => $newDirection,
+                                'search' => request('search'),
                             ]) : '#';
                         @endphp
 

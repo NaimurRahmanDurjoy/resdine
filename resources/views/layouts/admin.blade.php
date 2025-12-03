@@ -8,14 +8,6 @@
 <x-admin.header />
 @endsection
 
-@section('modal')
-<x-modal />
-@endsection
-
-@section('alerts')
-<x-validation-toast />
-@endsection
-
 @section('content')
 <p>Admin specific content goes here.</p>
 @endsection

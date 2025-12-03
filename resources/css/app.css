@@ -1,4 +1,15 @@
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
+/* If you want Google fonts */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); */
+
+/* If using Font Awesome */
+/* @import "@fortawesome/fontawesome-free/css/all.css"; */
+
+/* If using Select2 */
+/* @import "select2/dist/css/select2.css"; */
