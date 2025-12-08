@@ -14,7 +14,7 @@
     @livewireStyles
     @stack('styles')
     <!-- Alpine Collapse Plugin -->
-    <!-- <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/collapse.min.js"></script> -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/collapse.min.js"></script>
 </head>
 
 <body class="bg-gray-50 flex font-sans" x-data="{ sidebarOpen: false, darkMode: false }" :class="{ 'dark': darkMode }">
@@ -57,9 +57,9 @@
     <!-- Livewire Scripts -->
     @livewireScripts
     <script>
-        // document.addEventListener('alpine:initialized', () => {
-        //     Alpine.plugin(collapse);
-        // })
+        document.addEventListener('alpine:initialized', () => {
+            Alpine.plugin(collapse);
+        })
     </script>
     @stack('scripts')
     @yield('scripts')
