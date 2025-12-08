@@ -26,7 +26,7 @@
         </div>
     </div>
 @else
-    <a href="{{ $menu['url'] }}"
+    <a href="{{ $menu['url'] }}" wire:navigate
        class="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors
        {{ $isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200' }}">
         @if($menu['model']->icon)
