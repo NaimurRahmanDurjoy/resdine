@@ -30,7 +30,7 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.menu.categories.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2" data-ajax-link>
+        <a href="{{ route('admin.menu.categories.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
             <span class="material-symbols-outlined text-sm ">add</span>Add Category
         </a>
     </div>
@@ -59,24 +59,18 @@
                 </td>
                 <td class="px-6 py-1 whitespace-nowrap">
                     <div class="flex items-center space-x-4 text-base text-gray-600">
-                        <a href="{{ route('admin.menu.categories.edit', $category->id) }}" title="Edit" class="hover:text-indigo-600 transition" data-ajax-link> 
-                            <span class="material-symbols-outlined text-indigo-600" style="font-size: 20px;">edit</span> 
-                        </a>
                         <!-- Edit -->
-                        <!-- <a href="{{ route('admin.menu.categories.edit', $category->id) }}" title="Edit" class="hover:text-indigo-600 transition">
+                        <a href="{{ route('admin.menu.categories.edit', $category->id) }}" title="Edit" class="hover:text-indigo-600 transition">
                             <span class="material-symbols-outlined text-indigo-600" style="font-size: 20px;">edit</span>
-                        </a> -->
-                        <!-- Delete -->
-                        <a href="{{ route('admin.menu.categories.destroy', $category->id) }}" title="Delete" class="hover:text-red-600 transition" data-ajax-delete>
-                            <span class="material-symbols-outlined text-red-600" style="font-size: 20px;">delete</span>
                         </a>
-                        <!-- <form action="{{ route('admin.menu.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
+                        <!-- Delete -->
+                        <form action="{{ route('admin.menu.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" title="Delete" class="hover:text-red-600 transition bg-transparent border-0 p-0">
                                 <span class="material-symbols-outlined text-red-600" style="font-size: 20px;">delete</span>
                             </button>
-                        </form> -->
+                        </form>
                     </div>
                 </td>
             </tr>
@@ -89,7 +83,7 @@
                 <h3 class="text-lg font-semibold text-gray-700">No categories found</h3>
                 <p class="text-gray-500 text-sm">Start by adding a new category to your menu.</p>
                 <a href="{{ route('admin.menu.categories.create') }}"
-                    class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition" data-ajax-link>
+                    class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
                     + Add Category
                 </a>
             </div>
