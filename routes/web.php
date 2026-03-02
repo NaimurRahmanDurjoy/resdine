@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\HomeController;
+use Inertia\Inertia;
 // use App\Http\Controllers\OrderController;
 
 // Route::get('/', function () {
@@ -27,3 +28,6 @@ Route::get('/test-middleware', function () {
     return "Middleware loaded!";
 })->middleware('role:admin');
 
+Route::get('/inertia-test', function () {
+    return Inertia::render('Test');
+});
