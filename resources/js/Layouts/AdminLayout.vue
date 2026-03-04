@@ -22,26 +22,24 @@
       </main>
     </div>
 
-    <!-- Toasts and Modals -->
-    <Toast />
-    <ValidationToast />
-    <Modal />
+    <!-- Toasts and Modals (Removed temporarily) -->
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 import Header from '@/Components/Admin/Header.vue'
 import SideBar from '@/Components/Admin/SideBar.vue'
-import Toast from '@/Components/Toast.vue'
-import ValidationToast from '@/Components/ValidationToast.vue'
-import Modal from '@/Components/Modal.vue'
 
 const props = defineProps({
-  user: { type: Object, required: true },
-  menus: { type: Array, default: () => [] },
   notifications: { type: Array, default: () => [] },
 })
+
+const page = usePage().props
+const menus = page?.menus ?? []
+const user = page?.auth?.user ?? { name: 'Guest' }
+
 
 const sidebarOpen = ref(false)
 const darkMode = ref(false)

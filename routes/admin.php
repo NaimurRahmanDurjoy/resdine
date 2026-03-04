@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\MenuController;
-use App\Http\Controllers\Admin\MenuCategoryController;
-use App\Http\Controllers\Admin\MenuVariantsController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\productVariantsController;
 use App\Http\Controllers\Admin\ComboItemController;
 use App\Http\Controllers\Admin\ComplementaryItemController;
 use App\Http\Controllers\Admin\StockController;
@@ -33,10 +33,10 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
 
         // Menu management
-        Route::prefix('menu')->name('menu.')->group(function () {
-            Route::resource('categories', MenuCategoryController::class)->names('categories');
-            Route::resource('items', MenuController::class)->names('items');
-            Route::resource('variants', MenuVariantsController::class)->names('variants');
+        Route::prefix('product')->name('product.')->group(function () {
+            Route::resource('categories', ProductCategoryController::class)->names('categories');
+            Route::resource('items', ProductController::class)->names('items');
+            Route::resource('variants', ProductVariantsController::class)->names('variants');
         });
 
         // Stock management

@@ -56,7 +56,7 @@
       </LineChart>
 
       <!-- Low Stock Alerts -->
-      <DataList title="Low Stock Alerts" :items="lowStockItems">
+      <DataList title="Low Stock Alerts" :items="lowStock">
         <template #item="{ item }">
           <div class="flex justify-between items-center w-full">
             <div>
@@ -67,12 +67,12 @@
           </div>
         </template>
         <template #footer>
-          <router-link
+          <Link
             to="/admin/stock"
             class="w-full mt-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition block text-center"
           >
             View All Stock
-          </router-link>
+          </Link>
         </template>
       </DataList>
 
@@ -96,12 +96,12 @@
           </div>
         </template>
         <template #footer>
-          <router-link
+          <Link
             to="/admin/orders"
             class="w-full mt-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition block text-center"
           >
             View All Orders
-          </router-link>
+          </Link>
         </template>
       </DataList>
 
@@ -110,23 +110,35 @@
   </div>
 </template>
 
+<script>
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+
+export default {
+  layout: AdminLayout,
+}
+</script>
+
 <script setup>
 import Card from '@/Components/Admin/Card.vue'
 import DataList from '@/Components/Admin/DataList.vue'
 import LineChart from '@/Components/Admin/LineChart.vue'
+import { computed } from 'vue'
 
-import { ref } from 'vue'
+const props = defineProps({
+  totalSales: [Number, String],
+  topItemName: String,
+  lowStock: Array,
+  labels: Array,
+  salesData: Array
+});
 
-// Props or fetch data from API
-const totalSales = ref(1250.50)
-const topItemName = ref('Cheeseburger')
-const topItemSold = ref(28)
+// Assuming no specific property 'topItemSold' returned, leaving out or you could add to controller if needed.
+const topItemSold = 0; // Or passed from backend
 
-const labels = ref(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
-const chartDatasets = ref([
+const chartDatasets = computed(() => [
   {
     label: 'Sales ($)',
-    data: [120, 250, 180, 300, 200, 450, 400],
+    data: props.salesData,
     backgroundColor: 'rgba(99, 102, 241, 0.1)',
     borderColor: 'rgba(99, 102, 241, 1)',
     borderWidth: 3,
@@ -138,17 +150,7 @@ const chartDatasets = ref([
     pointRadius: 5,
     pointHoverRadius: 7
   }
-])
+]);
 
-const lowStockItems = ref([
-  { id: 1, ingredient_name: 'Tomatoes', quantity: 5 },
-  { id: 2, ingredient_name: 'Cheese', quantity: 2 },
-  { id: 3, ingredient_name: 'Lettuce', quantity: 1 }
-])
-
-const recentOrders = ref([
-  { id: 1, order_no: 'Order #1245', table: 'Table 4', time: '12:30 PM', status: 'Completed' },
-  { id: 2, order_no: 'Order #1244', table: 'Takeaway', time: '12:15 PM', status: 'Preparing' },
-  { id: 3, order_no: 'Order #1243', table: 'Table 2', time: '11:45 AM', status: 'Served' }
-])
+const recentOrders = []; // Add feature to Backend controller later if needed.
 </script>

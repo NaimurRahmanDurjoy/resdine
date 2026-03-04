@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\MenuItem\StoreMenuItemRequest;
-use App\Http\Requests\MenuItem\UpdateMenuItemRequest;
-use App\Models\MenuItem;
-use App\Models\MenuCategory;
+use App\Http\Requests\ProductItem\StoreMenuItemRequest;
+use App\Http\Requests\ProductItem\UpdateMenuItemRequest;
+use App\Models\ProductItem;
+use App\Models\ProductCategory;
 use App\Models\ComboItemDetail;
 use App\Models\Unit;
 use App\Models\ResDepartment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class MenuController extends Controller
+class ProductController extends Controller
 {
     public function index(Request $request)
 
@@ -23,7 +23,7 @@ class MenuController extends Controller
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
 
-        $items = MenuItem::with(['category', 'unit', 'department'])
+        $items = ProductItem::with(['category', 'unit', 'department'])
             ->when($search, function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('type', 'like', "%{$search}%")
@@ -40,10 +40,10 @@ class MenuController extends Controller
 
     public function create()
     {
-        $categories = MenuCategory::all();
+        $categories = ProductCategory::all();
         $units = Unit::all();
         $departments = ResDepartment::all();
-        $menuItems = MenuItem::where('type', 1)->where('status', 1)->get();
+        $menuItems = ProductItem::where('type', 1)->where('status', 1)->get();
 
         return view('admin.menus.items.create', compact('categories', 'menuItems', 'units', 'departments'));
     }
@@ -60,7 +60,7 @@ class MenuController extends Controller
         unset($validated['combo_items']); // Remove from main table data
 
         DB::transaction(function () use ($validated, $comboItems) {
-            $menuItem = MenuItem::create($validated);
+            $menuItem = ProductItem::create($validated);
 
             if ($menuItem->type == 2) {
                 $this->syncComboItems($menuItem, $comboItems);
@@ -70,19 +70,19 @@ class MenuController extends Controller
         return redirect()->route('admin.menu.items.index')->with('success', 'Menu item created successfully.');
     }
 
-    public function edit(MenuItem $item)
+    public function edit(ProductItem $item)
     {
-        $categories = MenuCategory::all();
+        $categories = ProductCategory::all();
         $units = Unit::all();
         $departments = ResDepartment::all();
-        $menuItems = MenuItem::where('type', 1)->where('status', 1)->get();
+        $menuItems = ProductItem::where('type', 1)->where('status', 1)->get();
 
         $item->load('comboItems.menuItem');
 
         return view('admin.menus.items.edit', compact('item', 'categories', 'menuItems', 'departments', 'units'));
     }
 
-    public function update(UpdateMenuItemRequest $request, MenuItem $item)
+    public function update(UpdateMenuItemRequest $request, ProductItem $item)
     {
         $validated = $request->validated();
         $comboItems = $request->input('combo_items', []);
@@ -108,7 +108,7 @@ class MenuController extends Controller
 
         return redirect()->route('admin.menu.items.index')->with('success', 'Menu item updated successfully.');
     }
-    public function destroy(MenuItem $item)
+    public function destroy(ProductItem $item)
     {
         if ($item->menu_img) {
             Storage::disk('public')->delete($item->menu_img);
@@ -125,11 +125,11 @@ class MenuController extends Controller
     /**
      * Sync combo items for a menu item.
      *
-     * @param MenuItem $menuItem
+     * @param ProductItem $menuItem
      * @param array $comboItems
      * @return void
      */
-    private function syncComboItems(MenuItem $menuItem, array $comboItems): void
+    private function syncComboItems(ProductItem $menuItem, array $comboItems): void
     {
         $menuItem->comboItems()->delete();
 

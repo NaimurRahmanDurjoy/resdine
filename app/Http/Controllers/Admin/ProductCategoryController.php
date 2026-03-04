@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MenuItem;
-use App\Models\MenuCategory;
+use App\Models\ProductCategory;
 use App\Models\Unit;
 use App\Models\ResDepartment;
 use App\Models\ComboItemDetail; // Add this model
 
 
-class MenuCategoryController extends Controller
+class ProductCategoryController extends Controller
 {
     public function index(Request $request)
     {
@@ -19,7 +19,7 @@ class MenuCategoryController extends Controller
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
 
-        $categories = MenuCategory::query()
+        $categories = ProductCategory::query()
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
             ->orderBy($sort, $direction)
             ->paginate(10);
@@ -29,7 +29,7 @@ class MenuCategoryController extends Controller
 
     public function create()
     {
-        $categories = MenuCategory::all();
+        $categories = ProductCategory::all();
         return view('admin.menus.category.create', compact('categories'));
     }
 
@@ -57,7 +57,7 @@ class MenuCategoryController extends Controller
             $imagePath = 'uploads/menu_category_img/' . $filename;
         }
 
-        MenuCategory::create([
+        ProductCategory::create([
             'name' => $validated['name'],
             'status' => $request->has('status') ? 1 : 0,
             'image' => $imagePath,
@@ -67,14 +67,14 @@ class MenuCategoryController extends Controller
     }
 
 
-    public function edit(MenuCategory $category)
+    public function edit(ProductCategory $category)
     {
-        $categories = MenuCategory::where('status', 1)->get();
+        $categories = ProductCategory::where('status', 1)->get();
         
         return view('admin.menus.category.edit', compact('category'));
     }
 
-    public function update(Request $request, MenuCategory $category)
+    public function update(Request $request, ProductCategory $category)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -111,7 +111,7 @@ class MenuCategoryController extends Controller
     }
 
 
-    public function destroy(MenuCategory $category)
+    public function destroy(ProductCategory $category)
     {
         // Delete associated image
         if ($category->image && file_exists(public_path($category->image))) {

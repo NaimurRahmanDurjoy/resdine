@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\MenuItem;
-use App\Models\MenuVariant;
+use App\Models\ProductItem;
+use App\Models\ProductVariant;
 
-class MenuVariantsController extends Controller
+class ProductVariantsController extends Controller
 {
     public function index(Request $request)
     {
@@ -15,11 +15,11 @@ class MenuVariantsController extends Controller
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
 
-        $variants = MenuVariant::with('MenuItem')
+        $variants = ProductVariant::with('productItem')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%$search%")
-                        ->orWhereHas('menuItem', function ($q2) use ($search) {
+                        ->orWhereHas('productItem', function ($q2) use ($search) {
                             $q2->where('name', 'like', "%$search%");
                         });
                 });
@@ -32,8 +32,8 @@ class MenuVariantsController extends Controller
 
     public function create()
     {
-        $variants = MenuVariant::with('MenuItem')->get();
-        $menuItems = MenuItem::all();
+        $variants = ProductVariant::with('productItem')->get();
+        $menuItems = ProductItem::all();
         return view('admin.menus.variants.create', compact('variants', 'menuItems'));
     }
 
@@ -45,7 +45,7 @@ class MenuVariantsController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
-        MenuVariant::create([
+        ProductVariant::create([
             'name' => $validated['name'],
             'item_id' => $validated['item_id'],
             'price' => $validated['price'],
@@ -54,13 +54,13 @@ class MenuVariantsController extends Controller
         return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants created successfully.');
     }
 
-    public function edit(MenuVariant $variant)
+    public function edit(ProductVariant $variant)
     {
-        $menuItems = MenuItem::all();
+        $menuItems = ProductItem::all();
         return view('admin.menus.variants.edit', compact('variant', 'menuItems'));
     }
 
-    public function update(Request $request, MenuVariant $variant)
+    public function update(Request $request, ProductVariant $variant)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -77,7 +77,7 @@ class MenuVariantsController extends Controller
         return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants updated successfully.');
     }
 
-    public function destroy(MenuVariant $variant)
+    public function destroy(ProductVariant $variant)
     {
         $variant->delete();
         return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants deleted successfully.');

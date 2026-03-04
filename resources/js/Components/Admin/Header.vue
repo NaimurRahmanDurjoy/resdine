@@ -37,17 +37,16 @@
     </div>
   </header>
 </template>
-
 <script setup>
-import { Inertia } from '@inertiajs/inertia'
+  import { router } from '@inertiajs/vue3'
 
-const props = defineProps({
-  pageTitle: { type: String, default: 'Dashboard' },
-  user: { type: Object, required: true },
-  notifications: { type: Array, default: () => [] }
-})
+  const props = defineProps({
+    pageTitle: { type: String, default: 'Dashboard' },
+    user: { type: Object, required: true },
+    notifications: { type: Array, default: () => [] }
+  })
 
-function logout() {
-  Inertia.post('/admin/logout')
-}
+  function logout() {
+    router.post('/admin/logout')
+  }
 </script>

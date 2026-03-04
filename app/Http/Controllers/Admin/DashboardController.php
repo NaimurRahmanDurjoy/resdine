@@ -12,7 +12,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-
         // Total Sales Today
         $totalSales = OrderMaster::whereDate('created_at', today())
                             ->where('order_status', 'completed')
@@ -26,8 +25,8 @@ class DashboardController extends Controller
                      ->orderByDesc('total_qty')
                      ->first();
 
-        $topItemName = $topItem ? MenuItem::find($topItem->menu_id)->name : 'N/A';
-
+        // $topItemName = $topItem ? MenuItem::find($topItem->menu_id)->name : 'N/A';
+        $topItemName = $topItem ? MenuItem::find($topItem->item_id)->name : 'N/A';
         // Low Stock Alerts
         $lowStock = StockSummary::where('current_stock', '<=', 5)->get(); // threshold = 5
 
@@ -45,9 +44,13 @@ class DashboardController extends Controller
         $labels = $salesTrend->pluck('date')->map(fn($d) => $d->format('D'))->toArray();
         $salesData = $salesTrend->pluck('total')->toArray();
 
-        return view('admin.dashboard', compact(
-            'totalSales', 'topItemName', 'lowStock', 'labels', 'salesData'
-        ));
+        return \Inertia\Inertia::render('Admin/Dashboard', [
+            'totalSales' => $totalSales,
+            'topItemName' => $topItemName,
+            'lowStock' => $lowStock,
+            'labels' => $labels,
+            'salesData' => $salesData
+        ]);
     }
 }
 
