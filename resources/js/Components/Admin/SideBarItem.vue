@@ -19,23 +19,30 @@
     </div>
 
     <!-- Single menu item -->
-    <a v-else :href="menu.url"
+    <Link v-else :href="menu.url"
        :class="[
          'flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors',
          isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'
        ]">
       <span v-if="menu.model.icon" class="material-symbols-outlined w-5 mr-3">{{ menu.model.icon }}</span>
       <span>{{ menu.model.name }}</span>
-    </a>
+    </Link>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { Link } from '@inertiajs/vue3'
+
 const props = defineProps({
   menu: { type: Object, required: true }
 })
 
 const open = ref(props.menu.isActive)
-const isActive = props.menu.isActive
+const isActive = computed(() => props.menu.isActive)
+
+// Keep submenus open if they become active
+watch(() => props.menu.isActive, (val) => {
+  if (val) open.value = true
+})
 </script>

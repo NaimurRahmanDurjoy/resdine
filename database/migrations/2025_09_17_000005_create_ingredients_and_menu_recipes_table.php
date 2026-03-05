@@ -33,7 +33,7 @@ return new class extends Migration
 
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
             $table->foreign('ingredient_id')->references('id')->on('ingredients')->onDelete('cascade');
-            $table->foreign('item_id')->references('id')->on('menu_items')->onDelete('cascade');
+            $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
     }
 

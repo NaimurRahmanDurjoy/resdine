@@ -10,7 +10,7 @@
         <p class="text-gray-600">Create a new menu item for your restaurant</p>
     </div>
 
-    <form action="{{ route('admin.menu.items.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.product.items.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -187,7 +187,7 @@
                 class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center">
                 <span class="material-symbols-outlined mr-2 text-sm">save</span> Save Item
             </button>
-            <a href="{{ route('admin.menu.items.index') }}"
+            <a href="{{ route('admin.product.items.index') }}"
                 class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
                 Cancel
             </a>

@@ -15,36 +15,82 @@ class UserController extends Controller
         $direction = $request->get('direction', 'desc');
 
         $users = User::query()
-            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
+            ->with('role')
+            ->when($search, fn($q) => $q->where('name', 'like', "%$search%")->orWhere('email', 'like', "%$search%"))
             ->orderBy($sort, $direction)
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('admin.users.index', compact('users', 'search', 'sort', 'direction'));
+        return \Inertia\Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+            ]
+        ]);
     }
+
     public function create()
     {
-        $user = new User();
-        return view('admin.users.create', compact('user'));
+        $roles = \App\Models\Role::all();
+        return \Inertia\Inertia::render('Admin/Users/Create', [
+            'roles' => $roles,
+            'branches' => \App\Models\Branch::all(),
+        ]);
     }
+
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'email' => 'required|email|unique:users,email',
+            'role_id' => 'required|exists:roles,id',
             'status' => 'required|boolean',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = User::create($data);
-
-        if ($request->ajax()) {
-            return response()->json(['message' => 'User created successfully', 'user' => $user]);
-        }
+        $data['password'] = \Hash::make($data['password']);
+        User::create($data);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
     }
-    public function show($id) {}
-    public function edit($id) {}
-    public function update(Request $request, $id) {}
-    public function destroy($id) {}
+
+    public function edit(User $user)
+    {
+        return \Inertia\Inertia::render('Admin/Users/Edit', [
+            'user' => $user,
+            'roles' => \App\Models\Role::all(),
+            'branches' => \App\Models\Branch::all(),
+        ]);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role_id' => 'required|exists:roles,id',
+            'status' => 'required|boolean',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        if ($request->filled('password')) {
+            $data['password'] = \Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully');
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return redirect()->back()->with('success', 'User deleted successfully');
+    }
 }

@@ -18,9 +18,17 @@ abstract class BaseMenuService
         $cacheKey = "{$this->cachePrefix}_{$entity->id}";
 
         return Cache::remember($cacheKey, now()->addHours(1), function () use ($entity) {
-            return ($this->model)::query()
-                ->whereHas($this->accessRelation, fn($q) => $q->where($this->foreignKey, $entity->id))
-                ->where('is_active', true)
+            $query = ($this->model)::query();
+
+            // If user is admin (role_id = 1), skip the permission check
+            $isAdmin = (isset($entity->role) && $entity->role->name === 'admin') || 
+                       (isset($entity->role_id) && $entity->role_id == 1);
+
+            if (!$isAdmin) {
+                $query->whereHas($this->accessRelation, fn($q) => $q->where($this->foreignKey, $entity->id));
+            }
+
+            return $query->where('is_active', true)
                 ->whereNull('parent_id')
                 ->orderBy('order')
                 ->with('childrenRecursive')
@@ -61,11 +69,16 @@ abstract class BaseMenuService
     public function isActive($menu): bool
     {
         if ($menu->route) {
-            if (
-                request()->routeIs($menu->route) ||
-                request()->routeIs($menu->route . '.*')
-            ) {
+            if (request()->routeIs($menu->route) || request()->routeIs($menu->route . '.*')) {
                 return true;
+            }
+
+            // If the route name ends in .index, we also check its prefix for related routes
+            if (str_ends_with($menu->route, '.index')) {
+                $prefix = substr($menu->route, 0, -6);
+                if (request()->routeIs($prefix . '.*')) {
+                    return true;
+                }
             }
         }
 

@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import Header from '@/Components/Admin/Header.vue'
 import SideBar from '@/Components/Admin/SideBar.vue'
@@ -36,10 +36,10 @@ const props = defineProps({
   notifications: { type: Array, default: () => [] },
 })
 
-const page = usePage().props
-const menus = page?.menus ?? []
-const user = page?.auth?.user ?? { name: 'Guest' }
-
+const page = usePage()
+const menus = computed(() => page.props.menus || [])
+const user = computed(() => page.props.auth?.user || { name: 'Guest' })
+const pageTitle = computed(() => page.props.pageTitle || 'Dashboard')
 
 const sidebarOpen = ref(false)
 const darkMode = ref(false)

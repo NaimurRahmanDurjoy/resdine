@@ -10,7 +10,7 @@
         <p class="text-gray-600">Update the menu variant details</p>
     </div>
 
-    <form action="{{ route('admin.menu.variants.update', $variant->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.product.variants.update', $variant->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -56,7 +56,7 @@
                 class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
                 Update Variants
             </button>
-            <a href="{{ route('admin.menu.variants.index') }}"
+            <a href="{{ route('admin.product.variants.index') }}"
                 class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
                 Cancel
             </a>

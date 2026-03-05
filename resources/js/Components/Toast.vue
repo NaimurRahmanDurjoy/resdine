@@ -10,20 +10,36 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
-const { props } = usePage()
-
-const flashMessages = props.value.flash || {}
+const page = usePage()
 
 const show = ref({
-  success: !!flashMessages.success,
-  error: !!flashMessages.error,
-  warning: !!flashMessages.warning,
-  info: !!flashMessages.info
+  success: false,
+  error: false,
+  warning: false,
+  info: false
 })
+
+const messages = ref({
+  success: '',
+  error: '',
+  warning: '',
+  info: ''
+})
+
+watch(() => page.props.flash, (flash) => {
+  if (flash) {
+    Object.keys(flash).forEach(key => {
+      if (flash[key]) {
+        messages.value[key] = flash[key]
+        show.value[key] = true
+        setTimeout(() => show.value[key] = false, 4000)
+      }
+    })
+  }
+}, { immediate: true, deep: true })
 
 function hide(type) {
   show.value[type] = false
@@ -37,15 +53,8 @@ function icon(type) {
 }
 
 function bgColor(type) {
-  return type === 'success' ? 'bg-green-400 text-white'
-       : type === 'error' ? 'bg-red-400 text-white'
-       : type === 'warning' ? 'bg-yellow-400 text-white'
-       : 'bg-blue-400 text-white'
+  return type === 'success' ? 'bg-green-500 text-white'
+       : type === 'error' ? 'bg-red-500 text-white'
+       : type === 'warning' ? 'bg-yellow-500 text-white'
+       : 'bg-blue-500 text-white'
 }
-
-onMounted(() => {
-  Object.keys(show.value).forEach(type => {
-    if(show.value[type]) setTimeout(() => show.value[type] = false, 3000)
-  })
-})
-</script>

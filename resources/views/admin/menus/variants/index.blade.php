@@ -17,7 +17,7 @@
 
     <!-- Table -->
     <div class="m-4 flex justify-between items-center">
-        <form method="GET" action="{{ route('admin.menu.variants.index') }}" class="flex space-x-2">
+        <form method="GET" action="{{ route('admin.product.variants.index') }}" class="flex space-x-2">
             <input
                 type="text"
                 name="search"
@@ -30,7 +30,7 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.menu.variants.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
+        <a href="{{ route('admin.product.variants.create') }}" class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2">
             <span class="material-symbols-outlined text-sm ">add</span>Add Variants
         </a>
     </div>
@@ -49,11 +49,11 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center space-x-4 text-base text-gray-600">
                         <!-- Edit -->
-                        <a href="{{ route('admin.menu.variants.edit', $variant->id) }}" title="Edit" class="hover:text-indigo-600 transition">
+                        <a href="{{ route('admin.product.variants.edit', $variant->id) }}" title="Edit" class="hover:text-indigo-600 transition">
                             <span class="material-symbols-outlined text-indigo-600" style="font-size: 20px;">edit</span>
                         </a>
                         <!-- Delete -->
-                        <form action="{{ route('admin.menu.variants.destroy', $variant->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
+                        <form action="{{ route('admin.product.variants.destroy', $variant->id) }}" method="POST" onsubmit="return confirm('Are you sure to want delete?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" title="Delete" class="hover:text-red-600 transition bg-transparent border-0 p-0">
@@ -71,7 +71,7 @@
                 <span class="material-symbols-outlined text-gray-300 text-6xl">variants</span>
                 <h3 class="text-lg font-semibold text-gray-700">No variants found</h3>
                 <p class="text-gray-500 text-sm">Start by adding a new variants to your menu.</p>
-                <a href="{{ route('admin.menu.variants.create') }}"
+                <a href="{{ route('admin.product.variants.create') }}"
                     class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
                     + Add variants
                 </a>

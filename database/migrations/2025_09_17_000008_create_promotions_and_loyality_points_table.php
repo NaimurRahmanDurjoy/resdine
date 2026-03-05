@@ -29,7 +29,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('promotion_id')->references('id')->on('promotions')->onDelete('cascade');
-            $table->foreign('item_id')->references('id')->on('menu_items')->onDelete('cascade');
+            $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
 
         Schema::create('loyalty_points', function (Blueprint $table) {

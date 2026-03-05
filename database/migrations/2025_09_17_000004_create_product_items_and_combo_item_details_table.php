@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('menu_items', function (Blueprint $table) {
+        Schema::create('product_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('category_id')->nullable();
             $table->string('name');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->tinyInteger('type')->default(1)->comment('1=regular,2=combo,3=complementary');
             $table->timestamps();
 
-            $table->foreign('category_id')->references('id')->on('menu_categories')->onDelete('set null');
+            $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('set null');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
             $table->foreign('department_id')->references('id')->on('res_departments')->onDelete('set null');
         });
@@ -36,18 +36,18 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->timestamps();
 
-            $table->foreign('combo_id')->references('id')->on('menu_items')->onDelete('cascade');
-            $table->foreign('item_id')->references('id')->on('menu_items')->onDelete('cascade');
+            $table->foreign('combo_id')->references('id')->on('product_items')->onDelete('cascade');
+            $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
 
-        Schema::create('menu_variants', function (Blueprint $table) {
+        Schema::create('product_variants', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('item_id'); 
             $table->string('name'); // e.g., Small, Medium, Large
             $table->decimal('price', 10, 2)->default(0);
             $table->timestamps();
 
-            $table->foreign('item_id')->references('id')->on('menu_items')->onDelete('cascade');
+            $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
 
     }
@@ -57,8 +57,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('menu_items');
+        Schema::dropIfExists('product_items');
         Schema::dropIfExists('combo_item_details');
-        Schema::dropIfExists('menu_variants');
+        Schema::dropIfExists('product_variants');
     }
 };
