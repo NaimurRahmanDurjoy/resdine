@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\MenuItem;
+namespace App\Http\Requests\ProductItem;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreMenuItemRequest extends FormRequest
+class UpdateMenuItemRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class StoreMenuItemRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'type' => 'required|in:1,2,3',
-            'category_id' => 'required|exists:menu_categories,id',
+            'category_id' => 'required|exists:product_categories,id',
             'price' => 'required|numeric|min:0',
             'unit_id' => 'required|exists:units,id',
             'department_id' => 'required|exists:res_departments,id',
@@ -33,7 +33,7 @@ class StoreMenuItemRequest extends FormRequest
             'status' => 'boolean',
             'is_featured' => 'boolean',
             'combo_items' => 'required_if:type,2|array',
-            'combo_items.*' => 'integer|exists:menu_items,id',
+            'combo_items.*' => 'integer|exists:product_items,id',
         ];
     }
 }

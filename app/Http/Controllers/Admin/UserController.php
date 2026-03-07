@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -14,30 +18,25 @@ class UserController extends Controller
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
 
-        $users = User::query()
-            ->with('role')
+        $data['users'] = User::query()->with('role')
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%")->orWhere('email', 'like', "%$search%"))
             ->orderBy($sort, $direction)
             ->paginate(10)
             ->withQueryString();
+            
+        $data['filters'] = ['search' => $search, 'sort' => $sort, 'direction' => $direction, ];
+        $data['pageTitle'] = 'Manage Users';
 
-        return \Inertia\Inertia::render('Admin/Users/Index', [
-            'users' => $users,
-            'filters' => [
-                'search' => $search,
-                'sort' => $sort,
-                'direction' => $direction,
-            ]
-        ]);
+        return Inertia::render('Admin/Users/Index', $data);
     }
 
     public function create()
     {
-        $roles = \App\Models\Role::all();
-        return \Inertia\Inertia::render('Admin/Users/Create', [
-            'roles' => $roles,
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        $data['roles'] = Role::all();
+        $data['branches'] = Branch::all();
+        $data['pageTitle'] = 'Create User';
+
+        return Inertia::render('Admin/Users/Create', $data);
     }
 
     public function store(Request $request)
@@ -51,7 +50,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $data['password'] = \Hash::make($data['password']);
+        $data['password'] = Hash::make($data['password']);
         User::create($data);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
@@ -59,11 +58,12 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return \Inertia\Inertia::render('Admin/Users/Edit', [
-            'user' => $user,
-            'roles' => \App\Models\Role::all(),
-            'branches' => \App\Models\Branch::all(),
-        ]);
+        $data['user'] = $user;
+        $data['roles'] = Role::all();
+        $data['branches'] = Branch::all();
+        $data['pageTitle'] = 'Edit User';
+    
+        return Inertia::render('Admin/Users/Edit', $data);
     }
 
     public function update(Request $request, User $user)
@@ -78,7 +78,7 @@ class UserController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $data['password'] = \Hash::make($data['password']);
+            $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }

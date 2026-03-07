@@ -123,7 +123,6 @@ import Card from '@/Components/Admin/Card.vue'
 import DataList from '@/Components/Admin/DataList.vue'
 import LineChart from '@/Components/Admin/LineChart.vue'
 import { computed } from 'vue'
-import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   totalSales: [Number, String],

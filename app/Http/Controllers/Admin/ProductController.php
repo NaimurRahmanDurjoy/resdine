@@ -13,12 +13,12 @@ use App\Models\Unit;
 use App\Models\ResDepartment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
-
-    {    
+    {
         $search = $request->get('search');
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
@@ -29,23 +29,32 @@ class ProductController extends Controller
                     ->orWhere('type', 'like', "%{$search}%")
                     ->orWhereHas('department', function ($departmentQuery) use ($search) {
                           $departmentQuery->where('name', 'like', "%{$search}%");
-                      });
-
+                    });
             })
             ->orderBy($sort, $direction)
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('admin.menus.items.index', compact('items', 'search', 'sort', 'direction'));
+        return Inertia::render('Admin/Products/Index', [
+            'products' => $items,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction
+            ],
+            'pageTitle' => 'Menu Items'
+        ]);
     }
 
     public function create()
     {
-        $categories = ProductCategory::all();
-        $units = Unit::all();
-        $departments = ResDepartment::all();
-        $menuItems = ProductItem::where('type', 1)->where('status', 1)->get();
-
-        return view('admin.menus.items.create', compact('categories', 'menuItems', 'units', 'departments'));
+        return Inertia::render('Admin/Products/Create', [
+            'categories' => ProductCategory::all(),
+            'units' => Unit::all(),
+            'departments' => ResDepartment::all(),
+            'menuItems' => ProductItem::where('type', 1)->where('status', 1)->get(),
+            'pageTitle' => 'Create Product'
+        ]);
     }
 
     public function store(StoreMenuItemRequest $request)
@@ -57,7 +66,7 @@ class ProductController extends Controller
             $validated['menu_img'] = $request->file('menu_img')->store('menu-images', 'public');
         }
 
-        unset($validated['combo_items']); // Remove from main table data
+        unset($validated['combo_items']); 
 
         DB::transaction(function () use ($validated, $comboItems) {
             $menuItem = ProductItem::create($validated);
@@ -67,19 +76,20 @@ class ProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.menu.items.index')->with('success', 'Menu item created successfully.');
+        return redirect()->route('admin.product.items.index')->with('success', 'Menu item created successfully.');
     }
 
     public function edit(ProductItem $item)
     {
-        $categories = ProductCategory::all();
-        $units = Unit::all();
-        $departments = ResDepartment::all();
-        $menuItems = ProductItem::where('type', 1)->where('status', 1)->get();
-
-        $item->load('comboItems.menuItem');
-
-        return view('admin.menus.items.edit', compact('item', 'categories', 'menuItems', 'departments', 'units'));
+        return Inertia::render('Admin/Products/Edit', [
+            'product' => $item,
+            'categories' => ProductCategory::all(),
+            'units' => Unit::all(),
+            'departments' => ResDepartment::all(),
+            'menuItems' => ProductItem::where('type', 1)->where('status', 1)->get(),
+            'comboItemIds' => $item->comboItems()->pluck('item_id')->toArray(),
+            'pageTitle' => 'Edit Product: ' . $item->name
+        ]);
     }
 
     public function update(UpdateMenuItemRequest $request, ProductItem $item)
@@ -106,8 +116,9 @@ class ProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.menu.items.index')->with('success', 'Menu item updated successfully.');
+        return redirect()->route('admin.product.items.index')->with('success', 'Menu item updated successfully.');
     }
+
     public function destroy(ProductItem $item)
     {
         if ($item->menu_img) {
@@ -119,16 +130,9 @@ class ProductController extends Controller
             $item->delete();
         });
 
-        return redirect()->route('admin.menu.items.index')->with('success', 'Menu item deleted successfully.');
+        return redirect()->route('admin.product.items.index')->with('success', 'Menu item deleted successfully.');
     }
 
-    /**
-     * Sync combo items for a menu item.
-     *
-     * @param ProductItem $menuItem
-     * @param array $comboItems
-     * @return void
-     */
     private function syncComboItems(ProductItem $menuItem, array $comboItems): void
     {
         $menuItem->comboItems()->delete();

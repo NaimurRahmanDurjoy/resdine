@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\ProductItem;
 use App\Models\ProductVariant;
 
+use Inertia\Inertia;
+
 class ProductVariantsController extends Controller
 {
     public function index(Request $request)
@@ -25,16 +27,26 @@ class ProductVariantsController extends Controller
                 });
             })
             ->orderBy($sort, $direction)
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('admin.menus.variants.index', compact('variants', 'search', 'sort', 'direction'));
+        return Inertia::render('Admin/ProductVariants/Index', [
+            'variants' => $variants,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction
+            ],
+            'pageTitle' => 'Menu Variants'
+        ]);
     }
 
     public function create()
     {
-        $variants = ProductVariant::with('productItem')->get();
-        $menuItems = ProductItem::all();
-        return view('admin.menus.variants.create', compact('variants', 'menuItems'));
+        return Inertia::render('Admin/ProductVariants/Create', [
+            'menuItems' => ProductItem::all(),
+            'pageTitle' => 'Create Variant'
+        ]);
     }
 
     public function store(Request $request)
@@ -45,19 +57,18 @@ class ProductVariantsController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
-        ProductVariant::create([
-            'name' => $validated['name'],
-            'item_id' => $validated['item_id'],
-            'price' => $validated['price'],
-        ]);
+        ProductVariant::create($validated);
 
-        return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants created successfully.');
+        return redirect()->route('admin.product.variants.index')->with('success', 'Menu variant created successfully.');
     }
 
     public function edit(ProductVariant $variant)
     {
-        $menuItems = ProductItem::all();
-        return view('admin.menus.variants.edit', compact('variant', 'menuItems'));
+        return Inertia::render('Admin/ProductVariants/Edit', [
+            'variant' => $variant,
+            'menuItems' => ProductItem::all(),
+            'pageTitle' => 'Edit Variant: ' . $variant->name
+        ]);
     }
 
     public function update(Request $request, ProductVariant $variant)
@@ -68,18 +79,14 @@ class ProductVariantsController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
-        $variant->update([
-            'name' => $validated['name'],
-            'item_id' => $validated['item_id'],
-            'price' => $validated['price'],
-        ]);
+        $variant->update($validated);
 
-        return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants updated successfully.');
+        return redirect()->route('admin.product.variants.index')->with('success', 'Menu variant updated successfully.');
     }
 
     public function destroy(ProductVariant $variant)
     {
         $variant->delete();
-        return redirect()->route('admin.menu.variants.index')->with('success', 'Menu variants deleted successfully.');
+        return redirect()->route('admin.product.variants.index')->with('success', 'Menu variant deleted successfully.');
     }
 }

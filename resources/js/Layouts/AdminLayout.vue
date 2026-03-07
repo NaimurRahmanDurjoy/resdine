@@ -1,4 +1,5 @@
 <template>
+  <Head :title="pageTitle" />
   <div class="flex h-screen bg-gray-50 dark:bg-gray-900" :class="{ dark: darkMode }">
     <!-- Sidebar Backdrop (for mobile) -->
     <div v-show="sidebarOpen" 
@@ -10,14 +11,15 @@
                   class="fixed inset-y-0 left-0 z-30 w-64 transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
                   :class="{ '-translate-x-full': !sidebarOpen }" />
 
-    <div class="flex-1 flex flex-col lg:ml-64 transition-all">
+    <div class="flex-1 flex flex-col lg:ml-64 transition-all min-w-0">
       <!-- Header -->
       <Header :user="user" 
                  :notifications="notifications" 
+                 :pageTitle="pageTitle"
                  @toggleSidebar="sidebarOpen = !sidebarOpen" />
 
       <!-- Page Content -->
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-6 overflow-x-hidden overflow-y-auto">
         <slot />
       </main>
     </div>

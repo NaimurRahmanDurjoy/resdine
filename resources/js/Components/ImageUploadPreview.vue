@@ -28,7 +28,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useAsset } from '@inertiajs/inertia-vue3'
 
 const props = defineProps({
   name: { type: String, default: 'image' },

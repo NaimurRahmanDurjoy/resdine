@@ -32,7 +32,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   menu: { type: Object, required: true }

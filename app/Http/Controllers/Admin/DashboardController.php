@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\OrderMaster;
 use App\Models\StockSummary;
-use App\Models\MenuItem;
+use App\Models\ProductItem;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         // Total Sales Today
-        $totalSales = OrderMaster::whereDate('created_at', today())
+        $data['totalSales'] = OrderMaster::whereDate('created_at', today())
                             ->where('order_status', 'completed')
                             ->sum('total_amount');
 
@@ -26,7 +27,7 @@ class DashboardController extends Controller
                      ->first();
 
         // $topItemName = $topItem ? MenuItem::find($topItem->menu_id)->name : 'N/A';
-        $topItemName = $topItem ? MenuItem::find($topItem->item_id)->name : 'N/A';
+        $data['topItemName'] = $topItem ? ProductItem::find($topItem->item_id)->name : 'N/A';
         // Low Stock Alerts
         $lowStock = StockSummary::where('current_stock', '<=', 5)->get(); // threshold = 5
 
@@ -41,16 +42,11 @@ class DashboardController extends Controller
                         ->orderBy('date')
                         ->get();
 
-        $labels = $salesTrend->pluck('date')->map(fn($d) => $d->format('D'))->toArray();
-        $salesData = $salesTrend->pluck('total')->toArray();
+        $data['labels'] = $salesTrend->pluck('date')->map(fn($d) => $d->format('D'))->toArray();
+        $data['salesData'] = $salesTrend->pluck('total')->toArray();
+        $data['pageTitle'] = 'Dashboard';
 
-        return \Inertia\Inertia::render('Admin/Dashboard', [
-            'totalSales' => $totalSales,
-            'topItemName' => $topItemName,
-            'lowStock' => $lowStock,
-            'labels' => $labels,
-            'salesData' => $salesData
-        ]);
+        return Inertia::render('Admin/Dashboard', $data);
     }
 }
 

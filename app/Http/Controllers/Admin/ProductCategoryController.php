@@ -8,8 +8,8 @@ use App\Models\MenuItem;
 use App\Models\ProductCategory;
 use App\Models\Unit;
 use App\Models\ResDepartment;
-use App\Models\ComboItemDetail; // Add this model
-
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class ProductCategoryController extends Controller
 {
@@ -22,15 +22,25 @@ class ProductCategoryController extends Controller
         $categories = ProductCategory::query()
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
             ->orderBy($sort, $direction)
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('admin.menus.category.index', compact('categories', 'search', 'sort', 'direction'));
+        return Inertia::render('Admin/ProductCategories/Index', [
+            'categories' => $categories,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction
+            ],
+            'pageTitle' => 'Product Categories'
+        ]);
     }
 
     public function create()
     {
-        $categories = ProductCategory::all();
-        return view('admin.menus.category.create', compact('categories'));
+        return Inertia::render('Admin/ProductCategories/Create', [
+            'pageTitle' => 'Create Category'
+        ]);
     }
 
     public function store(Request $request)
@@ -38,40 +48,30 @@ class ProductCategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'status' => 'nullable|boolean',
+            'status' => 'required|boolean',
         ]);
 
         $imagePath = null;
 
         if ($request->hasFile('category_img')) {
-            $file = $request->file('category_img');
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $destination = public_path('uploads/menu_category_img');
-
-            // Create folder if not exists
-            if (!file_exists($destination)) {
-                mkdir($destination, 0755, true);
-            }
-
-            $file->move($destination, $filename);
-            $imagePath = 'uploads/menu_category_img/' . $filename;
+            $imagePath = $request->file('category_img')->store('menu_categories', 'public');
         }
 
         ProductCategory::create([
             'name' => $validated['name'],
-            'status' => $request->has('status') ? 1 : 0,
+            'status' => $validated['status'],
             'image' => $imagePath,
         ]);
 
-        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category created successfully.');
+        return redirect()->route('admin.product.categories.index')->with('success', 'Menu category created successfully.');
     }
-
 
     public function edit(ProductCategory $category)
     {
-        $categories = ProductCategory::where('status', 1)->get();
-        
-        return view('admin.menus.category.edit', compact('category'));
+        return Inertia::render('Admin/ProductCategories/Edit', [
+            'category' => $category,
+            'pageTitle' => 'Edit Category: ' . $category->name
+        ]);
     }
 
     public function update(Request $request, ProductCategory $category)
@@ -79,45 +79,35 @@ class ProductCategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'status' => 'nullable|boolean',
+            'status' => 'required|boolean',
         ]);
 
         $data = [
             'name' => $validated['name'],
-            'status' => $request->has('status') ? 1 : 0,
+            'status' => $validated['status'],
         ];
 
         if ($request->hasFile('category_img')) {
             // Delete old image if it exists
-            if ($category->image && file_exists(public_path($category->image))) {
-                unlink(public_path($category->image));
+            if ($category->image) {
+                Storage::disk('public')->delete($category->image);
             }
 
-            $file = $request->file('category_img');
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $destination = public_path('uploads/menu_category_img');
-
-            if (!file_exists($destination)) {
-                mkdir($destination, 0755, true);
-            }
-
-            $file->move($destination, $filename);
-            $data['image'] = 'uploads/menu_category_img/' . $filename;
+            $data['image'] = $request->file('category_img')->store('menu_categories', 'public');
         }
 
         $category->update($data);
 
-        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category updated successfully.');
+        return redirect()->route('admin.product.categories.index')->with('success', 'Menu category updated successfully.');
     }
-
 
     public function destroy(ProductCategory $category)
     {
         // Delete associated image
-        if ($category->image && file_exists(public_path($category->image))) {
-            unlink(public_path($category->image));
+        if ($category->image) {
+            Storage::disk('public')->delete($category->image);
         }
         $category->delete();
-        return redirect()->route('admin.menu.categories.index')->with('success', 'Menu category deleted successfully.');
+        return redirect()->route('admin.product.categories.index')->with('success', 'Menu category deleted successfully.');
     }
 }
