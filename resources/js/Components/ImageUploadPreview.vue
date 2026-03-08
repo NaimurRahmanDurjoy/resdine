@@ -37,7 +37,12 @@ const props = defineProps({
 const imageUrl = ref(null)
 
 const existingImageUrl = computed(() => {
-  return props.existingImage ? `/storage/${props.existingImage}` : null
+  if (!props.existingImage) return null
+  // If it's already a full URL or data URI, return as is
+  if (props.existingImage.startsWith('http') || props.existingImage.startsWith('data:') || props.existingImage.startsWith('/')) {
+    return props.existingImage
+  }
+  return `/storage/${props.existingImage}`
 })
 
 function previewImage(event) {

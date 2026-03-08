@@ -10,9 +10,17 @@ use App\Models\Unit;
 use App\Models\ResDepartment;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageUploadService;
 
 class ProductCategoryController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(ImageUploadService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -54,7 +62,7 @@ class ProductCategoryController extends Controller
         $imagePath = null;
 
         if ($request->hasFile('category_img')) {
-            $imagePath = $request->file('category_img')->store('menu_categories', 'public');
+            $imagePath = $this->imageService->upload($request->file('category_img'), 'menu_categories');
         }
 
         ProductCategory::create([
@@ -88,12 +96,8 @@ class ProductCategoryController extends Controller
         ];
 
         if ($request->hasFile('category_img')) {
-            // Delete old image if it exists
-            if ($category->image) {
-                Storage::disk('public')->delete($category->image);
-            }
-
-            $data['image'] = $request->file('category_img')->store('menu_categories', 'public');
+            $this->imageService->delete($category->image);
+            $data['image'] = $this->imageService->upload($request->file('category_img'), 'menu_categories');
         }
 
         $category->update($data);
@@ -103,10 +107,7 @@ class ProductCategoryController extends Controller
 
     public function destroy(ProductCategory $category)
     {
-        // Delete associated image
-        if ($category->image) {
-            Storage::disk('public')->delete($category->image);
-        }
+        $this->imageService->delete($category->image);
         $category->delete();
         return redirect()->route('admin.product.categories.index')->with('success', 'Menu category deleted successfully.');
     }

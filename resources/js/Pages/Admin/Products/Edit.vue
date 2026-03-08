@@ -13,7 +13,7 @@
       :units="units"
       :departments="departments"
       :menuItems="menuItems"
-      :existingImage="product.menu_img"
+      :existingImage="product.image_url"
       :is-edit="true"
       @submit="submit" 
     />

@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <Form :form="form" :existingImage="category.image" :is-edit="true" @submit="submit" />
+    <Form :form="form" :existingImage="category.image_url" :is-edit="true" @submit="submit" />
   </div>
 </template>
 

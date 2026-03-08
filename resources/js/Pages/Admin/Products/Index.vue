@@ -64,8 +64,8 @@
              <span v-else>Unknown</span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div v-if="product.menu_img" class="w-12 h-12">
-              <img :src="`/storage/${product.menu_img}`" :alt="product.name" class="w-full h-full rounded-md object-cover border border-gray-200" />
+            <div v-if="product.image_url" class="w-12 h-12">
+              <img :src="product.image_url" :alt="product.name" class="w-full h-full rounded-md object-cover border border-gray-200" />
             </div>
             <span v-else class="text-gray-400 italic text-sm">No image</span>
           </td>

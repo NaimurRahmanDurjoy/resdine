@@ -4,10 +4,10 @@
     <div v-if="menu.hasChildren">
       <button @click="open = !open"
               :class="[
-                'flex items-center px-4 py-3 rounded-lg transition-colors justify-between',
-                isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'
+                'w-full flex items-center px-4 py-3 rounded transition-colors justify-between',
+                isActive ? 'border-l-4 border-blue-500 dark:border-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'
               ]">
-        <div class="flex items-center">
+        <div class="flex items-center ">
           <span v-if="menu.model.icon" class="material-symbols-outlined w-5 mr-3">{{ menu.model.icon }}</span>
           <span>{{ menu.model.name }}</span>
         </div>
@@ -21,8 +21,8 @@
     <!-- Single menu item -->
     <Link v-else :href="menu.url"
        :class="[
-         'flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors',
-         isActive ? 'bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'
+         'flex items-center px-4 py-3 rounded hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors',
+         isActive ? 'border-l-4 border-blue-500 dark:border-blue-900 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-200'
        ]">
       <span v-if="menu.model.icon" class="material-symbols-outlined w-5 mr-3">{{ menu.model.icon }}</span>
       <span>{{ menu.model.name }}</span>

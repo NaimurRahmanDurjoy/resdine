@@ -7,7 +7,7 @@
       </button>
 
       <!-- Logo (Mobile Only) -->
-      <div class="lg:hidden flex-shrink-0">
+      <div class="lg:hidden border-r pr-2 flex-shrink-0">
         <Logo />
       </div>
 

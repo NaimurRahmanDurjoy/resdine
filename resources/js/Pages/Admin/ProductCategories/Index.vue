@@ -55,8 +55,8 @@
             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ category.name }}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div v-if="category.image" class="w-12 h-12">
-              <img :src="category.image" :alt="category.name" class="w-full h-full rounded-md object-cover border border-gray-200" />
+            <div v-if="category.image_url" class="w-12 h-12">
+              <img :src="category.image_url" :alt="category.name" class="w-full h-full rounded-md object-cover border border-gray-200" />
             </div>
             <span v-else class="text-gray-400 italic text-sm">No image</span>
           </td>

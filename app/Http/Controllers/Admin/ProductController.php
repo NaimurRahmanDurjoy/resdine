@@ -14,9 +14,17 @@ use App\Models\ResDepartment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Services\ImageUploadService;
 
 class ProductController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(ImageUploadService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -28,7 +36,7 @@ class ProductController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('type', 'like', "%{$search}%")
                     ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                          $departmentQuery->where('name', 'like', "%{$search}%");
+                        $departmentQuery->where('name', 'like', "%{$search}%");
                     });
             })
             ->orderBy($sort, $direction)
@@ -63,10 +71,10 @@ class ProductController extends Controller
         $comboItems = $request->input('combo_items', []);
 
         if ($request->hasFile('menu_img')) {
-            $validated['menu_img'] = $request->file('menu_img')->store('menu-images', 'public');
+            $validated['menu_img'] = $this->imageService->upload($request->file('menu_img'), 'menu-images');
         }
 
-        unset($validated['combo_items']); 
+        unset($validated['combo_items']);
 
         DB::transaction(function () use ($validated, $comboItems) {
             $menuItem = ProductItem::create($validated);
@@ -98,10 +106,8 @@ class ProductController extends Controller
         $comboItems = $request->input('combo_items', []);
 
         if ($request->hasFile('menu_img')) {
-            if ($item->menu_img) {
-                Storage::disk('public')->delete($item->menu_img);
-            }
-            $validated['menu_img'] = $request->file('menu_img')->store('menu-images', 'public');
+            $this->imageService->delete($item->menu_img);
+            $validated['menu_img'] = $this->imageService->upload($request->file('menu_img'), 'menu-images');
         }
 
         unset($validated['combo_items']);
@@ -121,9 +127,7 @@ class ProductController extends Controller
 
     public function destroy(ProductItem $item)
     {
-        if ($item->menu_img) {
-            Storage::disk('public')->delete($item->menu_img);
-        }
+        $this->imageService->delete($item->menu_img);
 
         DB::transaction(function () use ($item) {
             $item->comboItems()->delete();
