@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\MembershipController;
 use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\RestaurantSetup\BranchController;
+use App\Http\Controllers\Admin\RestaurantSetup\ResDepartmentController;
+use App\Http\Controllers\Admin\RestaurantSetup\StaffDepartmentController;
+use App\Http\Controllers\Admin\RestaurantSetup\TableController;
 
 // ----------------------
 // Admin Panel Routes
@@ -58,6 +62,16 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('promotions', PromotionController::class);
 
         // Settings
-        Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            
+            // Restaurant Setup
+            Route::prefix('restaurant-setup')->name('restaurant-setup.')->group(function () {
+                Route::resource('branches', BranchController::class);
+                Route::resource('res-departments', ResDepartmentController::class);
+                Route::resource('staff-departments', StaffDepartmentController::class);
+                Route::resource('tables', TableController::class);
+            });
+        });
     });
 });

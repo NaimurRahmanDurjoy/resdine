@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ResDepartment extends Model
+class RestaurantTable extends Model
 {
-    protected $fillable = ['name', 'branch_id'];
+    protected $fillable = ['name', 'branch_id', 'capacity', 'status', 'section'];
 
     public function branch()
     {
