@@ -21,8 +21,15 @@ abstract class BaseMenuService
             $query = ($this->model)::query();
 
             // If user is admin (role_id = 1), skip the permission check
-            $isAdmin = (isset($entity->role) && $entity->role->name === 'admin') || 
-                       (isset($entity->role_id) && $entity->role_id == 1);
+            $isAdmin = false;
+            if (isset($entity->role)) {
+                if (is_string($entity->role)) {
+                    $isAdmin = in_array($entity->role, ['admin', 'superadmin', 'developer']);
+                } else {
+                    $isAdmin = $entity->role->name === 'admin';
+                }
+            }
+            $isAdmin = $isAdmin || (isset($entity->role_id) && $entity->role_id == 1);
 
             if (!$isAdmin) {
                 $query->whereHas($this->accessRelation, fn($q) => $q->where($this->foreignKey, $entity->id));
