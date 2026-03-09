@@ -8,6 +8,7 @@ use App\Models\Branch;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -16,54 +17,80 @@ class UserController extends Controller
         $search = $request->get('search');
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
-        $users = User::query()
+        $users = User::query()->with('role')
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
             ->orderBy($sort, $direction)
             ->paginate(10);
 
-        return view('devAdmin.users.index', compact('users', 'search', 'sort', 'direction'));
+        return Inertia::render('DevAdmin/Users/Index', [
+            'users' => $users,
+            'search' => $search,
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
     }
 
-        public function create()
+    public function create()
     {
-        $branch = Branch::all();
-        return view('devAdmin.users.create', compact('parents'));
+        $branches = Branch::all();
+        $roles = Role::all();
+        return Inertia::render('DevAdmin/Users/Form', [
+            'branches' => $branches,
+            'roles' => $roles,
+            'isEdit' => false
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'branch_id' => 'required|exists:branches,id',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         User::create($request->all());
-        // $this->menuService->clearAllCache();
 
         return redirect()->route('devAdmin.users.index')->with('success', 'Users created successfully.');
     }
 
-    public function edit(User $User)
+    public function edit(User $user)
     {
-        $parents = User::whereNull('parent_id')->where('id', '!=', $User->id)->get();
-        return view('devAdmin.users.edit', compact('User', 'parents'));
+        $branches = Branch::all();
+        $roles = Role::all();
+        return Inertia::render('DevAdmin/Users/Form', [
+            'user' => $user,
+            'branches' => $branches,
+            'roles' => $roles,
+            'isEdit' => true
+        ]);
     }
 
-    public function update(Request $request, User $User)
+    public function update(Request $request, User $user)
     {
         $request->validate([
-
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'branch_id' => 'required|exists:branches,id',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
-        $User->update($request->all());
-        // $this->menuService->clearAllCache();
+        $data = $request->all();
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
 
         return redirect()->route('devAdmin.users.index')->with('success', 'Users updated successfully.');
     }
 
-    public function destroy(User $User)
+    public function destroy(User $user)
     {
-        $User->delete();
-        // $this->menuService->clearAllCache();
+        $user->delete();
 
         return redirect()->back()->with('success', 'Users deleted successfully.');
     }

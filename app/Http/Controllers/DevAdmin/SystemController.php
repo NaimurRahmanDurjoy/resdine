@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 
 class SystemController extends Controller
 {
@@ -35,7 +36,9 @@ class SystemController extends Controller
             ->take(-100)
             ->implode("\n");
 
-        return view('devAdmin.systems.logs', compact('logs'));
+        return Inertia::render('DevAdmin/Systems/Logs', [
+            'logs' => $logs
+        ]);
     }
 
     /**
@@ -53,6 +56,10 @@ class SystemController extends Controller
 
         $totalSize = array_sum(array_column($tables, 'size_mb'));
 
-        return view('devAdmin.systems.database', compact('tables', 'totalSize', 'dbName'));
+        return Inertia::render('DevAdmin/Systems/Database', [
+            'tables' => $tables,
+            'totalSize' => $totalSize,
+            'dbName' => $dbName
+        ]);
     }
 }

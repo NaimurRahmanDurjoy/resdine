@@ -17,7 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead
 </head>
-<body class="bg-gray-50 font-sans antialiased text-gray-900">
+<body class="bg-gray-950 font-sans antialiased text-gray-900">
     @inertia
 
     <!-- jQuery (required by Select2) -->

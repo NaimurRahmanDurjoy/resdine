@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -43,15 +44,15 @@ class DashboardController extends Controller
         // Errors today from Laravel log file
         $errorsToday = $this->errorsToday();
 
-        return view('devAdmin.dashboard', compact(
-            'totalUsers',
-            'ordersToday',
-            'revenueToday',
-            'databaseSize',
-            'errorsToday',
-            'systemHealth',
-            'serverLoad'
-        ));
+        return Inertia::render('DevAdmin/Dashboard', [
+            'totalUsers' => $totalUsers,
+            'ordersToday' => $ordersToday,
+            'revenueToday' => (float) $revenueToday,
+            'databaseSize' => $databaseSize,
+            'errorsToday' => $errorsToday,
+            'systemHealth' => $systemHealth,
+            'serverLoad' => $serverLoad,
+        ]);
     }
 
     private function checkDatabase()

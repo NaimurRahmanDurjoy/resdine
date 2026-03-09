@@ -7,6 +7,7 @@ use App\Models\AdminMenu;
 use App\Services\DevAdminMenuService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AdminMenuController extends Controller
 {
@@ -20,26 +21,33 @@ class AdminMenuController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $sort = $request->get('sort', 'created_at');
-        $direction = $request->get('direction', 'desc');
+        $sort = $request->get('sort', 'order');
+        $direction = $request->get('direction', 'asc');
+
         $menus = AdminMenu::with('childrenRecursive')
             ->when($search, function ($q) use ($search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('route', 'like', "%{$search}%");
-                });
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('route', 'like', "%{$search}%");
             })
             ->whereNull('parent_id')
-            ->orderBy('order')
             ->orderBy($sort, $direction)
             ->paginate(10);
-        return view('devAdmin.systemConfig.adminMenu.index', compact('menus', 'search', 'sort', 'direction'));
+
+        return Inertia::render('DevAdmin/SystemConfig/AdminMenu/Index', [
+            'menus' => $menus,
+            'search' => $search,
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
     }
 
     public function create()
     {
         $parents = AdminMenu::whereNull('parent_id')->get();
-        return view('devAdmin.systemConfig.adminMenu.create', compact('parents'));
+        return Inertia::render('DevAdmin/SystemConfig/AdminMenu/Form', [
+            'parents' => $parents,
+            'isEdit' => false
+        ]);
     }
 
     public function store(Request $request)
@@ -54,7 +62,7 @@ class AdminMenuController extends Controller
         ]);
 
         AdminMenu::create($request->all());
-        $this->menuService->clearCache(Auth::guard('admin')->user()); // optional method to clear all cached menus
+        $this->menuService->clearCache(Auth::guard('admin')->user());
 
         return redirect()->route('devAdmin.systemConfig.adminPanel.menu.index')->with('success', 'Menu created successfully.');
     }
@@ -62,7 +70,11 @@ class AdminMenuController extends Controller
     public function edit(AdminMenu $menu)
     {
         $parents = AdminMenu::whereNull('parent_id')->where('id', '!=', $menu->id)->get();
-        return view('devAdmin.systemConfig.adminMenu.edit', compact('menu', 'parents'));
+        return Inertia::render('DevAdmin/SystemConfig/AdminMenu/Form', [
+            'menu' => $menu,
+            'parents' => $parents,
+            'isEdit' => true
+        ]);
     }
 
     public function update(Request $request, AdminMenu $menu)

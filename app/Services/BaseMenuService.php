@@ -93,7 +93,7 @@ abstract class BaseMenuService
             if ($this->isActive($child)) {
                 return true;
             }
-        }
+        }    
 
         return false;
     }
@@ -106,11 +106,15 @@ abstract class BaseMenuService
     {
         return $menus->map(function ($menu) {
             return [
-                'model' => $menu,
+                'id' => $menu->id,
+                'name' => $menu->name,
+                'route' => $menu->route,
+                'icon' => $menu->icon,
                 'url' => $this->getUrl($menu),
                 'isActive' => $this->isActive($menu),
                 'hasChildren' => $menu->children->count() > 0,
-                'children' => $this->prepareForView($menu->children)
+                'children' => $this->prepareForView($menu->children),
+                'model' => $menu,
             ];
         });
     }

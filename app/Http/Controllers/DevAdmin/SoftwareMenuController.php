@@ -4,44 +4,50 @@ namespace App\Http\Controllers\DevAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SoftwareMenu;
-use App\Services\MenuService;
+use App\Services\DevAdminMenuService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class SoftwareMenuController extends Controller
 {
-    protected MenuService $menuService;
+    protected DevAdminMenuService $menuService;
 
-    public function __construct(MenuService $menuService)
+    public function __construct(DevAdminMenuService $menuService)
     {
         $this->menuService = $menuService;
     }
 
-public function index(Request $request)
-{
-    $search = $request->get('search');
-    $sort = $request->get('sort', 'created_at');
-    $direction = $request->get('direction', 'desc');
+    public function index(Request $request)
+    {
+        $search = $request->get('search');
+        $sort = $request->get('sort', 'order');
+        $direction = $request->get('direction', 'asc');
 
-    $menus = SoftwareMenu::with('childrenRecursive')
-        ->when($search, function ($q) use ($search) {
-            $q->where(function($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('route', 'like', "%{$search}%");
-            });
-        })
-        ->whereNull('parent_id')
-        ->orderBy('order')
-        ->orderBy($sort, $direction)
-        ->paginate(10);
+        $menus = SoftwareMenu::with('childrenRecursive')
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('route', 'like', "%{$search}%");
+            })
+            ->whereNull('parent_id')
+            ->orderBy($sort, $direction)
+            ->paginate(10);
 
-    return view('devAdmin.systemConfig.softwareMenu.index', compact('menus', 'search', 'sort', 'direction'));
-}
-
+        return Inertia::render('DevAdmin/SystemConfig/SoftwareMenu/Index', [
+            'menus' => $menus,
+            'search' => $search,
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
+    }
 
     public function create()
     {
         $parents = SoftwareMenu::whereNull('parent_id')->get();
-        return view('devAdmin.systemConfig.softwareMenu.create', compact('parents'));
+        return Inertia::render('DevAdmin/SystemConfig/SoftwareMenu/Form', [
+            'parents' => $parents,
+            'isEdit' => false
+        ]);
     }
 
     public function store(Request $request)
@@ -56,15 +62,19 @@ public function index(Request $request)
         ]);
 
         SoftwareMenu::create($request->all());
-        $this->menuService->clearAllCache();
+        $this->menuService->clearCache(Auth::guard('admin')->user());
 
-        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu created successfully.');
+        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Software Menu created successfully.');
     }
 
     public function edit(SoftwareMenu $menu)
     {
         $parents = SoftwareMenu::whereNull('parent_id')->where('id', '!=', $menu->id)->get();
-        return view('devAdmin.systemConfig.softwareMenu.edit', compact('menu', 'parents'));
+        return Inertia::render('DevAdmin/SystemConfig/SoftwareMenu/Form', [
+            'menu' => $menu,
+            'parents' => $parents,
+            'isEdit' => true
+        ]);
     }
 
     public function update(Request $request, SoftwareMenu $menu)
@@ -79,16 +89,16 @@ public function index(Request $request)
         ]);
 
         $menu->update($request->all());
-        $this->menuService->clearAllCache();
+        $this->menuService->clearCache(Auth::guard('admin')->user());
 
-        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Menu updated successfully.');
+        return redirect()->route('devAdmin.systemConfig.software.menu.index')->with('success', 'Software Menu updated successfully.');
     }
 
     public function destroy(SoftwareMenu $menu)
     {
         $menu->delete();
-        $this->menuService->clearAllCache();
+        $this->menuService->clearCache(Auth::guard('admin')->user());
 
-        return redirect()->back()->with('success', 'Menu deleted successfully.');
+        return redirect()->back()->with('success', 'Software Menu deleted successfully.');
     }
 }
