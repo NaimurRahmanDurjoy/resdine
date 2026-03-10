@@ -34,7 +34,7 @@ class AdminMenuController extends Controller
             ->paginate(10);
 
         return Inertia::render('DevAdmin/SystemConfig/AdminMenu/Index', [
-            'menus' => $menus,
+            'items' => $menus,
             'search' => $search,
             'sort' => $sort,
             'direction' => $direction,

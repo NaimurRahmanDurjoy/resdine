@@ -41,95 +41,10 @@
 
             <!-- List Table -->
             <DataTable :headers="['Menu Name', 'Route', 'Icon', 'Parent', 'Order', 'Status', 'Actions']"
-                :items="menus.data" :pagination="menus" :sortableHeaders="{ 0: 'name', 1: 'route', 4: 'order' }"
+                :items="items.data" :pagination="items" :sortableHeaders="{ 0: 'name', 1: 'route', 4: 'order' }"
                 :currentSort="sort" :currentDirection="direction">
                 <template #rows>
-                    <template v-for="menu in menus.data" :key="menu.id">
-                        <!-- Parent Row -->
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors">
-                            <td class="px-6 py-3 font-bold text-emerald-900 dark:text-emerald-400">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    {{ menu.name }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">{{ menu.route ||
-                                '-' }}</td>
-                            <td class="px-6 py-3">
-                                <span v-if="menu.icon"
-                                    class="material-symbols-outlined text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 p-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800/50">{{
-                                        menu.icon }}</span>
-                                <span v-else class="text-gray-300">-</span>
-                            </td>
-                            <td class="px-6 py-3 text-gray-400 text-xs italic">Root</td>
-                            <td class="px-6 py-3">
-                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">#{{ menu.order
-                                }}</span>
-                            </td>
-                            <td class="px-6 py-3">
-                                <span :class="[
-                                    'px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-tighter',
-                                    menu.is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-                                ]">
-                                    {{ menu.is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3">
-                                <div class="flex items-center gap-3">
-                                    <Link :href="route('devAdmin.systemConfig.software.menu.edit', menu.id)"
-                                        class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors tooltip">
-                                        <span class="material-symbols-outlined text-xl font-icon">edit</span>
-                                    </Link>
-                                    <button @click="deleteMenu(menu.id)"
-                                        class="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-md transition-colors tooltip">
-                                        <span class="material-symbols-outlined text-xl font-icon">delete</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- Child Rows -->
-                        <tr v-for="child in menu.children_recursive" :key="child.id"
-                            class="hover:bg-gray-50 dark:hover:bg-gray-800/50 bg-gray-50/50 dark:bg-gray-900/30 group transition-colors">
-                            <td
-                                class="px-6 py-2 text-gray-700 dark:text-gray-300 pl-12 border-l-2 border-emerald-100 dark:border-emerald-900">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-emerald-300 leading-none">└─</span>
-                                    {{ child.name }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-2 text-gray-500 dark:text-gray-500 font-mono text-xs">{{ child.route ||
-                                '-' }}</td>
-                            <td class="px-6 py-2">
-                                <span v-if="child.icon" class="material-symbols-outlined text-gray-400 text-lg">{{
-                                    child.icon }}</span>
-                                <span v-else class="text-gray-300">-</span>
-                            </td>
-                            <td class="px-6 py-2 text-gray-500 text-xs">{{ menu.name }}</td>
-                            <td class="px-6 py-2">
-                                <span class="text-[10px] text-gray-400">#{{ child.order }}</span>
-                            </td>
-                            <td class="px-6 py-2">
-                                <span :class="[
-                                    'w-2 h-2 rounded-full inline-block mr-2',
-                                    child.is_active ? 'bg-emerald-500' : 'bg-rose-500'
-                                ]"></span>
-                                <span class="text-xs">{{ child.is_active ? 'Show' : 'Hide' }}</span>
-                            </td>
-                            <td class="px-6 py-2">
-                                <div class="flex items-center gap-2">
-                                    <Link :href="route('devAdmin.systemConfig.software.menu.edit', child.id)"
-                                        class="text-gray-400 hover:text-blue-600 transition-colors">
-                                        <span class="material-symbols-outlined text-lg font-icon">edit</span>
-                                    </Link>
-                                    <button @click="deleteMenu(child.id)"
-                                        class="text-gray-400 hover:text-rose-600 transition-colors">
-                                        <span class="material-symbols-outlined text-lg font-icon">delete</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </template>
+                    <MenuRow v-for="menu in items.data" :key="menu.id" :menu="menu" :color="'emerald'" :route-prefix="'devAdmin.systemConfig.software.menu'" />
                 </template>
 
                 <template #empty>
@@ -142,8 +57,7 @@
                         <p class="text-gray-500 text-sm max-w-xs text-center">No software menus found. Start by creating
                             a root menu item.</p>
                         <button @click="clearSearch" class="text-emerald-600 font-bold text-sm hover:underline">Clear
-                            all
-                            filters</button>
+                            all filters</button>
                     </div>
                 </template>
             </DataTable>
@@ -156,9 +70,10 @@ import { ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import DevAdminLayout from '@/Layouts/DevAdminLayout.vue'
 import DataTable from '@/Components/Admin/DataTable.vue'
+import MenuRow from '@/Components/DevAdmin/MenuRow.vue'
 
 const props = defineProps({
-    menus: Object,
+    items: Object,
     search: String,
     sort: String,
     direction: String

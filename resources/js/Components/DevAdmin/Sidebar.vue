@@ -29,12 +29,8 @@
               </span>
             </button>
 
-            <div v-show="isMenuOpen(menu.id)" class="mt-1 space-y-1 pl-10 border-l border-gray-800 ml-5">
-              <Link v-for="child in menu.children" :key="child.id" :href="child.url"
-                class="block px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150"
-                :class="child.isActive ? 'text-cyan-400' : 'text-gray-500 hover:text-white'">
-                {{ child.name }}
-              </Link>
+            <div v-show="isMenuOpen(menu.id)" class="mt-1 space-y-1 pl-4 border-l border-gray-800 ml-5">
+              <SideBarItem v-for="child in menu.children" :key="child.id" :menu="child" />
             </div>
           </div>
 
@@ -67,6 +63,7 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
+import SideBarItem from '@/Components/DevAdmin/SideBarItem.vue'
 import { ref } from 'vue'
 
 const props = defineProps({

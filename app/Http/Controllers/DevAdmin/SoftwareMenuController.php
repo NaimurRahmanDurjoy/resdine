@@ -34,7 +34,7 @@ class SoftwareMenuController extends Controller
             ->paginate(10);
 
         return Inertia::render('DevAdmin/SystemConfig/SoftwareMenu/Index', [
-            'menus' => $menus,
+            'items' => $menus,
             'search' => $search,
             'sort' => $sort,
             'direction' => $direction,
