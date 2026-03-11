@@ -7,9 +7,7 @@ use App\Models\Unit;
 use App\Models\ResDepartment;
 use App\Models\ComboItemDetail;
 use App\Traits\HasImage;
-use Illuminate\Database\Eloquent\Model;
-
-class ProductItem extends Model
+class ProductItem extends BaseModel
 {
     use HasImage;
 

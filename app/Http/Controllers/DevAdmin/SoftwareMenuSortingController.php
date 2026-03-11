@@ -39,7 +39,7 @@ class SoftwareMenuSortingController extends Controller
 
         $this->menuService->clearCache(Auth::user());
 
-        return response()->json(['success' => true]);
+        return back()->with('success', 'Menu order updated successfully');
     }
 
 

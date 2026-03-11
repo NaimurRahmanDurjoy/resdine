@@ -26,6 +26,10 @@ return new class extends Migration
             $table->decimal('grand_total', 10, 2)->default(0);
             $table->tinyInteger('status')->default(1)->comment('1=pending,2=paid,3=cancelled');
             $table->timestamps();
+                $table->softDeletes();
+                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedBigInteger('updated_by')->nullable();
+                $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('order_id')->references('id')->on('order_master')->onDelete('set null');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
@@ -40,6 +44,10 @@ return new class extends Migration
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('invoice_id')->references('id')->on('invoice_master')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');

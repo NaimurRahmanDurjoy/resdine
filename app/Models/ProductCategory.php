@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasImage;
-use Illuminate\Database\Eloquent\Model;
-
-class ProductCategory extends Model
+class ProductCategory extends BaseModel
 {
     use HasImage;
 

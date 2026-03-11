@@ -21,6 +21,10 @@ return new class extends Migration
             $table->decimal('collect_amount', 10, 2);
             $table->decimal('due_amount', 10, 2);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('order_master_id')->references('id')->on('order_master')->onDelete('cascade');
         });

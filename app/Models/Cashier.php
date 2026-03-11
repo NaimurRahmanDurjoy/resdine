@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Cashier extends Model
+class Cashier extends BaseModel
 {
     //
 }

@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->tinyInteger('status')->default(1); // 1=active
             $table->timestamps();
+                $table->softDeletes();
+                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedBigInteger('updated_by')->nullable();
+                $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('memberships', function (Blueprint $table) {
@@ -27,6 +31,10 @@ return new class extends Migration
             $table->integer('loyalty_multiplier')->default(1);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('customer_memberships', function (Blueprint $table) {
@@ -37,6 +45,10 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->foreign('membership_id')->references('id')->on('memberships')->onDelete('cascade');

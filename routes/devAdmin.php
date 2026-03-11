@@ -41,7 +41,7 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             Route::prefix('software')->name('software.')->group(function () {
                 Route::resource('menu', SoftwareMenuController::class);
                 Route::get('internal-link', [SettingsController::class, 'softwareInternalLink'])->name('internalLink');
-                Route::get('menu-sorting', [softwareMenuSortingController::class, 'index'])->name('menuSorting');
+                Route::get('menu-sorting', [SoftwareMenuSortingController::class, 'index'])->name('menuSorting');
                 Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
         });

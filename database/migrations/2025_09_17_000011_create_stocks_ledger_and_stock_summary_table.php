@@ -32,6 +32,11 @@ return new class extends Migration
             $table->dateTime('transaction_date')->useCurrent();
 
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
+
 
             // Indexes
             $table->index('ingredient_id');
@@ -55,6 +60,10 @@ return new class extends Migration
             $table->dateTime('last_transaction_date')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             // Unique ensures one row per product+branch+batch
             $table->unique(['ingredient_id', 'branch_id', 'batch_no']);
         });

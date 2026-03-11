@@ -1,8 +1,8 @@
 <template>
     <div class="menu-item">
         <!-- Menu Item Display -->
-        <div class="bg-white dark:bg-gray-800 p-2 rounded-lg border shadow-sm flex justify-between items-center hover:shadow-md transition-shadow"
-            :style="{ paddingLeft: `${level * 20}px` }"
+        <div class="bg-white dark:bg-gray-800 p-1 rounded-lg border shadow-sm flex justify-between items-center hover:shadow-md transition-shadow"
+            :style="{ marginLeft: `${level * 20}px` }"
             :class="color === 'indigo' ? 'border-indigo-200 dark:border-indigo-800' : 'border-emerald-200 dark:border-emerald-800'">
             <div class="flex items-center space-x-3 flex-1">
                 <button
@@ -28,6 +28,7 @@
         <draggable
             v-if="localMenu.children && localMenu.children.length > 0"
             v-model="localMenu.children"
+            item-key="id"
             :options="dragOptions"
             class="space-y-2 mt-2"
             @change="emitUpdate"

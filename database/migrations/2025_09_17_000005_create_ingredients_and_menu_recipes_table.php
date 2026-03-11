@@ -19,6 +19,10 @@ return new class extends Migration
             $table->boolean('has_expiry')->default(false)->comment('1=expiry item,0=non-expiry');
             $table->integer('expiry_days')->nullable()->comment('shelf life in days');
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
         });
@@ -30,6 +34,10 @@ return new class extends Migration
             $table->decimal('quantity', 10, 2);
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
             $table->foreign('ingredient_id')->references('id')->on('ingredients')->onDelete('cascade');

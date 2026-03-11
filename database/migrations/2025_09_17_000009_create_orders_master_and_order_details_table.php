@@ -26,6 +26,10 @@ return new class extends Migration
             $table->decimal('due_amount', 10, 2)->default(0)->comment('for partial payments');
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->timestamps();
+                $table->softDeletes();
+                $table->unsignedBigInteger('created_by')->nullable();
+                $table->unsignedBigInteger('updated_by')->nullable();
+                $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
@@ -42,6 +46,10 @@ return new class extends Migration
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('order_id')->references('id')->on('order_master')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');

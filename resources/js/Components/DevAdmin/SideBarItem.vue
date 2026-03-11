@@ -18,13 +18,13 @@
       </div>
     </div>
 
-    <a v-else :href="menu.url" :class="[
+    <Link v-else :href="menu.url" :class="[
       'block px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150',
       isActive ? 'text-cyan-400' : 'text-gray-500 hover:text-white'
     ]">
       <span v-if="menu.icon" class="material-symbols-outlined mr-3 text-base font-icon">{{ menu.icon }}</span>
       <span>{{ menu.name }}</span>
-    </a>
+    </Link>
   </div>
 </template>
 

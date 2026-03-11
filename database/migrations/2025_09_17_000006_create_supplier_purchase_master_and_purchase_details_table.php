@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('contact')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('purchase_master', function (Blueprint $table) {
@@ -29,6 +33,10 @@ return new class extends Migration
             $table->date('purchase_date');
             $table->tinyInteger('status')->default(1)->comment('0=pending,1=approved,2=received,3=cancelled');
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
@@ -43,6 +51,10 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('total', 10, 2);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('purchase_id')->references('id')->on('purchase_master')->onDelete('cascade');
             $table->foreign('ingredients_id')->references('id')->on('ingredients')->onDelete('cascade');

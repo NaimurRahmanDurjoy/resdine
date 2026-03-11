@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();               
         });
 
         Schema::create('restaurant_tables', function (Blueprint $table) {
@@ -25,6 +29,10 @@ return new class extends Migration
             $table->integer('capacity')->default(4);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();   
 
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
         });
@@ -34,7 +42,11 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('branch_id');
             $table->timestamps();
-
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();   
+            
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
         });
     }

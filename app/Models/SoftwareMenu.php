@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SoftwareMenu extends Model
+class SoftwareMenu extends BaseModel
 {
     protected $fillable = ['name', 'route', 'icon', 'parent_id', 'order', 'is_active'];
 

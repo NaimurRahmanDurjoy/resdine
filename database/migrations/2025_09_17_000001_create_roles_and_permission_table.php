@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->tinyInteger('status')->default(1)->comment('1=active,0=inactive');
             $table->timestamps();
+            $table->softDeletes();
+            // User tracking
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('permissions', function (Blueprint $table) {
@@ -25,6 +30,10 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();            
         });
 
         Schema::create('role_permissions', function (Blueprint $table) {
@@ -32,7 +41,11 @@ return new class extends Migration
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('permission_id');
             $table->timestamps();
-
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();   
+            
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade');
         });

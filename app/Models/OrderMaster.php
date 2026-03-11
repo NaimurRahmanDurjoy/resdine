@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class OrderMaster extends Model
+class OrderMaster extends BaseModel
 {
     //
 }

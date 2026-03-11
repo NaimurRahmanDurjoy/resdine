@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('units', function (Blueprint $table) {
@@ -24,6 +28,10 @@ return new class extends Migration
             $table->string('name'); // pcs, kg, liter
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
     }
 

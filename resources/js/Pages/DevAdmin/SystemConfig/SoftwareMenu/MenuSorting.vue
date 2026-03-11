@@ -54,6 +54,7 @@ import { ref } from 'vue'
 import draggable from 'vuedraggable'
 import DevAdminLayout from '@/Layouts/DevAdminLayout.vue'
 import MenuSortingItem from '@/Components/DevAdmin/MenuSortingItem.vue'
+import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     items: Array
@@ -99,37 +100,36 @@ const getMenuStructure = (items) => {
     }))
 }
 
-const saveOrder = async () => {
+const saveOrder = () => {
     isSaving.value = true
+
     const structure = getMenuStructure(menus.value)
 
-    try {
-        const response = await fetch(route('devAdmin.systemConfig.software.menuSorting.updateOrder'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: JSON.stringify({ structure })
-        })
+    router.post(
+        route('devAdmin.systemConfig.software.menuSorting.updateOrder'),
+        { structure },
+        {
+            preserveScroll: true,
 
-        if (response.ok) {
-            message.value = 'Order saved successfully!'
-            messageType.value = 'success'
-            setTimeout(() => {
-                message.value = ''
-            }, 3000)
-        } else {
-            message.value = 'Error saving order'
-            messageType.value = 'error'
+            onSuccess: () => {
+                message.value = 'Order saved successfully!'
+                messageType.value = 'success'
+
+                setTimeout(() => {
+                    message.value = ''
+                }, 3000)
+            },
+
+            onError: () => {
+                message.value = 'Error saving order'
+                messageType.value = 'error'
+            },
+
+            onFinish: () => {
+                isSaving.value = false
+            }
         }
-    } catch (error) {
-        console.error('Error:', error)
-        message.value = 'Error saving order'
-        messageType.value = 'error'
-    } finally {
-        isSaving.value = false
-    }
+    )
 }
 </script>
 

@@ -23,6 +23,10 @@ return new class extends Migration
             $table->tinyInteger('status')->default(1)->comment('1=available,0=not available');
             $table->tinyInteger('type')->default(1)->comment('1=regular,2=combo,3=complementary');
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('set null');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
@@ -35,6 +39,11 @@ return new class extends Migration
             $table->unsignedBigInteger('item_id');  // menu or complementary item
             $table->integer('quantity')->default(1);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
+
 
             $table->foreign('combo_id')->references('id')->on('product_items')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
@@ -42,14 +51,17 @@ return new class extends Migration
 
         Schema::create('product_variants', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('item_id'); 
+            $table->unsignedBigInteger('item_id');
             $table->string('name'); // e.g., Small, Medium, Large
             $table->decimal('price', 10, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
-
     }
 
     /**

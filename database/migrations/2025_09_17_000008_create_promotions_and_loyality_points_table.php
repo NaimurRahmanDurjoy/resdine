@@ -20,6 +20,10 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->tinyInteger('status')->default(1); // 1=active, 0=inactive
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
 
         Schema::create('promotion_items', function (Blueprint $table) {
@@ -27,6 +31,10 @@ return new class extends Migration
             $table->unsignedBigInteger('promotion_id');
             $table->unsignedBigInteger('item_id');
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('promotion_id')->references('id')->on('promotions')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
@@ -38,6 +46,10 @@ return new class extends Migration
             $table->decimal('points_earned', 10, 2)->default(0);
             $table->decimal('points_redeemed', 10, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
         });

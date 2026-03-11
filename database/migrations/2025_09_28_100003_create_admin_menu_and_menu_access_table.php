@@ -21,6 +21,13 @@ return new class extends Migration
             $table->integer('order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->integer('created_by_type')->nullable(); // 1=admin,2=staff
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->integer('updated_by_type')->nullable(); // 1=admin,2=staff
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->integer('deleted_by_type')->nullable(); // 1=admin,2=staff
 
             $table->foreign('parent_id')->references('id')->on('admin_menus')->onDelete('cascade');
         });
@@ -30,6 +37,13 @@ return new class extends Migration
             $table->unsignedBigInteger('menu_id');
             $table->unsignedBigInteger('admin_id');
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->integer('created_by_type')->nullable(); // 1=admin,2=staff
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->integer('updated_by_type')->nullable(); // 1=admin,2=staff
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->integer('deleted_by_type')->nullable(); // 1=admin,2=staff
 
             $table->foreign('menu_id')->references('id')->on('admin_menus')->onDelete('cascade');
             $table->foreign('admin_id')->references('id')->on('admins')->onDelete('cascade');

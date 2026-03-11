@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class StockSummary extends Model
+class StockSummary extends BaseModel
 {
    protected $table = 'stock_summary';
 }

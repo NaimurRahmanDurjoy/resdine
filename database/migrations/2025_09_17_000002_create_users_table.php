@@ -23,6 +23,13 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->integer('created_by_type')->nullable(); // 1=admin,2=user
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->integer('updated_by_type')->nullable(); // 1=admin,2=user
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->integer('deleted_by_type')->nullable(); // 1=admin,2=user
 
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');

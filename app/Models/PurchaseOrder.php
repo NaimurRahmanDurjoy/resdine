@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class PurchaseOrder extends Model
+class PurchaseOrder extends BaseModel
 {
     //
 }

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class RestaurantTable extends Model
+class RestaurantTable extends BaseModel
 {
     protected $fillable = ['name', 'branch_id', 'capacity', 'status', 'section'];
 

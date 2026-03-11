@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class ResDepartment extends Model
+class ResDepartment extends BaseModel
 {
     protected $fillable = ['name', 'branch_id'];
 

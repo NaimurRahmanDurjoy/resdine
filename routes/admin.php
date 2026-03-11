@@ -43,11 +43,13 @@ Route::middleware('web')->name('admin.')->group(function () {
             Route::resource('variants', ProductVariantsController::class)->names('variants');
         });
 
-        // Stock management
-        Route::resource('stock', StockController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
-
-        // Purchases
+        //Inventory & Purchases
+        Route::resource('unit', PurchaseController::class);
+        Route::resource('ingredients', PurchaseController::class);
+        Route::resource('suppliers', PurchaseController::class);
+        Route::resource('suppliers', PurchaseController::class);
         Route::resource('purchase', PurchaseController::class);
+        Route::resource('stock', StockController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
 
         // Orders
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
