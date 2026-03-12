@@ -8,7 +8,7 @@ use App\Http\Controllers\DevAdmin\SoftwareMenuController;
 use App\Http\Controllers\DevAdmin\SoftwareMenuSortingController;
 use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
-use App\Http\Controllers\DevAdmin\AdminController;
+// use App\Http\Controllers\DevAdmin\AdminController;
 use App\Http\Controllers\DevAdmin\AdminMenuController;
 use App\Http\Controllers\DevAdmin\AdminMenuSortingController;
 
@@ -25,7 +25,7 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::resource('admins', AdminController::class);
+        // Route::resource('admins', AdminController::class);
         Route::resource('users', UserController::class);
 
 

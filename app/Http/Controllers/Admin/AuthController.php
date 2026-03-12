@@ -10,12 +10,12 @@ use Inertia\Inertia;
 class AuthController extends Controller
 {
     public function showLoginForm()
-    {
-        return Inertia::render('Auth/Login');
+    { 
+        return Inertia::render('Admin/Login');
     }
 
     public function login(Request $request)
-    {
+    { 
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -23,9 +23,8 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             // Use intended URL if exists, otherwise role-based dashboard
-            return redirect()->intended(Auth::user()->redirectToDashboard());
+            return redirect()->to(Auth::user()->redirectToDashboard());
         }
 
         return back()->with('error', 'Invalid credentials.');

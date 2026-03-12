@@ -20,7 +20,7 @@ class BaseModel extends Model
             $user = static::getActedUser();
             if ($user && ! $model->created_by) {
                 $model->created_by = $user->id;
-                $model->created_by_type = static::getUserType($user);
+                // $model->created_by_type = static::getUserType($user);
             }
         });
 
@@ -28,7 +28,7 @@ class BaseModel extends Model
             $user = static::getActedUser();
             if ($user) {
                 $model->updated_by = $user->id;
-                $model->updated_by_type = static::getUserType($user);
+                // $model->updated_by_type = static::getUserType($user);
             }
         });
 
@@ -37,7 +37,7 @@ class BaseModel extends Model
                 $user = static::getActedUser();
                 if ($user) {
                     $model->deleted_by = $user->id;
-                    $model->deleted_by_type = static::getUserType($user);
+                    // $model->deleted_by_type = static::getUserType($user);
                     $model->saveQuietly();
                 }
             }

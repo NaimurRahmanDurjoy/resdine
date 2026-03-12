@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
@@ -8,8 +9,6 @@ use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\productVariantsController;
 use App\Http\Controllers\Admin\ComboItemController;
 use App\Http\Controllers\Admin\ComplementaryItemController;
-use App\Http\Controllers\Admin\StockController;
-use App\Http\Controllers\Admin\PurchaseController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\MembershipController;
@@ -20,6 +19,11 @@ use App\Http\Controllers\Admin\RestaurantSetup\BranchController;
 use App\Http\Controllers\Admin\RestaurantSetup\ResDepartmentController;
 use App\Http\Controllers\Admin\RestaurantSetup\StaffDepartmentController;
 use App\Http\Controllers\Admin\RestaurantSetup\TableController;
+use App\Http\Controllers\Admin\Inventory\StockController;
+use App\Http\Controllers\Admin\Inventory\PurchaseController;
+use App\Http\Controllers\Admin\Inventory\IngredientController;
+use App\Http\Controllers\Admin\Inventory\SupplierController;
+use App\Http\Controllers\Admin\Inventory\UnitController;
 
 // ----------------------
 // Admin Panel Routes
@@ -44,12 +48,16 @@ Route::middleware('web')->name('admin.')->group(function () {
         });
 
         //Inventory & Purchases
-        Route::resource('unit', PurchaseController::class);
-        Route::resource('ingredients', PurchaseController::class);
-        Route::resource('suppliers', PurchaseController::class);
-        Route::resource('suppliers', PurchaseController::class);
+        Route::resource('unit', UnitController::class);
+        Route::resource('ingredients', IngredientController::class);
+        Route::resource('suppliers', SupplierController::class);
         Route::resource('purchase', PurchaseController::class);
-        Route::resource('stock', StockController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
+        
+        Route::get('stock/low', [StockController::class, 'lowStock'])->name('stock.low');
+        Route::get('stock/expiries', [StockController::class, 'expiryAlerts'])->name('stock.expiries');
+        Route::get('stock/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
+        Route::post('stock/adjust', [StockController::class, 'processAdjustment'])->name('stock.adjust.process');
+        Route::resource('stock', StockController::class)->only(['index']);
 
         // Orders
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
