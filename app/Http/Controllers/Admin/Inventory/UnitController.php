@@ -9,10 +9,26 @@ use Inertia\Inertia;
 
 class UnitController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+        $sortable = ['name','short_name','status','created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
+        $units = Unit::when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+                    ->orderBy($sort, $direction)
+                    ->paginate($perPage)
+                    ->withQueryString();
+
         return Inertia::render('Admin/Inventory/Unit/Index', [
-            'units' => Unit::all(),
+            'units' => $units,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+                'perPage' => $perPage
+            ],
             'pageTitle' => 'Units'
         ]);
     }

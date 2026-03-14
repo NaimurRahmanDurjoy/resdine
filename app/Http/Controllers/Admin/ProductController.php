@@ -27,20 +27,23 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $search = $request->get('search');
-        $sort = $request->get('sort', 'created_at');
-        $direction = $request->get('direction', 'desc');
+        $search = $request->input('search');
+        $sortable = ['name','type','price','status','created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
 
-        $items = ProductItem::with(['category', 'unit', 'department'])
+        $items = ProductItem::select('id','name','type','price','status','menu_img','category_id','department_id')
+            ->with(['category:id,name','unit:id,name','department:id,name'])
             ->when($search, function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('type', 'like', "%{$search}%")
-                    ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                        $departmentQuery->where('name', 'like', "%{$search}%");
-                    });
+                $q->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('type', 'like', "%{$search}%")
+                        ->orWhereHas('department', fn($dq) => $dq->where('name', 'like', "%{$search}%"));
+                });
             })
             ->orderBy($sort, $direction)
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render('Admin/Products/Index', [
@@ -48,7 +51,8 @@ class ProductController extends Controller
             'filters' => [
                 'search' => $search,
                 'sort' => $sort,
-                'direction' => $direction
+                'direction' => $direction,
+                'perPage' => $perPage
             ],
             'pageTitle' => 'Menu Items'
         ]);

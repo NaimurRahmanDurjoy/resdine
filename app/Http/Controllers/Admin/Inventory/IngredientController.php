@@ -10,10 +10,27 @@ use Inertia\Inertia;
 
 class IngredientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+        $sortable = ['name', 'short_name', 'status', 'created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
+        $ingredients = Ingredient::with('unit')
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->withQueryString();
+            
         return Inertia::render('Admin/Inventory/Ingredient/Index', [
-            'ingredients' => Ingredient::with('unit')->get(),
+            'ingredients' => $ingredients,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+                'perPage' => $perPage
+            ],
             'pageTitle' => 'Ingredients'
         ]);
     }
