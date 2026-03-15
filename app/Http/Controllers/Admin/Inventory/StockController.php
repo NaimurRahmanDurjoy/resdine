@@ -15,20 +15,30 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $query = StockMaster::with(['ingredient.unit']);
+        $search = $request->input('search');
+        $sortable = ['name','short_name','status','created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
+        $stocks = StockLedger::with(['ingredient.unit'])
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('ingredient', function ($iq) use ($search) {
+                    $iq->where('name', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->withQueryString();
 
-        // Handle simple filtering or search if needed
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->whereHas('ingredient', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            });
-        }
-
-        $stocks = $query->get();
 
         return Inertia::render('Admin/Inventory/Stock/Index', [
             'stocks' => $stocks,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+                'perPage' => $perPage
+            ],
             'pageTitle' => 'Current Stock'
         ]);
     }
@@ -38,7 +48,7 @@ class StockController extends Controller
         // Find ingredients where current_stock <= min_stock in StockMaster
         // or items that don't even have a StockMaster entry but have min_stock > 0
         
-        $stocks = StockMaster::with(['ingredient.unit'])
+        $stocks = StockLedger::with(['ingredient.unit'])
             ->whereHas('ingredient', function ($q) {
                 $q->whereColumn('current_stock', '<=', 'min_stock');
             })->get();
@@ -112,7 +122,7 @@ class StockController extends Controller
 
         try {
             DB::transaction(function () use ($validated) {
-                $stockMaster = StockMaster::firstOrCreate(
+                $stockMaster = StockLedger::firstOrCreate(
                     ['ingredient_id' => $validated['ingredient_id']],
                     ['current_stock' => 0, 'total_in' => 0, 'total_out' => 0]
                 );

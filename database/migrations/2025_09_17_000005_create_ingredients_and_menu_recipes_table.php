@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('min_stock', 10, 2)->default(0);
             $table->boolean('has_expiry')->default(false)->comment('1=expiry item,0=non-expiry');
             $table->integer('expiry_days')->nullable()->comment('shelf life in days');
+            $table->integer('status')->default(1);
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

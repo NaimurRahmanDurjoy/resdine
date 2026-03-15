@@ -44,11 +44,8 @@
     </div>
 
     <!-- Users Table -->
-    <ListTable
-      :headers="['Name', 'Phone', 'Email', 'Role', 'Status', 'Actions']"
-      :items="users.data"
-      :pagination="users"
-    >
+    <ListTable :headers="headers" :items="users.data" :pagination="users" :sort="filters.sort"
+                :direction="filters.direction" :loading="loading" @sort="sortColumn">
       <template #rows="{ items }">
         <tr v-for="user in items" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
           <td class="px-6 py-4 whitespace-nowrap">
@@ -74,7 +71,7 @@
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <div class="flex justify-end space-x-2">
+            <div class="flex space-x-2">
               <Link :href="route('admin.users.edit', user.id)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <span class="material-symbols-outlined">edit</span>
               </Link>
@@ -125,43 +122,67 @@ const props = defineProps({
   filters: Object
 })
 
+const headers = [
+  { label: 'Name', key: 'name',sortable: true },
+  { label: 'Phone', key: 'phone', sortable: true },
+  { label: 'Email', key: 'email', sortable: true },
+  { label: 'Role', key: 'role', sortable: false },
+  { label: 'Status', key: 'status', sortable: true },
+  { label: 'Actions', key: 'action', sortable: false }
+]
+
 const search = ref(props.filters.search)
+const loading = ref(false)
 
 function debounce(fn, delay) {
-  let timeoutId;
-  return (...args) => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
+    let timeoutId;
+    return (...args) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
 }
 
 const performSearch = () => {
-  router.get(route('admin.users.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
-    preserveState: true,
-    replace: true
-  })
+    loading.value = true
+    router.get(route('admin.users.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
 }
 
-watch(search, debounce((value) => {
-  performSearch()
-}, 500))
+watch(search, debounce(() => performSearch(), 500))
 
-const sortBy = (field) => {
-  let direction = 'asc'
-  if (props.filters.sort === field && props.filters.direction === 'asc') {
-    direction = 'desc'
-  }
-  router.get(route('admin.users.index'), { search: search.value, sort: field, direction }, {
-    preserveState: true,
-    replace: true
-  })
+function sortColumn(column) {
+    let direction = 'asc'
+    if (props.filters.sort === column) {
+        direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
+    }
+    loading.value = true
+    router.get(route('admin.users.index'), { search: search.value, sort: column, direction: direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
 }
 
 const deleteUser = (id) => {
-  if (confirm('Are you sure you want to delete this user?')) {
-    router.delete(route('admin.users.destroy', id))
-  }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Deleting a user may affect their orders and data!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('admin.users.destroy', id), {
+                onSuccess: () => {
+                    Swal.fire('Deleted!', 'User has been deleted.', 'success')
+                }
+            })
+        }
+    })
 }
 </script>

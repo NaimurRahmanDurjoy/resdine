@@ -44,11 +44,8 @@
     </div>
 
     <!-- Variants Table -->
-    <ListTable
-      :headers="['Name', 'Item', 'Price', 'Actions']"
-      :items="variants.data"
-      :pagination="variants"
-    >
+    <ListTable :headers="headers" :items="variants.data" :pagination="variants" :sort="filters.sort"
+                :direction="filters.direction" :loading="loading" @sort="sortColumn">
       <template #rows="{ items }">
         <tr v-for="variant in items" :key="variant.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -61,7 +58,7 @@
             ${{ parseFloat(variant.price).toFixed(2) }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <div class="flex justify-end space-x-2">
+            <div class="flex space-x-2">
               <Link :href="route('admin.product.variants.edit', variant.id)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <span class="material-symbols-outlined">edit</span>
               </Link>
@@ -111,33 +108,64 @@ const props = defineProps({
   variants: Object,
   filters: Object
 })
-
+const headers = [
+  { label: 'Name', key: 'name', sortable: true },
+  { label: 'Menu Item', key: 'product_item.name', sortable: true },
+  { label: 'Price', key: 'price', sortable: true },
+  { label: 'Actions', key: 'actions', sortable: false }
+]
 const search = ref(props.filters.search)
+const loading = ref(false)
 
 function debounce(fn, delay) {
-  let timeoutId;
-  return (...args) => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
+    let timeoutId;
+    return (...args) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
 }
 
 const performSearch = () => {
-  router.get(route('admin.product.variants.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
-    preserveState: true,
-    replace: true
-  })
+    loading.value = true
+    router.get(route('admin.product.variants.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
 }
 
-watch(search, debounce((value) => {
-  performSearch()
-}, 500))
+watch(search, debounce(() => performSearch(), 500))
+
+function sortColumn(column) {
+    let direction = 'asc'
+    if (props.filters.sort === column) {
+        direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
+    }
+    loading.value = true
+    router.get(route('admin.product.variants.index'), { search: search.value, sort: column, direction: direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
+}
 
 const deleteVariant = (id) => {
-  if (confirm('Are you sure you want to delete this variant?')) {
-    router.delete(route('admin.product.variants.destroy', id))
-  }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Deleting a variant cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('admin.product.variants.destroy', id), {
+                onSuccess: () => {
+                    Swal.fire('Deleted!', 'Variant has been deleted.', 'success')
+                }
+            })
+        }
+    })
 }
 </script>

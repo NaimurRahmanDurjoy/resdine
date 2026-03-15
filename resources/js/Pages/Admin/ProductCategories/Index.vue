@@ -44,11 +44,8 @@
     </div>
 
     <!-- Categories Table -->
-    <ListTable
-      :headers="['Name', 'Image', 'Status', 'Actions']"
-      :items="categories.data"
-      :pagination="categories"
-    >
+    <ListTable :headers="headers" :items="categories.data" :pagination="categories" :sort="filters.sort"
+                :direction="filters.direction" :loading="loading" @sort="sortColumn">
       <template #rows="{ items }">
         <tr v-for="category in items" :key="category.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
           <td class="px-6 py-4 whitespace-nowrap">
@@ -69,7 +66,7 @@
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <div class="flex justify-end space-x-2">
+            <div class="flex space-x-2">
               <Link :href="route('admin.product.categories.edit', category.id)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <span class="material-symbols-outlined">edit</span>
               </Link>
@@ -112,6 +109,7 @@ import { ref, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
+import Swal from 'sweetalert2'
 
 defineOptions({ layout: AdminLayout })
 
@@ -120,32 +118,64 @@ const props = defineProps({
   filters: Object
 })
 
+const headers = [
+  { label: 'Name', key: 'name' , sortable: true },
+  { label: 'Image', key: 'image_url', sortable: false },
+  { label: 'Status', key: 'status', sortable: false },
+  { label: 'Actions', key: 'actions', sortable: false }
+]
 const search = ref(props.filters.search)
+const loading = ref(false)
 
 function debounce(fn, delay) {
-  let timeoutId;
-  return (...args) => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      fn(...args);
-    }, delay);
-  };
+    let timeoutId;
+    return (...args) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
 }
 
 const performSearch = () => {
-  router.get(route('admin.product.categories.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
-    preserveState: true,
-    replace: true
-  })
+    loading.value = true
+    router.get(route('admin.product.categories.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
 }
 
-watch(search, debounce((value) => {
-  performSearch()
-}, 500))
+watch(search, debounce(() => performSearch(), 500))
+
+function sortColumn(column) {
+    let direction = 'asc'
+    if (props.filters.sort === column) {
+        direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
+    }
+    loading.value = true
+    router.get(route('admin.product.categories.index'), { search: search.value, sort: column, direction: direction }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+    })
+}
 
 const deleteCategory = (id) => {
-  if (confirm('Are you sure you want to delete this category?')) {
-    router.delete(route('admin.product.categories.destroy', id))
-  }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Deleting a category may affect products and recipes!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('admin.product.categories.destroy', id), {
+                onSuccess: () => {
+                    Swal.fire('Deleted!', 'Category has been deleted.', 'success')
+                }
+            })
+        }
+    })
 }
 </script>

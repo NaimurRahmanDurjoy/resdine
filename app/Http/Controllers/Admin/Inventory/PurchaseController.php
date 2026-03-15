@@ -16,11 +16,26 @@ use Exception;
 
 class PurchaseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $purchases = PurchaseMaster::with('supplier')->orderBy('created_at', 'desc')->get();
+        $search = $request->input('search');
+        $sortable = ['name','short_name','status','created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
+        $purchases = PurchaseMaster::with('supplier')
+                    ->when($search, fn($q) => $q->whereHas('supplier', fn($sq) => $sq->where('name', 'like', "%{$search}%")))
+                    ->orderBy($sort, $direction)
+                    ->paginate($perPage)
+                    ->withQueryString();    
         return Inertia::render('Admin/Inventory/Purchase/Index', [
             'purchases' => $purchases,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+                'perPage' => $perPage
+            ],
             'pageTitle' => 'Purchases'
         ]);
     }
