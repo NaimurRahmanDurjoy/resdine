@@ -4,5 +4,18 @@ namespace App\Models;
 
 class Recipe extends BaseModel
 {
-    //
+    protected $fillable = [
+        'menu_item_id',
+        'branch_id',
+    ];
+
+    public function menuItem()
+    {
+        return $this->belongsTo(ProductItem::class, 'menu_item_id');
+    }
+
+    public function recipeItems()
+    {
+        return $this->hasMany(RecipeItem::class);
+    }
 }
