@@ -10,10 +10,31 @@ use Inertia\Inertia;
 
 class TableController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Admin/Settings/RestaurantSetup/Tables/Index', [
-            'tables' => RestaurantTable::with('branch')->get(),
+        $search = $request->input('search');
+        $sortable = ['name','type','price','status','created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $perPage = min($request->input('perPage', 10), 100);
+        $tables = RestaurantTable::with('branch')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('branch', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate($perPage)
+            ->appends(request()->query());
+    return Inertia::render('Admin/Settings/RestaurantSetup/Tables/Index', [
+            'tables' => $tables,
+            'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
+                'perPage' => $perPage
+            ],
             'pageTitle' => 'Restaurant Tables'
         ]);
     }
