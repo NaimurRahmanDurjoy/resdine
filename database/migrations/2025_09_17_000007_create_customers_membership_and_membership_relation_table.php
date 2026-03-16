@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('name'); // Silver, Gold, Platinum
             $table->decimal('discount_percentage', 5, 2)->default(0);
             $table->integer('loyalty_multiplier')->default(1);
+            $table->integer('min_points')->default(0);
+            $table->integer('max_points')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
             $table->softDeletes();

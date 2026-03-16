@@ -24,6 +24,10 @@ use App\Http\Controllers\Admin\Inventory\PurchaseController;
 use App\Http\Controllers\Admin\Inventory\IngredientController;
 use App\Http\Controllers\Admin\Inventory\SupplierController;
 use App\Http\Controllers\Admin\Inventory\UnitController;
+use App\Http\Controllers\Admin\RecipeController;
+use App\Http\Controllers\Admin\ReservationController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\BusinessConfigController;
 
 // ----------------------
 // Admin Panel Routes
@@ -59,6 +63,9 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::post('stock/adjust', [StockController::class, 'processAdjustment'])->name('stock.adjust.process');
         Route::resource('stock', StockController::class)->only(['index']);
 
+        // Recipes
+        Route::resource('recipes', RecipeController::class);
+
         // Orders
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
 
@@ -71,6 +78,13 @@ Route::middleware('web')->name('admin.')->group(function () {
         // Promotions
         Route::resource('promotions', PromotionController::class);
 
+        // Reservations & Events
+        Route::resource('reservations', ReservationController::class);
+        Route::post('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.status');
+        
+        Route::resource('events', EventController::class);
+        Route::post('events/{event}/approve', [EventController::class, 'approve'])->name('events.approve');
+
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
@@ -82,6 +96,10 @@ Route::middleware('web')->name('admin.')->group(function () {
                 Route::resource('staff-departments', StaffDepartmentController::class);
                 Route::resource('tables', TableController::class);
             });
+
+            // Business Config
+            Route::get('business-config', [BusinessConfigController::class, 'index'])->name('business-config.index');
+            Route::post('business-config', [BusinessConfigController::class, 'update'])->name('business-config.update');
         });
     });
 });
