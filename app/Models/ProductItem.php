@@ -32,7 +32,10 @@ class ProductItem extends BaseModel
     {
         return $this->hasMany(ComboItemDetail::class, 'combo_id');
     }
-
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class, 'item_id');
+    }
     public function recipe()
     {
         return $this->hasOne(Recipe::class, 'menu_item_id');

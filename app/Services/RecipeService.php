@@ -19,7 +19,10 @@ class RecipeService
     {
         return DB::transaction(function () use ($data) {
             $recipe = Recipe::updateOrCreate(
-                ['menu_item_id' => $data['menu_item_id']],
+                [
+                    'menu_item_id' => $data['menu_item_id'],
+                    'variant_id' => $data['variant_id'] ?? null
+                ],
                 ['branch_id' => $data['branch_id'] ?? null]
             );
 
@@ -46,9 +49,20 @@ class RecipeService
     /**
      * Deduct stock for ingredients in a menu item's recipe.
      */
-    public function deductStockForProduct(int $productItemId, float $quantity, string $referenceType, int $referenceId): void
+    public function deductStockForProduct(int $productItemId, ?int $variantId, float $quantity, string $referenceType, int $referenceId, int $branchId): void
     {
-        $recipe = Recipe::with('recipeItems')->where('menu_item_id', $productItemId)->first();
+        // Find recipe: specific variant recipe first, then general item recipe
+        $recipe = Recipe::with('recipeItems')
+            ->where('menu_item_id', $productItemId)
+            ->where('variant_id', $variantId)
+            ->first();
+
+        if (!$recipe && $variantId) {
+             $recipe = Recipe::with('recipeItems')
+                ->where('menu_item_id', $productItemId)
+                ->whereNull('variant_id')
+                ->first();
+        }
 
         if (!$recipe) {
             return;
@@ -57,32 +71,35 @@ class RecipeService
         foreach ($recipe->recipeItems as $recipeItem) {
             $totalDeduct = $recipeItem->quantity * $quantity;
 
-            DB::transaction(function () use ($recipeItem, $totalDeduct, $referenceType, $referenceId) {
-                // Update Stock Master
-                $stockMaster = StockMaster::where('ingredient_id', $recipeItem->ingredient_id)->first();
+            DB::transaction(function () use ($recipeItem, $totalDeduct, $referenceType, $referenceId, $branchId) {
+                // Update Stock Summary
+                $stockSummary = \App\Models\StockSummary::where('ingredient_id', $recipeItem->ingredient_id)
+                    ->where('branch_id', $branchId)
+                    ->first();
                 
-                if ($stockMaster) {
-                    $stockMaster->current_stock -= $totalDeduct;
-                    $stockMaster->total_out += $totalDeduct;
-                    $stockMaster->save();
+                if ($stockSummary) {
+                    $stockSummary->current_stock -= $totalDeduct;
+                    $stockSummary->last_transaction_date = now();
+                    $stockSummary->save();
                 } else {
-                    // This case should ideally not happen if stock is managed properly
-                    StockMaster::create([
+                    \App\Models\StockSummary::create([
                         'ingredient_id' => $recipeItem->ingredient_id,
+                        'unit_id' => $recipeItem->unit_id,
+                        'branch_id' => $branchId,
                         'current_stock' => -$totalDeduct,
-                        'total_in' => 0,
-                        'total_out' => $totalDeduct
+                        'last_transaction_date' => now()
                     ]);
                 }
 
                 // Insert to Stock Ledger
-                StockLedger::create([
+                \App\Models\StockLedger::create([
                     'ingredient_id' => $recipeItem->ingredient_id,
-                    'transaction_type' => 'out',
-                    'quantity' => $totalDeduct,
+                    'unit_id' => $recipeItem->unit_id,
+                    'branch_id' => $branchId,
+                    'transaction_type' => 2, // 2=sale
+                    'qty_out' => $totalDeduct,
                     'reference_type' => $referenceType,
                     'reference_id' => $referenceId,
-                    'notes' => 'Stock deduction for recipe item in ' . $referenceType . ' #' . $referenceId,
                     'transaction_date' => now()
                 ]);
             });

@@ -69,6 +69,14 @@
               {{ product.status ? 'Active' : 'Inactive' }}
             </span>
           </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <Link :href="route('admin.recipes.create', { product_id: product.id })"
+              class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold
+              bg-orange-200 text-orange-700 hover:bg-orange-300 dark:bg-orange-900/30 dark:text-orange-300 transition-all shadow-sm">
+              <span class="material-symbols-outlined text-sm">restaurant_menu</span> 
+              <span>Recipe</span>
+            </Link>
+          </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex space-x-2">
               <Link :href="route('admin.product.items.edit', product.id)"
@@ -127,6 +135,7 @@ const headers = [
  { label:'Image', key:'image', sortable:false },
  { label:'Price', key:'price', sortable:true },
  { label:'Status', key:'status', sortable:true },
+ { label:'Recipe', key:'recipe', sortable:false },
  { label:'Actions', key:'actions', sortable:false }
 ]
 

@@ -21,6 +21,7 @@ class StoreRecipeRequest extends FormRequest
     {
         return [
             'menu_item_id' => 'required|exists:product_items,id',
+            'variant_id' => 'nullable|exists:product_variants,id',
             'branch_id' => 'nullable|exists:branches,id',
             'items' => 'required|array|min:1',
             'items.*.ingredient_id' => 'required|exists:ingredients,id',

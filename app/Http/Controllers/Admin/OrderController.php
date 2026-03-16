@@ -59,6 +59,20 @@ class OrderController extends Controller {
             $this->loyaltyService->accruePoints($order);
         }
 
+        // Deduct stock based on recipes
+        // Normally this would happen in a service, but for this demo logic:
+        $recipeService = app(\App\Services\RecipeService::class);
+        foreach ($request->items as $item) {
+            $recipeService->deductStockForProduct(
+                $item['product_id'], 
+                $item['variant_id'] ?? null,
+                $item['quantity'], 
+                'invoice', 
+                $order->id,
+                1 // Default branch_id for now
+            );
+        }
+
         return redirect()->route('admin.orders.index')->with('success', 'Order created and points accrued.');
     }
 

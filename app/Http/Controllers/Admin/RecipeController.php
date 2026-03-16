@@ -27,12 +27,15 @@ class RecipeController extends Controller
         $search = $request->input('search');
         $perPage = min($request->input('perPage', 10), 100);
 
-        $recipes = Recipe::with(['menuItem:id,name', 'recipeItems.ingredient:id,name', 'recipeItems.unit:id,name'])
+        $recipes = Recipe::with(['menuItem:id,name', 'variant:id,name', 'recipeItems.ingredient:id,name', 'recipeItems.unit:id,name'])
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('menuItem', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
+                })->orWhereHas('variant', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
                 });
             })
+            ->latest()
             ->paginate($perPage)
             ->withQueryString();
 
@@ -46,13 +49,16 @@ class RecipeController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $selectedProductId = $request->get('product_id');
+        
         return Inertia::render('Admin/Recipes/Create', [
-            'menuItems' => ProductItem::where('status', 1)->whereDoesntHave('recipe')->get(['id', 'name']),
+            'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name']),
             'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
             'units' => Unit::all(),
             'branches' => Branch::all(),
+            'initialProductId' => $selectedProductId,
             'pageTitle' => 'Create Recipe'
         ]);
     }
@@ -61,18 +67,18 @@ class RecipeController extends Controller
     {
         $this->recipeService->storeOrUpdate($request->validated());
 
-        return redirect()->route('admin.recipes.index')->with('success', 'Recipe created successfully.');
+        return redirect()->route('admin.recipes.index')->with('success', 'Recipe saved successfully.');
     }
 
     public function edit(Recipe $recipe)
     {
         return Inertia::render('Admin/Recipes/Edit', [
-            'recipe' => $recipe->load(['recipeItems.ingredient.unit', 'menuItem']),
-            'menuItems' => ProductItem::where('id', $recipe->menu_item_id)->get(['id', 'name']), // Only show the current item
+            'recipe' => $recipe->load(['recipeItems.ingredient.unit', 'menuItem.variants', 'variant']),
+            'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name']),
             'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
             'units' => Unit::all(),
             'branches' => Branch::all(),
-            'pageTitle' => 'Edit Recipe: ' . $recipe->menuItem->name
+            'pageTitle' => 'Edit Recipe'
         ]);
     }
 
