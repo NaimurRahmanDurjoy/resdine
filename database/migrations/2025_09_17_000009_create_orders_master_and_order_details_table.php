@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('order_master', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('order_number')->unique();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('branch_id');
             $table->unsignedBigInteger('promotion_id')->nullable();
@@ -42,6 +43,8 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('item_id');
+            $table->unsignedBigInteger('variant_id')->nullable();
+            $table->json('modifiers')->nullable()->comment('Addons (extra cheese, toppings) or special instructions');
             $table->integer('quantity')->default(1);
             $table->decimal('price', 10, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
@@ -62,7 +65,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders_master');
+        Schema::dropIfExists('order_master');
         Schema::dropIfExists('order_details');
     }
 };

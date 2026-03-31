@@ -15,11 +15,10 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_master_id');
             $table->tinyInteger('method')->comment('1=cash,2=card,3=mobile banking,4=wallet');
-            $table->decimal('cash_amount', 10, 2);
-            $table->decimal('card_amount', 10, 2);
-            $table->decimal('mfs_amount', 10, 2);
-            $table->decimal('collect_amount', 10, 2);
-            $table->decimal('due_amount', 10, 2);
+            $table->decimal('amount', 10, 2);
+            $table->string('transaction_id')->nullable()->comment('for card/mobile payments');
+            $table->string('payment_reference')->nullable()->comment('for additional info like card type, mobile operator, etc.');
+            $table->tinyInteger('status')->default(1)->comment('1=completed,2=failed,3=refunded');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

@@ -10,4 +10,9 @@ class RestaurantTable extends BaseModel
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(OrderMaster::class, 'table_id');
+    }
 }

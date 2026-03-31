@@ -68,6 +68,9 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         // Orders
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
+        Route::post('orders/{order}/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('orders.payments.store');
+        Route::get('orders/{order}/invoice', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('orders.invoice');
+        Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
 
         // Customers
         Route::resource('customers', CustomerController::class);
