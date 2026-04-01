@@ -56,7 +56,7 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('ingredients', IngredientController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('purchase', PurchaseController::class);
-        
+
         Route::get('stock/low', [StockController::class, 'lowStock'])->name('stock.low');
         Route::get('stock/expiries', [StockController::class, 'expiryAlerts'])->name('stock.expiries');
         Route::get('stock/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
@@ -84,14 +84,19 @@ Route::middleware('web')->name('admin.')->group(function () {
         // Reservations & Events
         Route::resource('reservations', ReservationController::class);
         Route::post('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.status');
-        
+
         Route::resource('events', EventController::class);
         Route::post('events/{event}/approve', [EventController::class, 'approve'])->name('events.approve');
+
+        // Profile
+        Route::get('profile', [UserController::class, 'profile'])->name('profile');
+        Route::put('profile', [UserController::class, 'updateProfile'])->name('profile.update');
+        Route::put('profile/password', [UserController::class, 'updatePassword'])->name('profile.password.update');
 
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
-            
+
             // Restaurant Setup
             Route::prefix('restaurant-setup')->name('restaurant-setup.')->group(function () {
                 Route::resource('branches', BranchController::class);

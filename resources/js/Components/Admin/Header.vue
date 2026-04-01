@@ -1,8 +1,10 @@
 <template>
-  <header class="bg-white dark:bg-gray-900 shadow-sm px-4 h-16 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+  <header
+    class="bg-white dark:bg-gray-900 shadow-sm px-4 h-16 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
     <div class="flex items-center space-x-2 flex-1 min-w-0">
       <!-- Mobile Menu Button -->
-      <button class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0" @click="$emit('toggleSidebar')">
+      <button class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0"
+        @click="$emit('toggleSidebar')">
         <span class="material-symbols-outlined">menu</span>
       </button>
 
@@ -20,16 +22,21 @@
     <!-- Right Section -->
     <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
       <!-- Notifications -->
-      <button class="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" v-if="notifications.length">
+      <button class="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        v-if="notifications.length">
         <span class="material-symbols-outlined">notifications</span>
-        <span class="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center">
+        <span
+          class="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center">
           {{ notifications.length }}
         </span>
       </button>
 
       <!-- User Info -->
-      <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4">
-        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+             <div class="relative">
+         <button @click="open = !open" class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4 pr-4">
+        <div
+          class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-sm">person</span>
         </div>
         <span class="text-gray-700 dark:text-gray-300 font-medium truncate max-w-[100px] hidden sm:inline-block">
@@ -37,30 +44,41 @@
         </span>
       </div>
 
-      <!-- Logout -->
-      <button
-        @click="logout"
-        class="p-2 md:px-4 md:py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center transition-colors"
-        title="Logout"
-      >
-        <span class="material-symbols-outlined text-sm">logout</span>
-        <span class="ml-1 hidden md:inline-block">Logout</span>
-      </button>
+
+
+  </button>
+
+  <div v-if="open"
+       class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700">
+    
+    <Link :href="route('admin.profile')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+      Profile
+    </Link>
+
+    <button @click="logout"
+            class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+      <span class="material-symbols-outlined text-sm">logout</span> <span class="ml-1 hidden md:inline-block">Logout</span>
+    </button>
+  </div>
+</div>
     </div>
   </header>
 </template>
 
 <script setup>
-  import { router } from '@inertiajs/vue3'
-  import Logo from './Logo.vue'
+import { Link, router } from '@inertiajs/vue3'
+import Logo from './Logo.vue'
+import { ref } from 'vue'
 
-  const props = defineProps({
-    pageTitle: { type: String, default: 'Dashboard' },
-    user: { type: Object, required: true },
-    notifications: { type: Array, default: () => [] }
-  })
+const open = ref(false)
 
-  function logout() {
-    router.post('/admin/logout')
-  }
+const props = defineProps({
+  pageTitle: { type: String, default: 'Dashboard' },
+  user: { type: Object, required: true },
+  notifications: { type: Array, default: () => [] }
+})
+
+function logout() {
+  router.post('/admin/logout')
+}
 </script>

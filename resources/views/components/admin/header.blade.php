@@ -23,6 +23,9 @@
             <span class="text-gray-700 font-medium truncate max-w-xs">Hi, {{ auth()->user()->name }}</span>
         </div>
 
+        <!-- Profile -->
+        <a href="{{ route('admin.profile') }}" class="px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Profile</a>
+
         <!-- Logout -->
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf

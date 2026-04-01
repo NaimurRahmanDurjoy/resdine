@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Role;
+use App\Models\UserProfile;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role_id'];
+    protected $fillable = ['name', 'email', 'password', 'role_id', 'phone', 'branch_id', 'status'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -41,7 +42,7 @@ class User extends Authenticatable
     {
         $roleName = $this->role->name ?? null;
 
-        return match($roleName) {
+        return match ($roleName) {
             'admin' => route('admin.dashboard'),
             'cashier' => route('cashier.dashboard'),
             'customer' => route('home'),
@@ -60,5 +61,8 @@ class User extends Authenticatable
         return app(\App\Services\MenuService::class)->getMenusFor($this);
     }
 
-
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
 }

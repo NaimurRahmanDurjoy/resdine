@@ -4,7 +4,6 @@ namespace App\Models;
 
 class OrderMaster extends BaseModel
 {
-    protected $table = 'order_master';
 
     protected $casts = [
         'subtotal' => 'decimal:2',
