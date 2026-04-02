@@ -137,7 +137,7 @@
         <div class="flex items-start gap-6 pt-2">
           <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Product Image</label>
           <div class="flex-1 space-y-1">
-            <ImageUploadPreview name="menu_img" :existingImage="existingImage"
+            <ImageUploadPreview size="w-32 h-32" shape="rounded" name="menu_img" :existingImage="existingImage"
               @change="form.menu_img = $event.target.files[0]" />
             <p v-if="form.errors.menu_img" class="text-xs text-red-500">{{ form.errors.menu_img }}</p>
           </div>

@@ -32,43 +32,40 @@
       </button>
 
       <!-- User Info -->
-             <div class="relative">
-         <button @click="open = !open" class="flex items-center space-x-2">
-      <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4 pr-4">
-        <div
-          class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-sm">person</span>
+      <div class="relative dropdown">
+        <button @click="toggleDropdown" class="flex items-center space-x-2">
+          <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4 pr-4">
+            <div
+              class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-sm">person</span>
+            </div>
+            <span class="text-gray-700 dark:text-gray-300 font-medium truncate max-w-[100px] hidden sm:inline-block">
+              {{ user.name }}
+            </span>
+          </div>
+        </button>
+
+        <div v-if="open"
+          class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded shadow-lg border dark:border-gray-700">
+
+          <Link :href="route('admin.profile')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <span class="material-symbols-outlined text-sm">person</span> <span class="ml-1">Profile</span>
+          </Link>
+
+          <button @click="logout" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <span class="material-symbols-outlined text-sm">logout</span> <span
+              class="ml-1">Logout</span>
+          </button>
         </div>
-        <span class="text-gray-700 dark:text-gray-300 font-medium truncate max-w-[100px] hidden sm:inline-block">
-          {{ user.name }}
-        </span>
       </div>
-
-
-
-  </button>
-
-  <div v-if="open"
-       class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700">
-    
-    <Link :href="route('admin.profile')" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-      Profile
-    </Link>
-
-    <button @click="logout"
-            class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-      <span class="material-symbols-outlined text-sm">logout</span> <span class="ml-1 hidden md:inline-block">Logout</span>
-    </button>
-  </div>
-</div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router} from '@inertiajs/vue3'
 import Logo from './Logo.vue'
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const open = ref(false)
 
@@ -77,7 +74,22 @@ const props = defineProps({
   user: { type: Object, required: true },
   notifications: { type: Array, default: () => [] }
 })
+// Toggle dropdown
+function toggleDropdown() {
+  open.value = !open.value
+}
 
+// Close dropdown on outside click
+function handleClickOutside(event) {
+  if (!event.target.closest('.dropdown')) {
+    open.value = false
+  }
+}
+// Add event listener for clicks outside the dropdown
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
+
+// Logout function
 function logout() {
   router.post('/admin/logout')
 }

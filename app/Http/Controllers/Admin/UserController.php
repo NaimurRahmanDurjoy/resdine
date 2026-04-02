@@ -102,7 +102,7 @@ class UserController extends Controller
     }
 
     public function updateProfile(Request $request, ImageUploadService $imageUploadService)
-    {
+    { 
         $user = Auth::user();
 
         $userData = $request->validate([
