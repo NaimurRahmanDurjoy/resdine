@@ -12,6 +12,7 @@ class OrderItem extends BaseModel
         'unit_price' => 'decimal:2',
         'total' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'preparation_status' => 'string'
     ];
 
     public function order()

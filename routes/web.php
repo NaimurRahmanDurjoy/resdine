@@ -16,13 +16,16 @@ Route::get('/unauthorized', function() {
 
 
 
+use \App\Http\Controllers\WebController;
+
 // Home page
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', function() {
+    return redirect()->route('web.menu');
+})->name('home');
 
 // Customer order pages
-// Route::get('/menu', [OrderController::class, 'menu'])->name('menu');
-// Route::post('/order', [OrderController::class, 'store'])->name('order.store');
-
+Route::get('/menu', [WebController::class, 'menu'])->name('web.menu');
+Route::post('/order', [WebController::class, 'submitOrder'])->name('web.order.submit');
 
 Route::get('/test-middleware', function () {
     return "Middleware loaded!";
