@@ -93,6 +93,13 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::put('profile', [UserController::class, 'updateProfile'])->name('profile.update');
         Route::put('profile/password', [UserController::class, 'updatePassword'])->name('profile.password.update');
 
+        // POS (Point of Sale)
+        Route::get('pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('pos.index');
+        Route::post('pos/submit', [\App\Http\Controllers\Admin\PosController::class, 'submitOrder'])->name('pos.submit');
+
+        // Reports
+        Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
