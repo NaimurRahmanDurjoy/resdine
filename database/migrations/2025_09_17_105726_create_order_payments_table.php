@@ -19,13 +19,14 @@ return new class extends Migration
             $table->string('transaction_id')->nullable()->comment('for card/mobile payments');
             $table->string('payment_reference')->nullable()->comment('for additional info like card type, mobile operator, etc.');
             $table->tinyInteger('status')->default(1)->comment('1=completed,2=failed,3=refunded');
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
 
-            $table->foreign('order_master_id')->references('id')->on('order_master')->onDelete('cascade');
+            $table->foreign('order_master_id')->references('id')->on('order_masters')->onDelete('cascade');
         });
     }
 

@@ -28,6 +28,9 @@ use App\Http\Controllers\Admin\RecipeController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\BusinessConfigController;
+use App\Http\Controllers\Admin\PosController;
+use App\Http\Controllers\Admin\KdsController;
+use App\Http\Controllers\Admin\ReportController;
 
 // ----------------------
 // Admin Panel Routes
@@ -94,11 +97,14 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::put('profile/password', [UserController::class, 'updatePassword'])->name('profile.password.update');
 
         // POS (Point of Sale)
-        Route::get('pos', [\App\Http\Controllers\Admin\PosController::class, 'index'])->name('pos.index');
-        Route::post('pos/submit', [\App\Http\Controllers\Admin\PosController::class, 'submitOrder'])->name('pos.submit');
+        Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+        Route::post('pos/submit', [PosController::class, 'submitOrder'])->name('pos.submit');
+
+        // Kitchen Display System
+        Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
 
         // Reports
-        Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {

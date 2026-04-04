@@ -27,23 +27,6 @@ return new class extends Migration
 
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
         });
-
-        Schema::create('recipes', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('item_id');
-            $table->unsignedBigInteger('ingredient_id');
-            $table->decimal('quantity', 10, 2);
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->unsignedBigInteger('deleted_by')->nullable();
-
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
-            $table->foreign('ingredient_id')->references('id')->on('ingredients')->onDelete('cascade');
-            $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
-        });
     }
 
     /**
@@ -52,6 +35,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('ingredients');
-        Schema::dropIfExists('recipes');
     }
 };

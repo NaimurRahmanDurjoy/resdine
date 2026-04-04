@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_master', function (Blueprint $table) {
+        Schema::create('order_masters', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('order_number')->unique();
             $table->unsignedBigInteger('user_id');
@@ -26,11 +26,12 @@ return new class extends Migration
             $table->decimal('collect_amount', 10, 2)->default(0);
             $table->decimal('due_amount', 10, 2)->default(0)->comment('for partial payments');
             $table->decimal('total_amount', 10, 2)->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
-                $table->softDeletes();
-                $table->unsignedBigInteger('created_by')->nullable();
-                $table->unsignedBigInteger('updated_by')->nullable();
-                $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
@@ -46,15 +47,16 @@ return new class extends Migration
             $table->unsignedBigInteger('variant_id')->nullable();
             $table->json('modifiers')->nullable()->comment('Addons (extra cheese, toppings) or special instructions');
             $table->integer('quantity')->default(1);
-            $table->decimal('price', 10, 2)->default(0);
-            $table->decimal('total', 10, 2)->default(0);
+            $table->enum('preparation_status', ['pending', 'preparing', 'ready', 'served'])->default('pending');
+            $table->decimal('unit_price', 10, 2)->default(0);
+            $table->decimal('total_price', 10, 2)->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
 
-            $table->foreign('order_id')->references('id')->on('order_master')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('order_masters')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('product_items')->onDelete('cascade');
         });
 
@@ -65,7 +67,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_master');
+        Schema::dropIfExists('order_masters');
         Schema::dropIfExists('order_details');
     }
 };

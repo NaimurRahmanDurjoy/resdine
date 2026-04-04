@@ -25,13 +25,14 @@ return new class extends Migration
             $table->decimal('due_amount', 10, 2)->default(0);
             $table->decimal('grand_total', 10, 2)->default(0);
             $table->tinyInteger('status')->default(1)->comment('1=pending,2=paid,3=cancelled');
+            $table->timestamp('issued_at')->nullable();
             $table->timestamps();
-                $table->softDeletes();
-                $table->unsignedBigInteger('created_by')->nullable();
-                $table->unsignedBigInteger('updated_by')->nullable();
-                $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
 
-            $table->foreign('order_id')->references('id')->on('order_master')->onDelete('set null');
+            $table->foreign('order_id')->references('id')->on('order_masters')->onDelete('set null');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('set null');
             $table->foreign('promotion_id')->references('id')->on('promotions')->onDelete('set null');
         });
