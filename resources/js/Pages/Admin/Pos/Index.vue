@@ -23,7 +23,7 @@
       <div class="flex items-center space-x-3">
         <span class="text-sm opacity-90 mr-2 hidden lg:block">{{ currentTime }}</span>
         <div class="bg-indigo-600 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-inner cursor-pointer hover:bg-indigo-500 transition">
-          <span class="material-symbols-outlined text-sm mr-1">person</span> User
+          <span class="material-symbols-outlined text-sm mr-1">person</span>{{ user.name }}
         </div>
       </div>
     </header>
@@ -167,9 +167,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+
+const page = usePage()
+const user = computed(() => page.props.auth?.user || { name: 'Guest' })
 
 const props = defineProps({
   categories: Array,

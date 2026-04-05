@@ -30,7 +30,7 @@ class ReportController extends Controller
             ->get();
 
         // Top Selling Items (all time simple query)
-        $topItems = OrderItem::select('item_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total) as revenue'))
+        $topItems = OrderItem::select('item_id', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(total_price) as revenue'))
             ->with('product:id,name,image_url')
             ->groupBy('item_id')
             ->orderByDesc('total_qty')
