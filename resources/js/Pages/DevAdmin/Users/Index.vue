@@ -93,6 +93,11 @@
                                     title="Delete User">
                                     <span class="material-symbols-outlined text-xl font-icon">delete</span>
                                 </button>
+                                <Link :href="route('devAdmin.users.permissions', user.id)"
+                                    class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors tooltip"
+                                    title="Manage Permissions">
+                                    <span class="material-symbols-outlined text-xl font-icon">shield</span>
+                                </Link>
                             </div>
                         </td>
                     </tr>

@@ -19,6 +19,13 @@ class SoftwareMenu extends BaseModel
 
     public function access()
     {
-        return $this->belongsToMany(User::class, 'software_menu_access', 'menu_id', 'user_id');
+        return $this->belongsToMany(User::class, 'software_menu_access' , 'menu_id', 'user_id');
     }
+
+    public function actions()
+    {
+        return $this->hasMany(SoftwareMenuAction::class, 'software_menu_id', 'id');
+    }
+
+
 }

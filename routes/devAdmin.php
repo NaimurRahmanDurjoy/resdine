@@ -5,11 +5,13 @@ use App\Http\Controllers\DevAdmin\AuthController;
 use App\Http\Controllers\DevAdmin\DashboardController;
 use App\Http\Controllers\DevAdmin\SettingsController;
 use App\Http\Controllers\DevAdmin\SoftwareMenuController;
+use App\Http\Controllers\DevAdmin\SoftwareInternalLinkController;
 use App\Http\Controllers\DevAdmin\SoftwareMenuSortingController;
 use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
 // use App\Http\Controllers\DevAdmin\AdminController;
 use App\Http\Controllers\DevAdmin\AdminMenuController;
+use App\Http\Controllers\DevAdmin\AdminInternalLInkController;
 use App\Http\Controllers\DevAdmin\AdminMenuSortingController;
 
 // ----------------------
@@ -27,20 +29,22 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
 
         // Route::resource('admins', AdminController::class);
         Route::resource('users', UserController::class);
+        Route::get('users/{user}/permissions', [UserController::class, 'permissions'])->name('users.permissions');
+
 
 
         // System routes
         Route::prefix('system-config')->name('systemConfig.')->group(function () {
             Route::prefix('admin-panel')->name('adminPanel.')->group(function () {
                 Route::resource('menu', AdminMenuController::class);
-                Route::get('internal-link', [AdminMenuController::class, 'adminInternalLink'])->name('internalLink');
+                Route::resource('internal-link', AdminInternalLinkController::class);
                 Route::get('menu-sorting', [AdminMenuSortingController::class, 'index'])->name('menuSorting');
                 Route::post('menu-sorting/update-order', [AdminMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
 
             Route::prefix('software')->name('software.')->group(function () {
                 Route::resource('menu', SoftwareMenuController::class);
-                Route::get('internal-link', [SettingsController::class, 'softwareInternalLink'])->name('internalLink');
+                Route::resource('internal-link', SoftwareInternalLinkController::class);
                 Route::get('menu-sorting', [SoftwareMenuSortingController::class, 'index'])->name('menuSorting');
                 Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });

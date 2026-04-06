@@ -88,6 +88,18 @@ class UserController extends Controller
         return redirect()->route('devAdmin.users.index')->with('success', 'Users updated successfully.');
     }
 
+    public function permissions(User $user)
+    {
+        $permissions = app(\App\Services\PermissionService::class)->getAllowedActionIds($user);
+        $allActions = \App\Models\SoftwareMenuAction::with('menu')->get();
+
+        return Inertia::render('DevAdmin/Users/Permissions', [
+            'user' => $user,
+            'permissions' => $permissions,
+            'allActions' => $allActions,
+        ]);
+    }
+
     public function destroy(User $user)
     {
         $user->delete();

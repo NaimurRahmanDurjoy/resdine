@@ -50,10 +50,18 @@ class User extends Authenticatable
         };
     }
 
+    // Relationship to user-specific permissions
+    public function userPermissions()
+    {
+        return $this->hasMany(UserPermission::class);
+    }
+
     // Get menus the user has access to
     public function softwareMenus()
     {
-        return $this->belongsToMany(SoftwareMenu::class, 'user_id');
+        // This was the old way, keeping for compatibility if needed, 
+        // but now we use Role + User Permissions.
+        return $this->belongsToMany(SoftwareMenu::class, 'software_menu_access', 'user_id', 'menu_id');
     }
 
     public function accessibleMenus()

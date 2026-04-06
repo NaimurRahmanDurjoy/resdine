@@ -59,20 +59,7 @@ abstract class BaseMenuService
     /**
      * Common active state logic for all menu types
      */
-    // public function isActive($menu): bool
-    // {
-    //     if ($menu->route && request()->routeIs($menu->route . '.*')) {
-    //         return true;
-    //     }
 
-    //     foreach ($menu->children as $child) {
-    //         if ($this->isActive($child)) {
-    //             return true;
-    //         }
-    //     }
-
-    //     return false;
-    // }
     public function isActive($menu): bool
     {
         if ($menu->route) {
