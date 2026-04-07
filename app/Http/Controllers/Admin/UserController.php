@@ -160,4 +160,69 @@ class UserController extends Controller
         $user->delete();
         return redirect()->back()->with('success', 'User deleted successfully');
     }
+
+    /**
+     * Manage User Specific Permissions (Overrides)
+     */
+    public function permissions(User $user)
+    {
+        $user->load('role');
+        $softwareMenus = \App\Models\SoftwareMenu::where('status', true)
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->with(['actions', 'children_recursive' => function($q) {
+                $q->orderBy('order')->with('actions');
+            }])
+            ->get();
+
+        // Get role-based permissions
+        $rolePermissions = \App\Models\RolePermission::where('role_id', $user->role_id)
+            ->pluck('software_menu_action_id')
+            ->toArray();
+
+        // Get user overrides
+        $overrides = \App\Models\UserPermission::where('user_id', $user->id)
+            ->get()
+            ->map(function ($o) {
+                return [
+                    'action_id' => $o->software_menu_action_id,
+                    'is_allowed' => $o->is_allowed,
+                ];
+            })->toArray();
+
+        return Inertia::render('Admin/Users/Permissions', [
+            'user' => $user,
+            'softwareMenus' => $softwareMenus,
+            'rolePermissions' => $rolePermissions,
+            'overrides' => $overrides,
+            'pageTitle' => 'User Permissions Overrides: ' . $user->name,
+        ]);
+    }
+
+    /**
+     * Update User Specific Permissions (Overrides)
+     */
+    public function updatePermissions(Request $request, User $user)
+    {
+        $overrides = $request->input('overrides', []); // Array of {action_id, is_allowed}
+
+        \App\Models\UserPermission::where('user_id', $user->id)->delete();
+
+        foreach ($overrides as $override) {
+            // If is_allowed is null, it means 'Inherit', so we don't save a record
+            if ($override['is_allowed'] === null) continue;
+
+            \App\Models\UserPermission::create([
+                'user_id' => $user->id,
+                'software_menu_action_id' => $override['action_id'],
+                'is_allowed' => $override['is_allowed'],
+            ]);
+        }
+
+        // Clear user-specific cache
+        $menuService = app(\App\Services\BaseMenuService::class);
+        $menuService->clearCache($user);
+
+        return redirect()->back()->with('success', 'User specific permissions updated successfully');
+    }
 }

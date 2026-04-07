@@ -90,14 +90,62 @@ class UserController extends Controller
 
     public function permissions(User $user)
     {
-        $permissions = app(\App\Services\PermissionService::class)->getAllowedActionIds($user);
-        $allActions = \App\Models\SoftwareMenuAction::with('menu')->get();
+        $user->load('role');
+
+        // Get all software menus with their actions and recursive children
+        $softwareMenus = \App\Models\SoftwareMenu::whereNull('parent_id')
+            ->with(['childrenRecursive.actions', 'actions'])
+            ->orderBy('order')
+            ->get();
+
+        // Get role permissions for this user's role
+        $rolePermissions = \App\Models\RolePermission::where('role_id', $user->role_id)
+            ->where('is_allowed', true)
+            ->pluck('software_menu_action_id')
+            ->toArray();
+
+        // Get user specific overrides (true = explicitly allowed, false = explicitly denied)
+        $userPermissions = \App\Models\UserPermission::where('user_id', $user->id)
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->software_menu_action_id => $item->is_allowed];
+            })
+            ->toArray();
 
         return Inertia::render('DevAdmin/Users/Permissions', [
             'user' => $user,
-            'permissions' => $permissions,
-            'allActions' => $allActions,
+            'softwareMenus' => $softwareMenus,
+            'rolePermissions' => $rolePermissions,
+            'userPermissions' => $userPermissions,
         ]);
+    }
+
+    public function updatePermissions(Request $request, User $user)
+    {
+        $request->validate([
+            'overrides' => 'present|array',
+            'overrides.*.id' => 'required|exists:software_menu_actions,id',
+            'overrides.*.is_allowed' => 'nullable|boolean', // null means Inherited (Delete override)
+        ]);
+
+        // Remove all current overrides to start fresh
+        \App\Models\UserPermission::where('user_id', $user->id)->delete();
+
+        // Add new overrides where state is not null (not Inherited)
+        foreach ($request->overrides as $perm) {
+            if ($perm['is_allowed'] !== null) {
+                \App\Models\UserPermission::create([
+                    'user_id' => $user->id,
+                    'software_menu_action_id' => $perm['id'],
+                    'is_allowed' => $perm['is_allowed'],
+                ]);
+            }
+        }
+
+        // Clear permission cache to force refresh on next check
+        \Illuminate\Support\Facades\Cache::forget("perm_{$user->id}");
+
+        return redirect()->back()->with('success', 'User permissions updated successfully.');
     }
 
     public function destroy(User $user)

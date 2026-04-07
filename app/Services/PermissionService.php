@@ -50,13 +50,28 @@ class PermissionService
         // 1. Find if this route is defined as an action
         $action = \App\Models\SoftwareMenuAction::where('route', $routeName)->first();
 
-        // 2. If it's not a restricted action, we might allow it depending on policy 
-        // For now, if it's not in the actions table, we assume no restriction or handled by role
+        // 2. If it's not found exactly, try mapping it to a base permission (e.g., .store -> .create)
+        if (!$action) {
+            $segments = explode('.', $routeName);
+            if (count($segments) >= 2) {
+                $lastSegment = array_pop($segments);
+                $baseAction = \App\Models\SoftwareMenuAction::getBaseAction($lastSegment);
+                
+                // Reconstruct the route name with the base action suffix (e.g., .index, .create)
+                // Note: getBaseAction maps index->view, destroy->delete, etc.
+                $baseActionSuffix = \App\Models\SoftwareMenuAction::ROUTE_MAP[$baseAction] ?? $baseAction;
+                $baseRouteName = implode('.', $segments) . '.' . $baseActionSuffix;
+                
+                $action = \App\Models\SoftwareMenuAction::where('route', $baseRouteName)->first();
+            }
+        }
+
+        // 3. If still no action found, it's either an unrestricted route or handled globally
         if (!$action) {
             return true; 
         }
 
-        // 3. Get allowed action IDs
+        // 4. Check against allowed action IDs for the user
         $allowedIds = $this->getAllowedActionIds($user);
 
         return in_array($action->id, $allowedIds);

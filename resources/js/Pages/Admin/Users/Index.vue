@@ -78,7 +78,7 @@
               <button @click="deleteUser(user.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                 <span class="material-symbols-outlined">delete</span>
               </button>
-              <Link :href="route('admin.users.edit', user.id)" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+              <Link :href="route('admin.users.permissions', user.id)" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 tooltip" title="User Permissions">
                 <span class="material-symbols-outlined">key</span>
               </Link>
             </div>

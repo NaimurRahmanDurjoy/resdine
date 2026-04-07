@@ -30,6 +30,8 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\BusinessConfigController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\KdsController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
 
 // ----------------------
@@ -46,6 +48,8 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         // Users & Roles
         Route::resource('users', UserController::class);
+        Route::get('users/{user}/permissions', [UserController::class, 'permissions'])->name('users.permissions');
+        Route::post('users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
 
         // Menu management
         Route::prefix('product')->name('product.')->group(function () {
@@ -117,6 +121,13 @@ Route::middleware('web')->name('admin.')->group(function () {
                 Route::resource('staff-departments', StaffDepartmentController::class);
                 Route::resource('tables', TableController::class);
             });
+
+            // Roles & Permissions
+            Route::resource('roles', RoleController::class);
+            Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
+            Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
+            
+            Route::resource('permissions', PermissionController::class);
 
             // Business Config
             Route::get('business-config', [BusinessConfigController::class, 'index'])->name('business-config.index');

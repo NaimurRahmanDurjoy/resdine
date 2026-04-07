@@ -113,7 +113,12 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center gap-2">
-                                    <Link :href="route('devAdmin.systemConfig.software.internalLink.edit', action.id)"
+                                    <Link :href="route('devAdmin.systemConfig.software.internal-link.permissions', action.id)"
+                                        class="p-1.5 rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400 hover:bg-slate-200 transition inline-flex items-center group/shield"
+                                        title="Manage Permissions Across Roles/Users">
+                                        <span class="material-symbols-outlined text-lg group-hover/shield:scale-110 transition-transform">shield</span>
+                                    </Link>
+                                    <Link :href="route('devAdmin.systemConfig.software.internal-link.edit', action.id)"
                                         class="p-1.5 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 transition inline-flex items-center"
                                         title="Edit">
                                         <span class="material-symbols-outlined text-lg">edit</span>
@@ -180,7 +185,7 @@ const sort = ref(props.sort || 'id')
 const direction = ref(props.direction || 'desc')
 
 const handleSearch = () => {
-    router.get(route('devAdmin.systemConfig.software.internalLink.index'), {
+    router.get(route('devAdmin.systemConfig.software.internal-link.index'), {
         search: searchQuery.value,
         sort: sort.value,
         direction: direction.value
@@ -209,12 +214,12 @@ const updateSort = (field) => {
 
 const deleteAction = (id) => {
     if (confirm('Are you sure you want to delete this menu action?')) {
-        router.delete(route('devAdmin.systemConfig.software.internalLink.destroy', id))
+        router.delete(route('devAdmin.systemConfig.software.internal-link.destroy', id))
     }
 }
 
 const toggleActive = (action) => {
-    router.patch(route('devAdmin.systemConfig.software.internalLink.update', action.id), {
+    router.patch(route('devAdmin.systemConfig.software.internal-link.update', action.id), {
         software_menu_id: action.software_menu_id,
         action: action.action,
         route: action.route,

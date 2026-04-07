@@ -11,7 +11,7 @@ use App\Http\Controllers\DevAdmin\SystemController;
 use App\Http\Controllers\DevAdmin\UserController;
 // use App\Http\Controllers\DevAdmin\AdminController;
 use App\Http\Controllers\DevAdmin\AdminMenuController;
-use App\Http\Controllers\DevAdmin\AdminInternalLInkController;
+use App\Http\Controllers\DevAdmin\AdminInternalLinkController;
 use App\Http\Controllers\DevAdmin\AdminMenuSortingController;
 
 // ----------------------
@@ -30,6 +30,7 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
         // Route::resource('admins', AdminController::class);
         Route::resource('users', UserController::class);
         Route::get('users/{user}/permissions', [UserController::class, 'permissions'])->name('users.permissions');
+        Route::post('users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
 
 
 
@@ -45,6 +46,8 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             Route::prefix('software')->name('software.')->group(function () {
                 Route::resource('menu', SoftwareMenuController::class);
                 Route::resource('internal-link', SoftwareInternalLinkController::class);
+                Route::get('internal-link/{internal_link}/permissions', [SoftwareInternalLinkController::class, 'permissions'])->name('internal-link.permissions');
+                Route::post('internal-link/{internal_link}/permissions', [SoftwareInternalLinkController::class, 'updatePermissions'])->name('internal-link.permissions.update');
                 Route::get('menu-sorting', [SoftwareMenuSortingController::class, 'index'])->name('menuSorting');
                 Route::post('menu-sorting/update-order', [SoftwareMenuSortingController::class, 'updateOrder'])->name('menuSorting.updateOrder');
             });
