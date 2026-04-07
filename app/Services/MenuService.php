@@ -10,6 +10,6 @@ class MenuService extends BaseMenuService
         $this->model = SoftwareMenu::class;
         $this->accessRelation = 'access';
         $this->foreignKey = 'user_id'; // software_menu_access.user_id (software admin)
-        $this->cachePrefix = 'admin_menu';
+        $this->cachePrefix = 'admin_menu_v2';
     }
 }
