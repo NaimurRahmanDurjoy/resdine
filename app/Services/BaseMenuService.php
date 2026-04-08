@@ -12,43 +12,34 @@ abstract class BaseMenuService
     protected string $accessRelation; // 'access'
     protected string $foreignKey; // 'admin_id' or 'user_id'
     protected string $cachePrefix = 'menu';
+    protected bool $shouldFilterByActions = false;
 
     public function getMenusFor(Model $entity): Collection
     {
         $cacheKey = "{$this->cachePrefix}_{$entity->id}";
 
-        return Cache::remember($cacheKey, now()->addHours(1), function () use ($entity) {
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($entity) {
             $query = ($this->model)::query();
 
-            // If user is admin (role_id = 1), skip the permission check
-            $isAdmin = false;
-            
-            // Check for role_id == 1 (common for standard admin)
-            if (isset($entity->role_id) && $entity->role_id == 1) {
-                $isAdmin = true;
-            } 
-            
-            // Check for 'role' attribute or relation
-            if (!$isAdmin) {
-                $role = $entity->role;
-                if ($role) {
-                    if (is_string($role)) {
-                        $isAdmin = in_array($role, ['admin', 'superadmin', 'developer']);
-                    } else {
-                        $isAdmin = ($role->name ?? '') === 'admin';
-                    }
-                }
-            }
-
-            if (!$isAdmin) {
+            // Apply legacy access check for panels not using action-based permissions
+            if (!$this->shouldFilterByActions) {
                 $query->whereHas($this->accessRelation, fn($q) => $q->where($this->foreignKey, $entity->id));
             }
 
-            return $query->where('is_active', true)
+            $query->where('is_active', true)
                 ->whereNull('parent_id')
-                ->orderBy('order')
-                ->with('childrenRecursive')
-                ->get();
+                ->orderBy('order');
+
+            // Conditionally eager load actions only if needed
+            if ($this->shouldFilterByActions) {
+                $query->with(['actions', 'childrenRecursive' => function ($q) {
+                    $q->with('actions');
+                }]);
+            } else {
+                $query->with('childrenRecursive');
+            }
+
+            return $query->get();
         });
     }
 
@@ -68,7 +59,6 @@ abstract class BaseMenuService
     /**
      * Common active state logic for all menu types
      */
-
     public function isActive($menu): bool
     {
         if ($menu->route) {
@@ -85,9 +75,11 @@ abstract class BaseMenuService
             }
         }
 
-        foreach ($menu->children as $child) {
-            if ($this->isActive($child)) {
-                return true;
+        if ($menu->childrenRecursive) {
+            foreach ($menu->childrenRecursive as $child) {
+                if ($this->isActive($child)) {
+                    return true;
+                }
             }
         }    
 
@@ -96,11 +88,51 @@ abstract class BaseMenuService
 
 
     /**
-     * Prepare menu data for view (common for all menu types)
+     * Prepare menu data for view with conditional permission filtering
      */
-    public function prepareForView($menus)
+    public function prepareForView($menus, Model $entity)
     {
-        return $menus->map(function ($menu) {
+        $allowedActionIds = [];
+        if ($this->shouldFilterByActions) {
+            $permissionService = app(\App\Services\PermissionService::class);
+            $allowedActionIds = $permissionService->getAllowedActionIds($entity);
+        }
+
+        return $this->recursivePrepare($menus, $entity, $allowedActionIds);
+    }
+
+    /**
+     * Recursive preparation and filtering logic
+     */
+    protected function recursivePrepare($menus, $entity, $allowedActionIds)
+    {
+        return $menus->map(function ($menu) use ($entity, $allowedActionIds) {
+            // Recursive call for children
+            $children = $this->recursivePrepare($menu->childrenRecursive ?? collect(), $entity, $allowedActionIds);
+            
+            // Visibility Logic:
+            
+            if ($this->shouldFilterByActions) {
+                // 1. If it's the Software Admin panel using granular Actions
+                $hasAllowedActions = $menu->actions->some(fn($a) => in_array($a->id, $allowedActionIds));
+                $hasVisibleChildren = $children->count() > 0;
+
+                // Hide if no allowed actions AND no visible children
+                if (!$hasAllowedActions && !$hasVisibleChildren) {
+                    return null;
+                }
+            } else {
+                // 2. If it's the Developer Panel (DevAdmin) or simple panel
+                // $hasVisibleChildren = $children->count() > 0;
+                
+                // // Hide if no route AND no visible children (folders must have children)
+                // if (!$menu->route && !$hasVisibleChildren) {
+                //     return null;
+                // }
+                
+                // For DevAdmin, we show all active menus regardless of route or children, so no additional hiding logic is needed here.
+            }
+
             return [
                 'id' => $menu->id,
                 'name' => $menu->name,
@@ -108,10 +140,10 @@ abstract class BaseMenuService
                 'icon' => $menu->icon,
                 'url' => $this->getUrl($menu),
                 'isActive' => $this->isActive($menu),
-                'hasChildren' => $menu->children->count() > 0,
-                'children' => $this->prepareForView($menu->children),
+                'hasChildren' => $children->count() > 0,
+                'children' => $children,
                 'model' => $menu,
             ];
-        });
+        })->filter()->values();
     }
 }

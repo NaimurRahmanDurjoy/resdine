@@ -45,10 +45,12 @@ class HandleInertiaRequests extends Middleware
 
         if ($isAdminRoute && Auth::guard('web')->check()) { // Assuming 'web' guard for admin based on your setup
             $user = Auth::guard('web')->user();
-            $menus = app(\App\Services\MenuService::class)->prepareForView(app(\App\Services\MenuService::class)->getMenusFor($user));
+            $menuService = app(\App\Services\MenuService::class);
+            $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         } elseif ($isDevAdminRoute && Auth::guard('admin')->check()) { // Assuming 'admin' guard for devAdmin based on your setup
             $user = Auth::guard('admin')->user();
-            $menus = app(\App\Services\DevAdminMenuService::class)->prepareForView(app(\App\Services\DevAdminMenuService::class)->getMenusFor($user));
+            $menuService = app(\App\Services\DevAdminMenuService::class);
+            $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         }
 
         return array_merge(parent::share($request), [

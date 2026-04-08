@@ -54,7 +54,7 @@ class RoleController extends Controller
 
         Role::create($data);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+        return redirect()->route('admin.settings.roles.index')->with('success', 'Role created successfully.');
     }
 
     public function edit(Role $role)
@@ -76,7 +76,7 @@ class RoleController extends Controller
 
         $role->update($data);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+        return redirect()->route('admin.settings.roles.index')->with('success', 'Role updated successfully.');
     }
 
     public function destroy(Role $role)
@@ -88,7 +88,7 @@ class RoleController extends Controller
         }
 
         $role->delete();
-        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
+        return redirect()->route('admin.settings.roles.index')->with('success', 'Role deleted successfully.');
     }
 
     public function permissions(Role $role)
