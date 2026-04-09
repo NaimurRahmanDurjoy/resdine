@@ -40,14 +40,15 @@ class User extends Authenticatable
     // Redirect user based on role
     public function redirectToDashboard(): string
     {
-        $roleName = $this->role->name ?? null;
+        $roleName = strtolower($this->role->name ?? '');
 
         return match ($roleName) {
             'admin' => route('admin.dashboard'),
             'cashier' => route('cashier.dashboard'),
+            'staff'   => route('admin.pos.index'),
             'customer' => route('home'),
             default => route('home'),
-        };
+        };  
     }
 
     // Relationship to user-specific permissions

@@ -7,32 +7,26 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
-    public function handle($request, Closure $next, string $role)
+    public function handle($request, Closure $next, ...$roles)
     {
-        // Determine which guard to use based on the role
-        $guard = $role === 'developer' ? 'admin' : 'web';
-        $user = Auth::guard($guard)->user();
-
-        // If not logged in, redirect to the appropriate login
-        if (!$user) {
-            return match ($role) {
-                'developer' => redirect()->route('devAdmin.login')->with('error', 'You must be logged in.'),
-                'admin' => redirect()->route('admin.login')->with('error', 'You must be logged in.'),
-                default => redirect()->route('login')->with('error', 'You must be logged in.'),
-            };
+        // 1. Detect which guard is currently active (web, admin, or customer)
+        $guard = collect(config('auth.guards'))->keys()->first(fn($g) => Auth::guard($g)->check());
+        
+        if (!$guard) {
+            abort(401); // Standard Laravel behavior: let 'auth' middleware handle redirects
         }
 
-        // ---- ROLE CHECK ----
-        if ($guard === 'web') {
-            // For "users" table (role_id + relation)
-            if (!$user->role || strtolower($user->role->name) !== strtolower($role)) {
-                abort(403, "Unauthorized: Requires {$role} role.");
-            }
-        } else {
-            // For "admins" table (direct role field)
-            if (strtolower($user->role) !== strtolower($role)) {
-                abort(403, "Unauthorized: Requires {$role} role.");
-            }
+        $user = Auth::guard($guard)->user();
+
+        // 2. Get the role name dynamically
+        // Handles both relationship ($user->role->name) and direct column ($user->role)
+        $userRole = is_object($user->role) ? strtolower($user->role->name)   : strtolower($user->role);
+
+        // 3. Check if role matches
+        $allowedRoles = array_map('strtolower', $roles);
+
+        if (!in_array($userRole, $allowedRoles)) {
+            abort(403, "Access denied. Your role ($userRole) is not authorized for this section.");
         }
 
         return $next($request);

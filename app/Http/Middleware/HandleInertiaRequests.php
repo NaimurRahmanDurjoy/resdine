@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\DevAdminMenuService;
+use App\Services\MenuService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Illuminate\Support\Facades\Auth;
@@ -45,11 +47,11 @@ class HandleInertiaRequests extends Middleware
 
         if ($isAdminRoute && Auth::guard('web')->check()) { // Assuming 'web' guard for admin based on your setup
             $user = Auth::guard('web')->user();
-            $menuService = app(\App\Services\MenuService::class);
+            $menuService = app(MenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         } elseif ($isDevAdminRoute && Auth::guard('admin')->check()) { // Assuming 'admin' guard for devAdmin based on your setup
             $user = Auth::guard('admin')->user();
-            $menuService = app(\App\Services\DevAdminMenuService::class);
+            $menuService = app(DevAdminMenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         }
 

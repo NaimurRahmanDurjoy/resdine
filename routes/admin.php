@@ -28,21 +28,30 @@ use App\Http\Controllers\Admin\RecipeController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\BusinessConfigController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\KdsController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
 
-// ----------------------
-// Admin Panel Routes
-// ----------------------
-Route::middleware('web')->name('admin.')->group(function () {
-    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
-    Route::get('/', fn() => redirect()->route('admin.login'))->name('home');
+// ----------------------------
+// Software Admin Panel Routes
+// ----------------------------
 
-    Route::middleware(['auth:web', 'role:admin'])->group(function () {
+Route::middleware('web')->name('admin.')->group(function () {
+    Route::middleware('guest:web')->group(function () {
+        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    });
+
+    Route::get('/', function () {
+        $guard = Auth::guard('web');
+
+        return $guard->check() ? redirect()->to($guard->user()->redirectToDashboard()) : redirect()->route('admin.login');
+    })->name('home');
+
+    Route::middleware(['auth:web', 'role:admin,manager,cashier,staff', 'permission'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -75,8 +84,8 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         // Orders
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'create', 'store', 'edit', 'update']);
-        Route::post('orders/{order}/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'store'])->name('orders.payments.store');
-        Route::get('orders/{order}/invoice', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('orders.invoice');
+        Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->name('orders.payments.store');
+        Route::get('orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
         Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
 
         // Customers
@@ -126,8 +135,6 @@ Route::middleware('web')->name('admin.')->group(function () {
             Route::resource('roles', RoleController::class);
             Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
             Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
-            
-            Route::resource('permissions', PermissionController::class);
 
             // Business Config
             Route::get('business-config', [BusinessConfigController::class, 'index'])->name('business-config.index');
