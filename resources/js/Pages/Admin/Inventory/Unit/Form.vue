@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -68,9 +68,9 @@ const props = defineProps({
     isEdit: Boolean
 })
 
-const form = reactive({
-    name: props.unit?.name || '',
-    short_name: props.unit?.short_name || '',
-    status: props.unit?.status ?? 1
+const form = useForm({
+    name: '',
+    short_name: '',
+    status: 1
 })
 </script>

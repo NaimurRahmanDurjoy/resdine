@@ -53,7 +53,7 @@ class ProductVariantsController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'item_id' => 'required|exists:menu_items,id',
+            'item_id' => 'required|exists:product_items,id',
             'price' => 'required|numeric|min:0',
         ]);
 
@@ -75,7 +75,7 @@ class ProductVariantsController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'item_id' => 'required|exists:menu_items,id',
+            'item_id' => 'required|exists:product_items,id',
             'price' => 'required|numeric|min:0',
         ]);
 

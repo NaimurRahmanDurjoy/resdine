@@ -28,13 +28,13 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $sortable = ['name','type','price','status','created_at'];
+        $sortable = ['name', 'type', 'price', 'status', 'created_at'];
         $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = min($request->input('perPage', 10), 100);
 
-        $items = ProductItem::select('id','name','type','price','status','menu_img','category_id','department_id')
-            ->with(['category:id,name','unit:id,name','department:id,name'])
+        $items = ProductItem::select('id', 'name', 'type', 'price', 'status', 'menu_img', 'category_id', 'department_id')
+            ->with(['category:id,name', 'unit:id,name', 'department:id,name'])
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -112,6 +112,8 @@ class ProductController extends Controller
         if ($request->hasFile('menu_img')) {
             $this->imageService->delete($item->menu_img);
             $validated['menu_img'] = $this->imageService->upload($request->file('menu_img'), 'menu-images');
+        } else {
+            unset($validated['menu_img']);
         }
 
         unset($validated['combo_items']);

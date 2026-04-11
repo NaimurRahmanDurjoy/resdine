@@ -17,11 +17,12 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2)->default(0);
-            $table->string('image')->nullable();
+            $table->string('menu_img')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->unsignedBigInteger('department_id')->nullable();
             $table->tinyInteger('status')->default(1)->comment('1=available,0=not available');
             $table->tinyInteger('type')->default(1)->comment('1=regular,2=combo,3=complementary');
+            $table->tinyInteger('is_featured')->default(1); // 1=featured,0=not featured
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
