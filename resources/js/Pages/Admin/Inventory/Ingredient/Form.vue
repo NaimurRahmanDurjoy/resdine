@@ -99,7 +99,6 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
 import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -108,7 +107,7 @@ const props = defineProps({
     isEdit: Boolean
 })
 
-const form = reactive({
+const form = useForm({
     name: props.ingredient?.name || '',
     unit_id: props.ingredient?.unit_id || '',
     min_stock: props.ingredient?.min_stock || 0,

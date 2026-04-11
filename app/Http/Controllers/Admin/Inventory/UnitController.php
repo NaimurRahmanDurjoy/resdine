@@ -44,7 +44,7 @@ class UnitController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string|max:50',
+            // 'short_name' => 'nullable|string|max:50',
             'status' => 'required|integer'
         ]);
 
@@ -65,7 +65,7 @@ class UnitController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string|max:50',
+            // 'short_name' => 'nullable|string|max:50',
             'status' => 'required|integer'
         ]);
 

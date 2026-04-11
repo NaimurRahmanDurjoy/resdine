@@ -12,13 +12,13 @@
             </div>
 
             <!-- Short Name -->
-            <div class="flex items-start gap-6">
+            <!-- <div class="flex items-start gap-6">
                 <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Short Name</label>
                 <div class="flex-1">
                     <input v-model="form.short_name" type="text" placeholder="E.g. KG, L, Pcs"
                         class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm" />
                 </div>
-            </div>
+            </div> -->
 
             <!-- Status -->
             <div class="flex items-center gap-6">
@@ -69,8 +69,7 @@ const props = defineProps({
 })
 
 const form = useForm({
-    name: '',
-    short_name: '',
-    status: 1
+    name: props.unit?.name ?? '',
+    status: props.unit?.status ?? 1
 })
 </script>

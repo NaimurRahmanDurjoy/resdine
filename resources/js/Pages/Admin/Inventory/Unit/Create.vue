@@ -35,7 +35,7 @@ const props = defineProps({
     pageTitle: String
 })
 
-const submit = () => {
+const submit = (form) => {
     form.post(route('admin.unit.store'))
 }
 </script>

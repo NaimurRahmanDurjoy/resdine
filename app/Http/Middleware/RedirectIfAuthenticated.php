@@ -13,7 +13,7 @@ class RedirectIfAuthenticated
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
                 // Redirect based on role if already logged in
-                return redirect()->to(Auth::user()->redirectToDashboard());
+                return redirect()->to(Auth::guard($guard)->user()->redirectToDashboard());
             }
         }
 

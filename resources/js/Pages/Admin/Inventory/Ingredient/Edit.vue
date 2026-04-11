@@ -39,6 +39,6 @@ const props = defineProps({
 })
 
 const submit = (form) => {
-    router.put(route('admin.ingredients.update', props.ingredient.id), form)
+    form.put(route('admin.ingredients.update', props.ingredient.id))
 }
 </script>
