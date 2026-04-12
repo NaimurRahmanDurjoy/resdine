@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="$emit('submit', form)" class="space-y-6">
+    <form @submit.prevent="submit" class="space-y-6">
         <div class="grid grid-cols-1 gap-6">
             <!-- Name -->
             <div class="flex items-start gap-6">
@@ -43,13 +43,13 @@
                 <div class="flex-1">
                     <div class="flex items-center gap-6">
                         <label class="flex items-center cursor-pointer group">
-                            <input type="radio" v-model="form.expiry_tracking" :value="1"
+                            <input type="radio" v-model="form.has_expiry" :value="1"
                                 class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <span
                                 class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 transition-colors">Yes</span>
                         </label>
                         <label class="flex items-center cursor-pointer group">
-                            <input type="radio" v-model="form.expiry_tracking" :value="0"
+                            <input type="radio" v-model="form.has_expiry" :value="0"
                                 class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <span
                                 class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 transition-colors">No</span>
@@ -84,10 +84,11 @@
         <!-- Form Actions -->
         <div class="pt-6 border-t border-gray-100 dark:border-gray-700">
             <div class="flex items-center gap-3">
-                <button type="submit"
+                <button type="submit" :disabled="form.processing"
                     class="px-8 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">save</span>
-                    {{ isEdit ? 'Update Ingredient' : 'Create Ingredient' }}
+                    <span class="material-symbols-outlined text-sm">save</span>    
+                    <span v-if="form.processing">Saving...</span>
+                    <span v-else>{{ isEdit ? 'Update Ingredient' : 'Create Ingredient' }}</span>
                 </button>
                 <Link :href="route('admin.ingredients.index')"
                     class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
@@ -99,7 +100,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link,useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
     ingredient: Object,
@@ -111,7 +112,15 @@ const form = useForm({
     name: props.ingredient?.name || '',
     unit_id: props.ingredient?.unit_id || '',
     min_stock: props.ingredient?.min_stock || 0,
-    expiry_tracking: props.ingredient?.expiry_tracking ?? 0,
+    has_expiry: props.ingredient?.has_expiry ?? 0,
     status: props.ingredient?.status ?? 1
 })
+
+const submit = () => {
+    if (props.isEdit) {
+        form.put(route('admin.ingredients.update', props.ingredient.id))
+    } else {
+        form.post(route('admin.ingredients.store'))
+    }
+}
 </script>

@@ -8,7 +8,7 @@ class Ingredient extends BaseModel
         'name',
         'unit_id',
         'min_stock',
-        'expiry_tracking',
+        'has_expiry',
         'status'
     ];
 

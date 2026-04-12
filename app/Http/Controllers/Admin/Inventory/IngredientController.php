@@ -49,7 +49,7 @@ class IngredientController extends Controller
             'name' => 'required|string|max:255',
             'unit_id' => 'required|exists:units,id',
             'min_stock' => 'required|numeric|min:0',
-            'expiry_tracking' => 'required|boolean',
+            'has_expiry' => 'required|boolean',
             'status' => 'required|boolean'
         ]);
 
@@ -73,7 +73,7 @@ class IngredientController extends Controller
             'name' => 'required|string|max:255',
             'unit_id' => 'required|exists:units,id',
             'min_stock' => 'required|numeric|min:0',
-            'expiry_tracking' => 'required|boolean',
+            'has_expiry' => 'required|boolean',
             'status' => 'required|boolean'
         ]);
 

@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="$emit('submit', form)" class="space-y-6">
+    <form @submit.prevent="submit" class="space-y-6">
         <div class="grid grid-cols-1 gap-6">
             <!-- Name -->
             <div class="flex items-start gap-6">
@@ -67,19 +67,26 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
     supplier: Object,
     isEdit: Boolean
 })
 
-const form = reactive({
+const form = useForm({
     name: props.supplier?.name || '',
     phone: props.supplier?.phone || '',
     email: props.supplier?.email || '',
     address: props.supplier?.address || '',
     company_name: props.supplier?.company_name || ''
 })
+const submit = () => {
+    if (props.isEdit) {
+        form.put(route('admin.suppliers.update', props.supplier.id))
+    } else {
+        form.post(route('admin.suppliers.store'))
+    }
+}
+
 </script>

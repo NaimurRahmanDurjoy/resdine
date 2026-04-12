@@ -19,14 +19,14 @@
 
             <!-- Form Body -->
             <div class="p-8">
-                <Form :ingredient="null" :units="units" :isEdit="false" @submit="submit" />
+                <Form :ingredient="null" :units="units" :isEdit="false" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Form from './Form.vue'
 defineOptions({ layout: AdminLayout })
@@ -36,7 +36,4 @@ const props = defineProps({
     pageTitle: String
 })
 
-const submit = (form) => {
-    form.post(route('admin.ingredients.store'))
-}
 </script>

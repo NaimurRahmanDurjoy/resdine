@@ -41,19 +41,19 @@
             <template #rows="{ items }">
                 <tr v-for="unit in items" :key="unit.id"
                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                         {{ unit.name }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ unit.short_name || 'N/A' }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-2 whitespace-nowrap">
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                             :class="unit.status ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'">
                             {{ unit.status ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex gap-3">
                             <Link :href="route('admin.unit.edit', unit.id)"
                                 class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
@@ -71,9 +71,8 @@
             <template #pagination>
                 <div class="flex items-center justify-between w-full">
                     <div class="text-sm text-gray-700 dark:text-gray-400">
-                        Showing <span class="font-medium">{{ units.from }}</span> to <span class="font-medium">{{
-                            units.to
-                            }}</span> of <span class="font-medium">{{ units.total }}</span> entries
+                        Showing <span class="font-medium">{{ units.from }}</span> to <span class="font-medium">
+                            {{ units.to }}</span> of <span class="font-medium">{{ units.total }}</span> entries
                     </div>
                     <div class="flex space-x-1">
                         <Link v-for="(link, k) in units.links" :key="k" :href="link.url || '#'" v-html="link.label"

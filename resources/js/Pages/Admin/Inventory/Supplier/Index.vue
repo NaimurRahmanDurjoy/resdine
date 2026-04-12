@@ -41,20 +41,23 @@
                 <template #rows="{ items }">
                     <tr v-for="supplier in items" :key="supplier.id"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                             {{ supplier.name }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {{ supplier.company_name || 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {{ supplier.phone || 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {{ supplier.email || 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end gap-3">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            {{ supplier.address || 'N/A' }}
+                        </td>
+                        <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex gap-3">
                                 <Link :href="route('admin.suppliers.edit', supplier.id)"
                                     class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
                                     <span class="material-symbols-outlined">edit</span>
@@ -70,10 +73,8 @@
                 <template #pagination>
                     <div class="flex items-center justify-between w-full">
                         <div class="text-sm text-gray-700 dark:text-gray-400">
-                            Showing <span class="font-medium">{{ suppliers.from }}</span> to <span
-                                class="font-medium">{{
-                                    suppliers.to
-                                }}</span> of <span class="font-medium">{{ suppliers.total }}</span> entries
+                            Showing <span class="font-medium">{{ suppliers.from }}</span> to <span class="font-medium">
+                                {{ suppliers.to }}</span> of <span class="font-medium">{{ suppliers.total }}</span> entries
                         </div>
                         <div class="flex space-x-1">
                             <Link v-for="(link, k) in suppliers.links" :key="k" :href="link.url || '#'"
@@ -113,6 +114,7 @@ const headers = [
     { label: 'Company', key: 'company_name', sortable: true },
     { label: 'Phone', key: 'phone', sortable: false },
     { label: 'Email', key: 'email', sortable: false },
+    { label: 'Address', key: 'address', sortable: false },
     { label: 'Actions', key: 'actions', sortable: false }
 ]
 

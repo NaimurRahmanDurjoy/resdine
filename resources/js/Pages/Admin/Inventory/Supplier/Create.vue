@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Header -->
@@ -20,23 +19,20 @@
 
                 <!-- Form Body -->
                 <div class="p-8">
-                    <Form :supplier="null" :isEdit="false" @submit="submit" />
+                    <Form :supplier="null" :isEdit="false" />
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Form from './Form.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     pageTitle: String
 })
 
-const submit = (form) => {
-    router.post(route('admin.suppliers.store'), form)
-}
 </script>

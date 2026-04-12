@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Header -->
@@ -20,17 +19,17 @@
 
                 <!-- Form Body -->
                 <div class="p-8">
-                    <Form :ingredient="ingredient" :units="units" :isEdit="true" @submit="submit" />
+                    <Form :ingredient="ingredient" :units="units" :isEdit="true" />
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Form from './Form.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     ingredient: Object,
@@ -38,7 +37,4 @@ const props = defineProps({
     pageTitle: String
 })
 
-const submit = (form) => {
-    form.put(route('admin.ingredients.update', props.ingredient.id))
-}
 </script>
