@@ -24,6 +24,7 @@
 
     <!-- Toasts and Modals -->
     <Toast />
+    <GlobalModal />
   </div>
 </template>
 
@@ -33,6 +34,7 @@ import { usePage } from '@inertiajs/vue3'
 import Header from '@/Components/Admin/Header.vue'
 import SideBar from '@/Components/Admin/SideBar.vue'
 import Toast from '@/Components/Toast.vue'
+import GlobalModal from '@/Components/GlobalModal.vue'
 
 const props = defineProps({
   notifications: { type: Array, default: () => [] },

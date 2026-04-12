@@ -59,14 +59,14 @@
                             {{ purchase.status_label }}
                         </span>
                     </td>
-                    <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex gap-3">
-                            <Link :href="route('admin.purchase.show', purchase.id)"
-                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </Link>
-                        </div>
-                    </td>
+                        <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex gap-3">
+                                <button @click="showDetails(purchase)"
+                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                </button>
+                            </div>
+                        </td>
                 </tr>
             </template>
             <template #pagination>
@@ -97,6 +97,8 @@ import { ref, watch } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
+import { openModal } from '@/Stores/modalStore'
+import PurchaseDetails from '@/Components/Admin/Inventory/Purchase/PurchaseDetails.vue'
 
 defineOptions({ layout: AdminLayout })
 
@@ -115,6 +117,13 @@ const headers = [
 ]
 const search = ref(props.filters.search)
 const loading = ref(false)
+
+const showDetails = (purchase) => {
+    openModal(PurchaseDetails, { purchase }, {
+        title: `Purchase Order: ${purchase.invoice_number || purchase.id}`,
+        maxWidth: '5xl'
+    })
+}
 
 function debounce(fn, delay) {
     let timeoutId;
