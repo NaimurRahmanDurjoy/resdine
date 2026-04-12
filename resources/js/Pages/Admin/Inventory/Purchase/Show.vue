@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-5xl mx-auto space-y-6">
             
             <!-- Header Card -->
@@ -31,12 +30,12 @@
                         </div>
                         <div>
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Invoice Number</p>
-                            <p class="text-sm font-medium text-gray-900">{{ purchase.invoice_no || '--' }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ purchase.invoice_number || '--' }}</p>
                         </div>
                         <div>
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Status</p>
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                {{ purchase.status.charAt(0).toUpperCase() + purchase.status.slice(1) }}
+                                {{ purchase.status_label }}
                             </span>
                         </div>
                     </div>
@@ -95,12 +94,12 @@
             </div>
 
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     purchase: Object,

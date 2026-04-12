@@ -14,13 +14,20 @@ return new class extends Migration
         Schema::create('suppliers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('contact')->nullable();
-            $table->tinyInteger('status')->default(1);
+            $table->string('company_name')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable()->unique();
+            $table->text('address')->nullable();
+            $table->tinyInteger('status')->default(1); // 0=inactive, 1=active
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
+
+            $table->index('name');
+            $table->index('company_name');
+            $table->index('status');
         });
 
         Schema::create('purchase_master', function (Blueprint $table) {
@@ -30,6 +37,7 @@ return new class extends Migration
             $table->string('invoice_number')->unique();
             $table->unsignedBigInteger('supplier_id')->nullable();
             $table->decimal('total_amount', 10, 2)->default(0);
+            $table->text('notes')->nullable();
             $table->date('purchase_date');
             $table->tinyInteger('status')->default(1)->comment('0=pending,1=approved,2=received,3=cancelled');
             $table->timestamps();
@@ -49,7 +57,8 @@ return new class extends Migration
             $table->unsignedBigInteger('ingredients_id');
             $table->decimal('unit_price', 10, 2);
             $table->integer('quantity');
-            $table->decimal('total', 10, 2);
+            $table->decimal('total_price', 10, 2);
+            $table->date('expiry_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

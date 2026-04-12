@@ -52,7 +52,7 @@
                 <template #rows="{ items }">
                     <tr v-for="stock in items" :key="stock.id"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-transparent"
+                        <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-transparent"
                             :class="{ '!border-red-500 bg-red-50/30': parseFloat(stock.current_stock) <= parseFloat(stock.ingredient?.min_stock) }">
                             {{ stock.ingredient?.name || 'Unknown' }}
                             <span v-if="parseFloat(stock.current_stock) <= parseFloat(stock.ingredient?.min_stock)"
@@ -60,23 +60,42 @@
                                 Low Stock
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                             {{ stock.ingredient?.unit?.short_name || stock.ingredient?.unit?.name || 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold"
+                        <td class="px-6 py-2 whitespace-nowrap text-sm font-bold"
                             :class="parseFloat(stock.current_stock) <= parseFloat(stock.ingredient?.min_stock) ? 'text-red-600' : 'text-indigo-600'">
                             {{ parseFloat(stock.current_stock).toFixed(2) }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-green-600 font-medium">
                             {{ parseFloat(stock.total_in).toFixed(2) }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600 font-medium">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-orange-600 font-medium">
                             {{ parseFloat(stock.total_out).toFixed(2) }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
                             {{ new Date(stock.last_updated).toLocaleString() }}
                         </td>
                     </tr>
+                </template>
+
+                <template #pagination>
+                    <div class="flex items-center justify-between w-full">
+                        <div class="text-sm text-gray-700 dark:text-gray-400">
+                            Showing <span class="font-medium">{{ stocks.from }}</span> to <span class="font-medium">
+                                {{ stocks.to }}</span> of <span class="font-medium">{{ stocks.total }}</span> entries
+                        </div>
+                        <div class="flex space-x-1">
+                            <Link v-for="(link, k) in stocks.links" :key="k" :href="link.url || '#'" v-html="link.label"
+                                class="relative inline-flex items-center px-3 py-1 border text-xs font-medium transition-colors rounded shadow-sm"
+                                :class="[
+                                    link.active
+                                        ? 'z-10 bg-indigo-600 border-indigo-600 text-white'
+                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700',
+                                    !link.url ? 'cursor-not-allowed opacity-50' : ''
+                                ]" />
+                        </div>
+                    </div>
                 </template>
 
             </ListTable>

@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-6xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Header -->
@@ -34,6 +33,7 @@
                                         {{ supplier.name }} - {{ supplier.company_name }}
                                     </option>
                                 </select>
+                                <div v-if="form.errors.supplier_id" class="text-red-500 text-xs mt-1">{{ form.errors.supplier_id }}</div>
                             </div>
                             
                             <div>
@@ -41,12 +41,14 @@
                                 <input v-model="form.purchase_date" type="date"
                                     class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                                     required />
+                                <div v-if="form.errors.purchase_date" class="text-red-500 text-xs mt-1">{{ form.errors.purchase_date }}</div>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Invoice Number</label>
-                                <input v-model="form.invoice_no" type="text" placeholder="Optional reference"
+                                <input v-model="form.invoice_number" type="text" placeholder="Optional reference"
                                     class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm" />
+                                <div v-if="form.errors.invoice_number" class="text-red-500 text-xs mt-1">{{ form.errors.invoice_number }}</div>
                             </div>
                         </div>
 
@@ -110,6 +112,9 @@
                                     </div>
 
                                 </div>
+                                <div v-if="form.errors.items" class="text-red-500 text-sm mt-4 p-3 bg-red-50 rounded-lg border border-red-100">
+                                    {{ form.errors.items }}
+                                </div>
                             </div>
                             
                             <!-- Totals Footer -->
@@ -147,13 +152,13 @@
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
-import { Link, router, usePage } from '@inertiajs/vue3'
+import {  computed } from 'vue'
+import { Link, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout : AdminLayout })
 
 const props = defineProps({
     suppliers: Array,
@@ -161,10 +166,10 @@ const props = defineProps({
     pageTitle: String
 })
 
-const form = reactive({
+const form = useForm({
     supplier_id: '',
     purchase_date: new Date().toISOString().split('T')[0],
-    invoice_no: '',
+    invoice_number: '',
     notes: '',
     items: [
         { ingredient_id: '', quantity: 1, unit_price: 0, expiry_date: '' }
@@ -212,6 +217,13 @@ const grandTotal = computed(() => {
 })
 
 const submit = () => {
-    router.post(route('admin.purchase.store'), form)
+    // Normalize empty dates to null before submission
+    form.items.forEach(item => {
+        if (item.expiry_date === '') {
+            item.expiry_date = null;
+        }
+    });
+
+    form.post(route('admin.purchase.store'))
 }
 </script>

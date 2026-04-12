@@ -8,11 +8,16 @@ class StockLedger extends BaseModel
 
     protected $fillable = [
         'ingredient_id',
-        'transaction_type', // 'in' or 'out'
-        'quantity',
-        'reference_type', // e.g. 'purchase', 'sales', 'adjustment'
-        'reference_id', // ID of the purchase master or order
-        'notes',
+        'unit_id',
+        'branch_id',
+        'transaction_type',
+        'reference_id',
+        'reference_type',
+        'qty_in',
+        'qty_out',
+        'unit_cost',
+        'batch_no',
+        'expiry_date',
         'transaction_date'
     ];
 
