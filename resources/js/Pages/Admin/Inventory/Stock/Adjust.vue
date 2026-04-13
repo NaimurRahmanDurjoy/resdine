@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-3xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Header -->
@@ -104,13 +103,13 @@
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     ingredients: Array,
@@ -139,9 +138,9 @@ const updateCurrentStockDisplay = () => {
     const ingredient = props.ingredients.find(i => i.id === form.ingredient_id)
     if (ingredient) {
         unitDisplay.value = ingredient.unit?.short_name || ingredient.unit?.name || ''
-        if (ingredient.stock_master) {
-            currentStockValue.value = parseFloat(ingredient.stock_master.current_stock)
-            currentStockDisplay.value = parseFloat(ingredient.stock_master.current_stock).toFixed(2)
+        if (ingredient.stock_summary) {
+            currentStockValue.value = parseFloat(ingredient.stock_summary.current_stock)
+            currentStockDisplay.value = parseFloat(ingredient.stock_summary.current_stock).toFixed(2)
         } else {
             currentStockValue.value = 0
             currentStockDisplay.value = '0.00'

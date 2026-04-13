@@ -68,13 +68,13 @@
                             {{ parseFloat(stock.current_stock).toFixed(2) }}
                         </td>
                         <td class="px-6 py-2 whitespace-nowrap text-sm text-green-600 font-medium">
-                            {{ parseFloat(stock.total_in).toFixed(2) }}
+                            {{ parseFloat(stock.qty_in).toFixed(2) }}
                         </td>
                         <td class="px-6 py-2 whitespace-nowrap text-sm text-orange-600 font-medium">
-                            {{ parseFloat(stock.total_out).toFixed(2) }}
+                            {{ parseFloat(stock.qty_out).toFixed(2) }}
                         </td>
                         <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {{ new Date(stock.last_updated).toLocaleString() }}
+                            {{ new Date(stock.updated_at).toLocaleString() }}
                         </td>
                     </tr>
                 </template>
@@ -104,7 +104,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
 
@@ -136,7 +136,7 @@ function debounce(fn, delay) {
 
 const performSearch = () => {
     loading.value = true
-    router.get(route('admin.stocks.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
+    router.get(route('admin.stock.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
         preserveState: true,
         replace: true,
         onFinish: () => loading.value = false
@@ -151,7 +151,7 @@ function sortColumn(column) {
         direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
     }
     loading.value = true
-    router.get(route('admin.stocks.index'), { search: search.value, sort: column, direction: direction }, {
+    router.get(route('admin.stock.index'), { search: search.value, sort: column, direction: direction }, {
         preserveState: true,
         replace: true,
         onFinish: () => loading.value = false

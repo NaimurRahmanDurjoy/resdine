@@ -139,7 +139,7 @@ class PurchaseController extends Controller
                         'ingredient_id' => $item['ingredient_id'],
                         'branch_id' => $branchId,
                         'batch_no' => null 
-                    ])->first();
+                    ])->lockForUpdate()->first();
                     
                     if ($stockSummary) {
                         $stockSummary->current_stock += $item['quantity'];
@@ -193,6 +193,10 @@ class PurchaseController extends Controller
     {
         $purchase = PurchaseMaster::with(['supplier', 'details.ingredient.unit'])->findOrFail($id);
         
+        if (request()->wantsJson()) {
+            return response()->json($purchase);
+        }
+
         return Inertia::render('Admin/Inventory/Purchase/Show', [
             'purchase' => $purchase,
             'pageTitle' => 'Purchase Order Details'

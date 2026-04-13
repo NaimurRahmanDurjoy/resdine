@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-4xl mx-auto">
             <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>
@@ -48,13 +47,13 @@
                 </div>
             </form>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
 import { reactive, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     configs: Object,
@@ -85,7 +84,7 @@ const submit = () => {
         group: findGroup(key)
     }))
     
-    form.post(route('admin.business-config.update'), {
+    form.post(route('admin.settings.business-config.update'), {
         preserveScroll: true
     })
 }

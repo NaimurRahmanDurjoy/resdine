@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Admin\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\StockMaster;
+use App\Models\Branch;
+use App\Models\StockSummary;
 use App\Models\StockLedger;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
@@ -103,7 +104,11 @@ class StockController extends Controller
 
     public function adjust()
     {
-        $ingredients = Ingredient::with(['unit', 'stockMaster'])->where('status', 1)->get();
+        $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
+        
+        $ingredients = Ingredient::with(['unit', 'stockSummary' => function($q) use ($branchId) {
+            $q->where('branch_id', $branchId);
+        }])->where('status', 1)->get();
         
         return Inertia::render('Admin/Inventory/Stock/Adjust', [
             'ingredients' => $ingredients,
@@ -122,29 +127,64 @@ class StockController extends Controller
 
         try {
             DB::transaction(function () use ($validated) {
-                $stockMaster = StockLedger::firstOrCreate(
-                    ['ingredient_id' => $validated['ingredient_id']],
-                    ['current_stock' => 0, 'total_in' => 0, 'total_out' => 0]
-                );
-
-                if ($validated['transaction_type'] === 'in') {
-                    $stockMaster->current_stock += $validated['quantity'];
-                    $stockMaster->total_in += $validated['quantity'];
-                } else {
-                    if ($stockMaster->current_stock < $validated['quantity']) {
-                        throw new Exception('Insufficient stock for outward adjustment.');
-                    }
-                    $stockMaster->current_stock -= $validated['quantity'];
-                    $stockMaster->total_out += $validated['quantity'];
+                $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
+                
+                if (!$branchId) {
+                    throw new Exception('A branch must be assigned to perform stock adjustment.');
                 }
 
-                $stockMaster->save();
+                $ingredient = Ingredient::findOrFail($validated['ingredient_id']);
+                
+                // 1. Update/Create Stock Summary
+                $stockSummary = StockSummary::where([
+                    'ingredient_id' => $validated['ingredient_id'],
+                    'branch_id' => $branchId,
+                    'batch_no' => null
+                ])->lockForUpdate()->first();
 
+                if ($validated['transaction_type'] === 'in') {
+                    if ($stockSummary) {
+                        $stockSummary->current_stock += $validated['quantity'];
+                        $stockSummary->last_transaction_date = now();
+                        $stockSummary->save();
+                    } else {
+                        StockSummary::create([
+                            'ingredient_id' => $validated['ingredient_id'],
+                            'unit_id' => $ingredient->unit_id,
+                            'branch_id' => $branchId,
+                            'current_stock' => $validated['quantity'],
+                            'average_cost' => 0, // Adjustment might not have cost info
+                            'batch_no' => null,
+                            'last_transaction_date' => now()
+                        ]);
+                    }
+                    
+                    $qtyIn = $validated['quantity'];
+                    $qtyOut = 0;
+                    $transType = 5; // 5=adjustment_in
+                } else {
+                    if (!$stockSummary || $stockSummary->current_stock < $validated['quantity']) {
+                        throw new Exception('Insufficient stock for outward adjustment.');
+                    }
+                    
+                    $stockSummary->current_stock -= $validated['quantity'];
+                    $stockSummary->last_transaction_date = now();
+                    $stockSummary->save();
+                    
+                    $qtyIn = 0;
+                    $qtyOut = $validated['quantity'];
+                    $transType = 6; // 6=adjustment_out
+                }
+
+                // 2. Create Stock Ledger Entry
                 StockLedger::create([
                     'ingredient_id' => $validated['ingredient_id'],
-                    'transaction_type' => $validated['transaction_type'],
-                    'quantity' => $validated['quantity'],
+                    'unit_id' => $ingredient->unit_id,
+                    'branch_id' => $branchId,
+                    'transaction_type' => $transType,
                     'reference_type' => 'adjustment',
+                    'qty_in' => $qtyIn,
+                    'qty_out' => $qtyOut,
                     'notes' => $validated['notes'],
                     'transaction_date' => now()
                 ]);

@@ -62,8 +62,10 @@
                         <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex gap-3">
                                 <button @click="showDetails(purchase)"
-                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
-                                    <span class="material-symbols-outlined">visibility</span>
+                                    :disabled="fetchingId === purchase.id"
+                                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors disabled:opacity-50">
+                                    <span v-if="fetchingId === purchase.id" class="material-symbols-outlined animate-spin">progress_activity</span>
+                                    <span v-else class="material-symbols-outlined">visibility</span>
                                 </button>
                             </div>
                         </td>
@@ -95,10 +97,11 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
+import axios from 'axios'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
 import { openModal } from '@/Stores/modalStore'
-import PurchaseDetails from '@/Components/Admin/Inventory/Purchase/PurchaseDetails.vue'
+import PurchaseDetails from './PurchaseDetails.vue'
 
 defineOptions({ layout: AdminLayout })
 
@@ -117,12 +120,25 @@ const headers = [
 ]
 const search = ref(props.filters.search)
 const loading = ref(false)
+const fetchingId = ref(null)
 
-const showDetails = (purchase) => {
-    openModal(PurchaseDetails, { purchase }, {
-        title: `Purchase Order: ${purchase.invoice_number || purchase.id}`,
-        maxWidth: '5xl'
-    })
+const showDetails = async (purchase) => {
+    try {
+        fetchingId.value = purchase.id
+        const response = await axios.get(route('admin.purchase.show', purchase.id), {
+            headers: { 'Accept': 'application/json' }
+        })
+        
+        openModal(PurchaseDetails, { purchase: response.data }, {
+            title: `Purchase Order: ${response.data.invoice_number || response.data.id}`,
+            maxWidth: '5xl'
+        })
+    } catch (error) {
+        console.error('Failed to fetch purchase details:', error)
+        Swal.fire('Error', 'Could not load purchase details.', 'error')
+    } finally {
+        fetchingId.value = null
+    }
 }
 
 function debounce(fn, delay) {

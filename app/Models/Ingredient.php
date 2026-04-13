@@ -16,4 +16,13 @@ class Ingredient extends BaseModel
     {
         return $this->belongsTo(Unit::class);
     }
+    public function stockSummary()
+    {
+        return $this->hasOne(StockSummary::class);
+    }
+
+    public function stockLedger()
+    {
+        return $this->hasMany(StockLedger::class);
+    }
 }
