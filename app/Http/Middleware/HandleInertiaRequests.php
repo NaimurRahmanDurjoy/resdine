@@ -49,14 +49,12 @@ class HandleInertiaRequests extends Middleware
             $user = Auth::guard('web')->user();
             $menuService = app(MenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
+            $notifications = (new \App\Services\NotificationService())->getAlerts();
         } elseif ($isDevAdminRoute && Auth::guard('admin')->check()) { // Assuming 'admin' guard for devAdmin based on your setup
             $user = Auth::guard('admin')->user();
             $menuService = app(DevAdminMenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         }
-
-        // Shared notifications via Service
-        $notifications = (new \App\Services\NotificationService())->getAlerts();
 
         return array_merge(parent::share($request), [
             'auth' => [
