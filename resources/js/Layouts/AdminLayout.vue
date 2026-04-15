@@ -37,7 +37,7 @@ import Toast from '@/Components/Toast.vue'
 import GlobalModal from '@/Components/GlobalModal.vue'
 
 const props = defineProps({
-  notifications: { type: Array, default: () => [] },
+  notifications: { type: Object, default: () => ({ total: 0, groups: {} }) },
 })
 
 const page = usePage()

@@ -17,25 +17,52 @@ class StockController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $sortable = ['name','short_name','status','created_at'];
-        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'created_at';
+        $filter = $request->input('filter');
+        $sortable = ['name', 'current_stock', 'created_at'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'name';
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = min($request->input('perPage', 10), 100);
-        $stocks = StockLedger::with(['ingredient.unit'])
-            ->when($search, function ($q) use ($search) {
-                $q->whereHas('ingredient', function ($iq) use ($search) {
-                    $iq->where('name', 'like', "%{$search}%");
+
+        // We use Ingredient as the base to catch items with ZERO stock (no summary)
+        $query = Ingredient::with(['unit', 'stockSummary']);
+
+        // Main Query with Search
+        $query->when($search, function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%");
+        });
+
+        // Quick Filters
+        if ($filter === 'low_stock') {
+            $query->where(function($q) {
+                $q->whereHas('stockSummary', function ($sq) {
+                    $sq->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
+                })->orWhereDoesntHave('stockSummary', function($sq) {
+                    $sq->where('min_stock', '>', 0);
                 });
-            })
-            ->orderBy($sort, $direction)
+            });
+        } elseif ($filter === 'expiring') {
+            $query->where('has_expiry', 1)
+                ->whereHas('purchaseDetails', function ($q) {
+                    $q->whereNotNull('expiry_date')
+                      ->where('expiry_date', '<=', now()->addDays(30))
+                      ->where('expiry_date', '>=', now());
+                })
+                ->with(['purchaseDetails' => function($q) {
+                    $q->whereNotNull('expiry_date')
+                      ->where('expiry_date', '<=', now()->addDays(30))
+                      ->orderBy('expiry_date', 'asc');
+                }]);
+        }
+
+        $stocks = $query->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
-
 
         return Inertia::render('Admin/Inventory/Stock/Index', [
             'stocks' => $stocks,
             'filters' => [
                 'search' => $search,
+                'filter' => $filter,
                 'sort' => $sort,
                 'direction' => $direction,
                 'perPage' => $perPage
@@ -44,63 +71,23 @@ class StockController extends Controller
         ]);
     }
 
-    public function lowStock()
+    public function show($id)
     {
-        // Find ingredients where current_stock <= min_stock in StockMaster
-        // or items that don't even have a StockMaster entry but have min_stock > 0
+        $ingredient = Ingredient::with(['unit', 'stockSummary'])->findOrFail($id);
         
-        $stocks = StockLedger::with(['ingredient.unit'])
-            ->whereHas('ingredient', function ($q) {
-                $q->whereColumn('current_stock', '<=', 'min_stock');
-            })->get();
+        $ledger = StockLedger::where('ingredient_id', $id)
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
-        // Also find ingredients with no stock record but configured with min_stock > 0
-        $noStockIngredients = Ingredient::with('unit')
-            ->whereDoesntHave('stockMaster')
-            ->where('min_stock', '>', 0)
-            ->get()
-            ->map(function ($ingredient) {
-                return (object) [
-                    'ingredient' => $ingredient,
-                    'current_stock' => 0,
-                    'status' => 'critical'
-                ];
-            });
-
-        return Inertia::render('Admin/Inventory/Stock/LowStock', [
-            'stocks' => $stocks,
-            'missingStocks' => $noStockIngredients,
-            'pageTitle' => 'Low Stock Alerts'
+        return Inertia::render('Admin/Inventory/Stock/History', [
+            'ingredient' => $ingredient,
+            'ledger' => $ledger,
+            'pageTitle' => 'Stock Audit: ' . $ingredient->name
         ]);
     }
 
-    public function expiryAlerts()
-    {
-        // In a real scenario, we'd query PurchaseDetails or batches for expiry_date.
-        // We'll simulate checking purchase details for upcoming expiries.
-        
-        $expiringItems = DB::table('purchase_details')
-            ->join('ingredients', 'purchase_details.ingredient_id', '=', 'ingredients.id')
-            ->join('units', 'ingredients.unit_id', '=', 'units.id')
-            ->whereNotNull('purchase_details.expiry_date')
-            ->where('purchase_details.expiry_date', '<=', now()->addDays(30))
-            ->where('ingredients.expiry_tracking', 1)
-            ->select(
-                'purchase_details.id',
-                'ingredients.name as ingredient_name',
-                'units.short_name as unit_name',
-                'purchase_details.quantity',
-                'purchase_details.expiry_date',
-                'purchase_details.purchase_master_id'
-            )
-            ->orderBy('purchase_details.expiry_date', 'asc')
-            ->get();
-
-        return Inertia::render('Admin/Inventory/Stock/ExpiryAlert', [
-            'expiringItems' => $expiringItems,
-            'pageTitle' => 'Expiry Alerts'
-        ]);
-    }
 
     public function adjust()
     {

@@ -113,7 +113,7 @@ class PurchaseController extends Controller
                     'invoice_number' => $validated['invoice_number'] ?? 'PO-' . time(),
                     'total_amount' => $totalAmount,
                     'notes' => $validated['notes'] ?? null,
-                    'status' => 2 // 2 = Received
+                    'status' => 2 // 2 = Received  
                 ]);
 
                 // 2. Create Details and Update Stock
@@ -121,7 +121,7 @@ class PurchaseController extends Controller
                     $totalPrice = $item['quantity'] * $item['unit_price'];
                     $ingredient = Ingredient::findOrFail($item['ingredient_id']);
                     
-                    // Normalize empty date string to null
+                    // Normalize empty date string to null 
                     $expiryDate = !empty($item['expiry_date']) ? $item['expiry_date'] : null;
 
                     // Record detail

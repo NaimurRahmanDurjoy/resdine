@@ -23,11 +23,13 @@
     <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
       <!-- Notifications -->
       <button class="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-        v-if="notifications.length">
+        v-if="notifications?.total"
+        @click="router.get(route('admin.stock.index'))"
+        :title="Object.values(notifications.groups).map(g => g.label).join(', ')">
         <span class="material-symbols-outlined">notifications</span>
         <span
           class="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center">
-          {{ notifications.length }}
+          {{ notifications.total }}
         </span>
       </button>
 
@@ -72,7 +74,7 @@ const open = ref(false)
 const props = defineProps({
   pageTitle: { type: String, default: 'Dashboard' },
   user: { type: Object, required: true },
-  notifications: { type: Array, default: () => [] }
+  notifications: { type: Object, default: () => ({ total: 0, groups: {} }) }
 })
 // Toggle dropdown
 function toggleDropdown() {

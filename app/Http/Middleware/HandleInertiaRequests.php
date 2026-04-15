@@ -55,12 +55,15 @@ class HandleInertiaRequests extends Middleware
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         }
 
+        // Shared notifications via Service
+        $notifications = (new \App\Services\NotificationService())->getAlerts();
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
             ],
+            'notifications' => $notifications,
             'menus' => $menus,
-            // Flash messages or other global data can go here
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
                 'success' => fn () => $request->session()->get('success'),

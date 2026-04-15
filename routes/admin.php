@@ -73,11 +73,9 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('suppliers', SupplierController::class);
         Route::resource('purchase', PurchaseController::class);
 
-        Route::get('stock/low', [StockController::class, 'lowStock'])->name('stock.low');
-        Route::get('stock/expiries', [StockController::class, 'expiryAlerts'])->name('stock.expiries');
         Route::get('stock/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
         Route::post('stock/adjust', [StockController::class, 'processAdjustment'])->name('stock.adjust.process');
-        Route::resource('stock', StockController::class)->only(['index']);
+        Route::resource('stock', StockController::class)->only(['index', 'show']);
 
         // Recipes
         Route::resource('recipes', RecipeController::class);

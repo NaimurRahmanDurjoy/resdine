@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderMaster;
+use App\Models\Ingredient;
 use App\Models\StockSummary;
 use App\Models\ProductItem;
 use Illuminate\Support\Facades\DB;
@@ -26,10 +27,33 @@ class DashboardController extends Controller
                      ->orderByDesc('total_qty')
                      ->first();
 
-        // $topItemName = $topItem ? MenuItem::find($topItem->menu_id)->name : 'N/A';
         $data['topItemName'] = $topItem ? ProductItem::find($topItem->item_id)->name : 'N/A';
-        // Low Stock Alerts
-        $lowStock = StockSummary::where('current_stock', '<=', 5)->get(); // threshold = 5
+        
+        // Accurate Low Stock Alerts (based on ingredient.min_stock)
+        $data['lowStock'] = StockSummary::with('ingredient')
+            ->whereHas('ingredient', function($q) {
+                $q->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
+            })
+            ->take(5)
+            ->get()
+            ->map(function($stock) {
+                return [
+                    'ingredient_name' => $stock->ingredient->name,
+                    'quantity' => $stock->current_stock,
+                    'unit' => $stock->ingredient->unit->short_name ?? ''
+                ];
+            });
+
+        // Expiring Items (within next 30 days)
+        $data['expiringItems'] = DB::table('purchase_details')
+            ->join('ingredients', 'purchase_details.ingredients_id', '=', 'ingredients.id')
+            ->whereNotNull('purchase_details.expiry_date')
+            ->where('purchase_details.expiry_date', '<=', now()->addDays(30))
+            ->where('purchase_details.expiry_date', '>=', now())
+            ->select('ingredients.name as ingredient_name', 'purchase_details.expiry_date', 'purchase_details.quantity')
+            ->orderBy('purchase_details.expiry_date', 'asc')
+            ->take(5)
+            ->get();
 
         // Sales trend last 7 days
         $salesTrend = OrderMaster::select(
@@ -42,8 +66,15 @@ class DashboardController extends Controller
                         ->orderBy('date')
                         ->get();
 
-        $data['labels'] = $salesTrend->pluck('date')->map(fn($d) => $d->format('D'))->toArray();
+        $data['labels'] = $salesTrend->pluck('date')->map(fn($d) => \Carbon\Carbon::parse($d)->format('D'))->toArray();
         $data['salesData'] = $salesTrend->pluck('total')->toArray();
+
+        // Recent Orders
+        $data['recentOrders'] = OrderMaster::with(['customer', 'table'])
+                                ->latest()
+                                ->take(5)
+                                ->get();
+
         $data['pageTitle'] = 'Dashboard';
 
         return Inertia::render('Admin/Dashboard', $data);

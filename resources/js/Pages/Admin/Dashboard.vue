@@ -58,20 +58,46 @@
       <!-- Low Stock Alerts -->
       <DataList title="Low Stock Alerts" :items="lowStock">
         <template #item="{ item }">
-          <div class="flex justify-between items-center w-full">
+          <div class="flex justify-between items-center w-full group cursor-pointer" @click="router.get(route('admin.stock.index'), { filter: 'low_stock' })">
             <div>
-              <div class="font-medium">{{ item.ingredient_name }}</div>
-              <div class="text-xs text-gray-500">Only {{ item.quantity }} left</div>
+              <div class="font-medium group-hover:text-indigo-600 transition-colors">{{ item.ingredient_name }}</div>
+              <div class="text-xs text-gray-500">Only {{ item.quantity }} {{ item.unit }} left</div>
             </div>
-            <span class="material-symbols-outlined text-amber-500 text-sm">arrow_forward</span>
+            <span class="material-symbols-outlined text-amber-500 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
           </div>
         </template>
         <template #footer>
           <Link
-            to="/admin/stock"
-            class="w-full mt-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition block text-center"
+            :href="route('admin.stock.index', { filter: 'low_stock' })"
+            class="w-full mt-4 py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-sm font-medium hover:bg-amber-100 transition block text-center"
           >
-            View All Stock
+            Manage Low Stock
+          </Link>
+        </template>
+      </DataList>
+
+      <!-- Expiring Items -->
+      <DataList title="Upcoming Expiries" :items="expiringItems">
+        <template #empty>
+          <div class="py-4 text-center text-gray-400 text-sm italic">
+            No items expiring soon
+          </div>
+        </template>
+        <template #item="{ item }">
+          <div class="flex justify-between items-center w-full group cursor-pointer" @click="router.get(route('admin.stock.index'), { filter: 'expiring' })">
+            <div>
+              <div class="font-medium group-hover:text-red-600 transition-colors">{{ item.ingredient_name }}</div>
+              <div class="text-xs text-gray-500">Expiring on {{ new Date(item.expiry_date).toLocaleDateString() }}</div>
+            </div>
+            <span class="material-symbols-outlined text-red-500 text-sm group-hover:translate-x-1 transition-transform">event_busy</span>
+          </div>
+        </template>
+        <template #footer>
+          <Link
+            :href="route('admin.stock.index', { filter: 'expiring' })"
+            class="w-full mt-4 py-2 bg-red-50 text-red-700 border border-red-100 rounded-lg text-sm font-medium hover:bg-red-100 transition block text-center"
+          >
+            View All Expiries
           </Link>
         </template>
       </DataList>
@@ -79,26 +105,23 @@
       <!-- Recent Orders -->
       <DataList title="Recent Orders" :items="recentOrders">
         <template #item="{ item }">
-          <div class="flex justify-between items-center w-full">
+          <Link :href="route('admin.orders.show', item.id)" class="flex justify-between items-center w-full group">
             <div>
-              <div class="font-medium">{{ item.order_no }}</div>
-              <div class="text-xs text-gray-500">{{ item.table }} • {{ item.time }}</div>
+              <div class="font-medium group-hover:text-green-600 transition-colors">{{ item.order_number }}</div>
+              <div class="text-xs text-gray-500">
+                {{ item.customer?.name || 'Walk-in Customer' }} • {{ item.table?.name || 'Takeaway' }}
+              </div>
             </div>
-            <span
-              :class="{
-                'px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full': item.status === 'Completed',
-                'px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full': item.status === 'Preparing',
-                'px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full': item.status === 'Served'
-              }"
-            >
-              {{ item.status }}
-            </span>
-          </div>
+            <div class="text-right">
+              <div class="font-bold text-gray-900">${{ parseFloat(item.total_amount).toFixed(2) }}</div>
+              <div class="text-[10px] uppercase font-bold text-green-600">{{ item.order_status }}</div>
+            </div>
+          </Link>
         </template>
         <template #footer>
           <Link
-            to="/admin/orders"
-            class="w-full mt-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition block text-center"
+            :href="route('admin.orders.index')"
+            class="w-full mt-4 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-100 transition block text-center"
           >
             View All Orders
           </Link>
@@ -123,13 +146,16 @@ import Card from '@/Components/Admin/Card.vue'
 import DataList from '@/Components/Admin/DataList.vue'
 import LineChart from '@/Components/Admin/LineChart.vue'
 import { computed } from 'vue'
+import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
   totalSales: [Number, String],
   topItemName: String,
   lowStock: Array,
+  expiringItems: Array,
   labels: Array,
-  salesData: Array
+  salesData: Array,
+  recentOrders: Array
 });
 
 // Assuming no specific property 'topItemSold' returned, leaving out or you could add to controller if needed.
@@ -152,5 +178,4 @@ const chartDatasets = computed(() => [
   }
 ]);
 
-const recentOrders = []; // Add feature to Backend controller later if needed.
 </script>

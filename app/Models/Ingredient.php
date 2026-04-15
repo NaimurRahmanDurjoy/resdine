@@ -25,4 +25,9 @@ class Ingredient extends BaseModel
     {
         return $this->hasMany(StockLedger::class);
     }
+
+    public function purchaseDetails()
+    {
+        return $this->hasMany(PurchaseDetail::class, 'ingredients_id');
+    }
 }
