@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
 
         $menus = [];
         $user = null;
+        $notifications = [];
 
         if ($isAdminRoute && Auth::guard('web')->check()) { // Assuming 'web' guard for admin based on your setup
             $user = Auth::guard('web')->user();

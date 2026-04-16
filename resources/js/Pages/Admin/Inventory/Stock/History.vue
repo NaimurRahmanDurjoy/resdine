@@ -21,15 +21,22 @@ const headers = [
     { label: 'Batch No', key: 'batch_no' }
 ]
 
-const getStatusClass = (type) => {
-    const t = String(type || '').toLowerCase()
-    if (!t) return 'bg-gray-100 text-gray-700 border-gray-200'
-    switch (t) {
-        case 'purchase': return 'bg-green-100 text-green-700 border-green-200'
-        case 'adjustment': return 'bg-amber-100 text-amber-700 border-amber-200'
-        case 'consumption': return 'bg-red-100 text-red-700 border-red-200'
-        case 'return': return 'bg-gray-100 text-gray-700 border-gray-200'
-        default: return 'bg-blue-100 text-blue-700 border-blue-200'
+const TRANSACTION_TYPES = {
+    1: { label: 'Purchase', class: 'bg-green-100 text-green-700 border-green-200' },
+    2: { label: 'Sale', class: 'bg-blue-100 text-blue-700 border-blue-200' },
+    3: { label: 'Return In', class: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    4: { label: 'Return Out', class: 'bg-red-100 text-red-700 border-red-200' },
+    5: { label: 'Adjustment In', class: 'bg-amber-100 text-amber-700 border-amber-200' },
+    6: { label: 'Adjustment Out', class: 'bg-orange-100 text-orange-700 border-orange-200' },
+    7: { label: 'Transfer In', class: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    8: { label: 'Transfer Out', class: 'bg-purple-100 text-purple-700 border-purple-200' },
+}
+
+const getTransactionType  = (type) => {
+    const t = Number(type)
+    return TRANSACTION_TYPES[t] || {
+        label: 'unknown',
+        class: 'bg-blue-100 text-blue-700 border-blue-200'
     }
 }
 </script>
@@ -110,6 +117,7 @@ const getStatusClass = (type) => {
                     </div>
                 </div>
             </div>
+        </div>
 
             <!-- Audit Table -->
             <ListTable :headers="headers" :items="ledger.data" :pagination="ledger">
@@ -121,8 +129,8 @@ const getStatusClass = (type) => {
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border"
-                                :class="getStatusClass(entry.transaction_type)">
-                                {{ entry.transaction_type }}
+                                :class="getTransactionType(entry.transaction_type).class">
+                                {{ getTransactionType(entry.transaction_type).label }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
@@ -168,6 +176,6 @@ const getStatusClass = (type) => {
                     </div>
                 </template>
             </ListTable>
-        </div>
+
     </div>
 </template>

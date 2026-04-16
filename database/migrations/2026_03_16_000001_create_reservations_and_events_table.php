@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('customer_name')->nullable();
             $table->string('customer_phone')->nullable();
             $table->text('special_requests')->nullable();
-            $table->tinyInteger('status')->default(1); // 1=confirmed, 0=cancelled, 2=arrived
+            $table->tinyInteger('status')->default(1)->comment('1=confirmed, 0=cancelled, 2=arrived');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
@@ -41,8 +41,8 @@ return new class extends Migration
             $table->dateTime('end_time');
             $table->integer('estimated_guests')->nullable();
             $table->text('description')->nullable();
-            $table->tinyInteger('admin_approval')->default(0); // 0=pending, 1=approved, 2=rejected
-            $table->tinyInteger('status')->default(1); // 1=active, 0=inactive
+            $table->tinyInteger('admin_approval')->default(0)->comment('0=pending, 1=approved, 2=rejected');
+            $table->tinyInteger('status')->default(1)->comment('1=active, 0=inactive');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

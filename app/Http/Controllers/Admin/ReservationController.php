@@ -74,6 +74,7 @@ class ReservationController extends Controller
             'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'required_without:customer_id',
             'customer_phone' => 'required_without:customer_id',
+            'special_requests' => 'nullable|string|max:500',
         ]);
 
         if (!$this->bookingService->isTableAvailable($request->table_id, $request->reservation_time)) {

@@ -53,6 +53,9 @@
                         {{ formatDate(reservation.reservation_time) }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {{ reservation.special_requests }}
+                    </td>
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {{ reservation.guests_count }} Persons
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap">
@@ -62,7 +65,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex justify-end gap-2">
+                        <div class="flex gap-2">
                             <button v-if="reservation.status === 1" @click="updateStatus(reservation.id, 2)"
                                 class="text-green-600 hover:text-green-900 text-xs flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm">check_circle</span> Arrived
@@ -116,6 +119,7 @@ const headers = [
     { label: 'Guest', key: 'customer_name', sortable: true },
     { label: 'Table/Branch', key: 'table_id', sortable: false },
     { label: 'Time', key: 'reservation_time', sortable: true },
+    { label: 'Special Requests', key: 'special_requests', sortable: false },
     { label: 'Guests', key: 'guests_count', sortable: true },
     { label: 'Status', key: 'status', sortable: false },
     { label: 'Actions', key: null, sortable: false }
