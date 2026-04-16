@@ -32,9 +32,7 @@ abstract class BaseMenuService
 
             // Conditionally eager load actions only if needed
             if ($this->shouldFilterByActions) {
-                $query->with(['actions', 'childrenRecursive' => function ($q) {
-                    $q->with('actions');
-                }]);
+                $query->with(['actions', 'childrenRecursive']);
             } else {
                 $query->with('childrenRecursive');
             }

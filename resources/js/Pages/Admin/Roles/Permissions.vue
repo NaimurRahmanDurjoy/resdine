@@ -126,74 +126,14 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                             <template v-for="menu in filteredMenus" :key="menu.id">
-                                <!-- Parent Menu Row -->
-                                <tr class="bg-gray-50/50 dark:bg-gray-900/20 group cursor-pointer" @click="toggleMenu(menu.id)">
-                                    <td class="py-3 px-2">
-                                        <div class="flex items-center space-x-3">
-                                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-lg font-icon transition-transform" 
-                                                :class="{ 'rotate-90 text-blue-500': isExpanded(menu.id) }">chevron_right</span>
-                                            <span
-                                                class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-xl font-icon">{{
-                                                menu.icon || 'folder' }}</span>
-                                            <span
-                                                class="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider">{{
-                                                menu.name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-1 px-4 text-right">
-                                        <div
-                                            class="inline-flex gap-1 items-center bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" @click.stop>
-                                            <span
-                                                class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mr-1 pl-1">Batch
-                                                Actions:</span>
-                                            <button @click="bulkApplyToMenu(menu, true)" type="button"
-                                                title="Grant All under this Menu"
-                                                class="p-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded text-emerald-500 material-symbols-outlined text-sm">check_circle</button>
-                                            <button @click="bulkApplyToMenu(menu, false)" type="button"
-                                                title="Revoke All under this Menu"
-                                                class="p-1 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded text-rose-500 material-symbols-outlined text-sm">cancel</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Actions & Children -->
-                                <template v-if="isExpanded(menu.id)">
-                                    <!-- Actions for Parent Menu -->
-                                    <template v-for="action in menu.actions" :key="action.id">
-                                        <PermissionRow :action="action" :form="form" />
-                                    </template>
-                                    <!-- Render recursive child menus -->
-                                    <template v-for="child in menu.children_recursive" :key="child.id">
-                                        <tr
-                                            class="bg-gray-50/20 dark:bg-gray-900/10 border-l-4 border-gray-100 dark:border-gray-800 group cursor-pointer" @click="toggleMenu(child.id)">
-                                            <td class="py-3 px-4">
-                                                <div class="flex items-center space-x-3 pl-4">
-                                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-sm font-icon transition-transform" 
-                                                        :class="{ 'rotate-90 text-blue-500': isExpanded(child.id) }">chevron_right</span>
-                                                    <span
-                                                        class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-lg font-icon">{{
-                                                        child.icon || 'subdirectory_arrow_right' }}</span>
-                                                    <span
-                                                        class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest">{{
-                                                        child.name }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="py-1 px-4 text-right">
-                                                <div
-                                                    class="inline-flex gap-1 items-center bg-white dark:bg-gray-800 p-0.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" @click.stop>
-                                                    <button @click="bulkApplyToMenu(child, true)" type="button"
-                                                        class="p-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded text-emerald-500 material-symbols-outlined text-xs">check_circle</button>
-                                                    <button @click="bulkApplyToMenu(child, false)" type="button"
-                                                        class="p-1 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded text-rose-500 material-symbols-outlined text-xs">cancel</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <template v-if="isExpanded(child.id)">
-                                            <template v-for="childAction in child.actions" :key="childAction.id">
-                                                <PermissionRow :action="childAction" :form="form" :indent="true" />
-                                            </template>
-                                        </template>
-                                    </template>
-                                </template>
+                                <PermissionTreeNode 
+                                    :menu="menu" 
+                                    :form="form" 
+                                    :expandedMenus="expandedMenus"
+                                    :searchQuery="searchQuery"
+                                    @toggle="toggleMenu"
+                                    @bulk-apply="bulkApplyToMenu"
+                                />
                             </template>
                         </tbody>
                     </table>
@@ -208,6 +148,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import PermissionRow from './Partials/PermissionRow.vue'
+import PermissionTreeNode from './Partials/PermissionTreeNode.vue'
 
 const props = defineProps({
     role: Object,

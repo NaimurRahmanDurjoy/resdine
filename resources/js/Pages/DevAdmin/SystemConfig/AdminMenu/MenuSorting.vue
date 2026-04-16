@@ -12,7 +12,11 @@
             <div class="p-6">
                 <draggable
                     v-model="menus"
-                    :options="dragOptions"
+                    item-key="id"
+                    group="menus"
+                    :animation="200"
+                    ghost-class="bg-indigo-50 dark:bg-indigo-900/50"
+                    handle=".drag-handle"
                     class="space-y-2"
                     @change="onMenusChanged"
                     tag="div">
@@ -59,7 +63,14 @@ const props = defineProps({
     items: Array
 })
 
-const menus = ref(props.items || [])
+const normalizeMenus = (items) => {
+    return items.map(item => ({
+        ...item,
+        children: normalizeMenus(item.children || item.children_recursive || [])
+    }))
+}
+
+const menus = ref(normalizeMenus(props.items || []))
 const message = ref('')
 const messageType = ref('success')
 const isSaving = ref(false)

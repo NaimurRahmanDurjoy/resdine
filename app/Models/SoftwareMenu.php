@@ -14,7 +14,7 @@ class SoftwareMenu extends BaseModel
     // Recursive children
     public function childrenRecursive()
     {
-        return $this->children()->with('childrenRecursive');
+        return $this->children()->with(['actions', 'childrenRecursive']);
     }
 
     public function access()
