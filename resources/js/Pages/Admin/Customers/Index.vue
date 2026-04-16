@@ -38,31 +38,31 @@
                     <template #rows="{ items }">
                         <tr v-for="customer in items" :key="customer.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                            <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {{ customer.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ customer.email || 'N/A' }} <br>
                                 <span class="text-xs">{{ customer.phone || 'No phone' }}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <span v-if="customer.memberships.length" 
                                     class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                     {{ customer.memberships[0].name }}
                                 </span>
                                 <span v-else class="text-gray-400 text-xs italic">No Tier</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ customer.loyalty_points ? customer.loyalty_points.points_earned - customer.loyalty_points.points_redeemed : 0 }} Pts
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-2 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="customer.status ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'">
                                     {{ customer.status ? 'Active' : 'Inactive' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end gap-3">
+                            <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex gap-3">
                                     <Link :href="route('admin.customers.edit', customer.id)"
                                         class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">
                                         <span class="material-symbols-outlined">edit</span>

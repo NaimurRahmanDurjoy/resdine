@@ -24,7 +24,7 @@ class EventController extends Controller
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
-        return Inertia::render('Admin/Events/Index', [
+        return Inertia::render('Admin/Reservations/Events/Index', [
             'events' => $events,
             'filters' => [
                 'search' => $search,
@@ -38,7 +38,7 @@ class EventController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Events/Create', [
+        return Inertia::render('Admin/Reservations/Events/Create', [
             'branches' => Branch::all(),
             'pageTitle' => 'Schedule Event'
         ]);

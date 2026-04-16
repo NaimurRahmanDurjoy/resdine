@@ -97,12 +97,18 @@ const props = defineProps({
   isEdit: Boolean
 })
 
+const isoDate = (dateString) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toISOString().split('T')[0]
+}
+
 const form = useForm({
   name: props.promotion.name || '',
   type: props.promotion.type || 'percentage',
   value: props.promotion.value || 0,
-  start_date: props.promotion.start_date || '',
-  end_date: props.promotion.end_date || '',
+  start_date: isoDate(props.promotion.start_date),
+  end_date: isoDate(props.promotion.end_date),
   status: props.promotion.status !== undefined ? props.promotion.status : 1,
   items: props.selectedItems || []
 })

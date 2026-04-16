@@ -94,7 +94,7 @@ class UserController extends Controller
 
         // Get all software menus with their actions and recursive children
         $softwareMenus = \App\Models\SoftwareMenu::whereNull('parent_id')
-            ->with(['childrenRecursive.actions', 'actions'])
+            ->with('childrenRecursive')
             ->orderBy('order')
             ->get();
 

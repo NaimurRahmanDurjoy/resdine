@@ -12,6 +12,7 @@ use App\Models\UserPermission;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -173,9 +174,7 @@ class UserController extends Controller
         $softwareMenus = SoftwareMenu::where('is_active', true)
             ->whereNull('parent_id')
             ->orderBy('order')
-            ->with(['actions', 'childrenRecursive' => function($q) {
-                $q->orderBy('order')->with('actions');
-            }])
+            ->with(['actions', 'childrenRecursive'])
             ->get();
 
         // Get role-based permissions
@@ -225,6 +224,9 @@ class UserController extends Controller
         // Clear user-specific cache
         $menuService = app(\App\Services\MenuService::class);
         $menuService->clearCache($user);
+
+        // Also clear any permission-related cache if exists
+        Cache::forget("perm_{$user->id}");
 
         return redirect()->back()->with('success', 'User specific permissions updated successfully');
     }

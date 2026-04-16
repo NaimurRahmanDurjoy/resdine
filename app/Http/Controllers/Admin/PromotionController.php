@@ -52,7 +52,7 @@ class PromotionController extends Controller
 
         try {
             DB::transaction(function () use ($validated) {
-                $promotion = Promotion::create($validated);
+                $promotion = Promotion::create(collect($validated)->except('items')->toArray());
                 if (!empty($validated['items'])) {
                     $promotion->items()->sync($validated['items']);
                 }
@@ -90,7 +90,7 @@ class PromotionController extends Controller
 
         try {
             DB::transaction(function () use ($validated, $promotion) {
-                $promotion->update($validated);
+                $promotion->update(collect($validated)->except('items')->toArray());
                 $promotion->items()->sync($validated['items'] ?? []);
             });
 
