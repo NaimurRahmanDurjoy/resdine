@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Role;
+use App\Models\RolePermission;
+use App\Models\SoftwareMenu;
+use App\Models\UserPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -93,19 +97,19 @@ class UserController extends Controller
         $user->load('role');
 
         // Get all software menus with their actions and recursive children
-        $softwareMenus = \App\Models\SoftwareMenu::whereNull('parent_id')
+        $softwareMenus = SoftwareMenu::whereNull('parent_id')
             ->with('childrenRecursive')
             ->orderBy('order')
             ->get();
 
         // Get role permissions for this user's role
-        $rolePermissions = \App\Models\RolePermission::where('role_id', $user->role_id)
+        $rolePermissions = RolePermission::where('role_id', $user->role_id)
             ->where('is_allowed', true)
             ->pluck('software_menu_action_id')
             ->toArray();
 
         // Get user specific overrides (true = explicitly allowed, false = explicitly denied)
-        $userPermissions = \App\Models\UserPermission::where('user_id', $user->id)
+        $userPermissions = UserPermission::where('user_id', $user->id)
             ->get()
             ->mapWithKeys(function ($item) {
                 return [$item->software_menu_action_id => $item->is_allowed];
@@ -129,12 +133,12 @@ class UserController extends Controller
         ]);
 
         // Remove all current overrides to start fresh
-        \App\Models\UserPermission::where('user_id', $user->id)->delete();
+        UserPermission::where('user_id', $user->id)->delete();
 
         // Add new overrides where state is not null (not Inherited)
         foreach ($request->overrides as $perm) {
             if ($perm['is_allowed'] !== null) {
-                \App\Models\UserPermission::create([
+                UserPermission::create([
                     'user_id' => $user->id,
                     'software_menu_action_id' => $perm['id'],
                     'is_allowed' => $perm['is_allowed'],
@@ -143,7 +147,7 @@ class UserController extends Controller
         }
 
         // Clear permission cache to force refresh on next check
-        \Illuminate\Support\Facades\Cache::forget("perm_{$user->id}");
+        Cache::forget("perm_{$user->id}");
 
         return redirect()->back()->with('success', 'User permissions updated successfully.');
     }

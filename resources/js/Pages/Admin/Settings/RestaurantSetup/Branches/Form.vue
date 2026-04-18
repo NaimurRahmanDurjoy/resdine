@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="$emit('submit', form)" class="space-y-6">
+    <form @submit.prevent="submit" class="space-y-6">
         <div class="grid grid-cols-1 gap-6">
             <!-- Name -->
             <div class="flex items-start gap-6">
@@ -60,17 +60,26 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { Link } from '@inertiajs/vue3'
+
+import { Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
     branch: Object,
     isEdit: Boolean
 })
 
-const form = reactive({
+const form = useForm({
     name: props.branch?.name || '',
     location: props.branch?.location || '',
     status: props.branch?.status ?? 1
 })
+
+const submit = () => {
+    if (props.isEdit) {
+        form.put(route('admin.settings.restaurant-setup.branches.update', props.branch.id))
+    } else {
+        form.post(route('admin.settings.restaurant-setup.branches.store'))
+    }
+}
+
 </script>
