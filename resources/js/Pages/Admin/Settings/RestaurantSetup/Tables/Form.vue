@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="$emit('submit', form)" class="space-y-6">
+    <form @submit.prevent="submit" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div
@@ -15,6 +15,7 @@
                             <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}
                             </option>
                         </select>
+                        <p v-if="form.errors.branch_id" class="text-sm text-red-500 mt-1">{{ form.errors.branch_id }}</p>
                     </div>
                 </div>
 
@@ -25,6 +26,7 @@
                         <input v-model="form.name" type="text" placeholder="E.g. Table 01, VIP-A"
                             class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                             required />
+                        <p v-if="form.errors.name" class="text-sm text-red-500 mt-1">{{ form.errors.name }}</p>
                     </div>
                 </div>
 
@@ -35,6 +37,7 @@
                         <input v-model="form.capacity" type="number" min="1"
                             class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                             required />
+                        <p v-if="form.errors.capacity" class="text-sm text-red-500 mt-1">{{ form.errors.capacity }}</p>
                     </div>
                 </div>
             </div>
@@ -47,6 +50,7 @@
                     <div class="flex-1">
                         <input v-model="form.section" type="text" placeholder="E.g. Ground Floor, VIP Hall"
                             class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm" />
+                        <p v-if="form.errors.section" class="text-sm text-red-500 mt-1">{{ form.errors.section }}</p>
                     </div>
                 </div>
 
@@ -67,6 +71,7 @@
                                 <span
                                     class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 transition-colors">Unavailable</span>
                             </label>
+                            <p v-if="form.errors.status" class="text-sm text-red-500 mt-1">{{ form.errors.status }}</p>
                         </div>
                     </div>
                 </div>
@@ -91,8 +96,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
     table: Object,
@@ -100,11 +104,22 @@ const props = defineProps({
     isEdit: Boolean
 })
 
-const form = reactive({
+const form = useForm({
     name: props.table?.name || '',
     branch_id: props.table?.branch_id || '',
     capacity: props.table?.capacity || 4,
     section: props.table?.section || '',
     status: props.table?.status ?? 1
 })
+const submit = () => {
+    if (props.isEdit) {
+        form.put(route('admin.settings.restaurant-setup.tables.update', props.table.id), {
+            preserveScroll: true
+        })
+    } else {
+        form.post(route('admin.settings.restaurant-setup.tables.store'), {
+            preserveScroll: true
+        })
+    }
+}
 </script>

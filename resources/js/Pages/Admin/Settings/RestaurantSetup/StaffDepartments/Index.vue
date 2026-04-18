@@ -42,13 +42,13 @@
                         <tr v-for="dept in items" :key="dept.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <td
-                                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {{ dept.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ dept.branch?.name || 'N/A' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex gap-3">
                                     <Link
                                         :href="route('admin.settings.restaurant-setup.staff-departments.edit', dept.id)"
