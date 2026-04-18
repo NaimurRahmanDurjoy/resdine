@@ -8,6 +8,7 @@
                     <input v-model="form.name" type="text" placeholder="E.g. Main Branch, Downtown Location"
                         class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                         required />
+                    <p v-if="form.errors.name" class="text-sm text-red-500 mt-1">{{ form.errors.name }}</p>
                 </div>
             </div>
 
@@ -17,6 +18,7 @@
                 <div class="flex-1">
                     <textarea v-model="form.location" rows="2" placeholder="Enter branch address or location details"
                         class="w-full border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 py-2 text-sm"></textarea>
+                    <p v-if="form.errors.location" class="text-sm text-red-500 mt-1">{{ form.errors.location }}</p>
                 </div>
             </div>
 
@@ -37,6 +39,7 @@
                             <span
                                 class="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 transition-colors">Inactive</span>
                         </label>
+                        <p v-if="form.errors.status" class="text-sm text-red-500 mt-1">{{ form.errors.status }}</p>
                     </div>
                 </div>
             </div>

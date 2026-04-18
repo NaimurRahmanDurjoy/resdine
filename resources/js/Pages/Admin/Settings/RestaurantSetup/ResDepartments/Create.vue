@@ -1,5 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
         <div class="max-w-4xl mx-auto">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Header -->
@@ -20,24 +19,21 @@
 
                 <!-- Form Body -->
                 <div class="p-8">
-                    <Form :department="null" :branches="branches" :isEdit="false" @submit="submit" />
+                    <Form :department="null" :branches="branches" :isEdit="false" />
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Form from './Form.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
-    branches: Array,
+    branches: Object,
     pageTitle: String
 })
 
-const submit = (form) => {
-    router.post(route('admin.settings.restaurant-setup.res-departments.store'), form)
-}
 </script>
