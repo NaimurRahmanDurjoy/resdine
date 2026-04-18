@@ -48,21 +48,21 @@
                 :direction="filters.direction" :loading="loading" @sort="sortColumn">
       <template #rows="{ items }">
         <tr v-for="user in items" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-2 whitespace-nowrap">
             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ user.name }}</div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-2 whitespace-nowrap">
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.phone }}</div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-2 whitespace-nowrap">
             <div class="text-sm text-gray-900 dark:text-gray-100">{{ user.email }}</div>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-2 whitespace-nowrap">
             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               {{ user.role?.name || 'N/A' }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
+          <td class="px-6 py-2 whitespace-nowrap">
             <span
               class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
               :class="user.status ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'"
@@ -70,7 +70,7 @@
               {{ user.status ? 'Active' : 'Inactive' }}
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex space-x-2">
               <Link :href="route('admin.users.edit', user.id)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <span class="material-symbols-outlined">edit</span>

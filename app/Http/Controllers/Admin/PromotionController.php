@@ -27,6 +27,7 @@ class PromotionController extends Controller
         return Inertia::render('Admin/Promotions/Index', [
             'promotions' => $promotions,
             'filters' => $request->only(['search', 'sort', 'direction']),
+            'pageTitle' => 'Promotions'
         ]);
     }
 
@@ -34,6 +35,7 @@ class PromotionController extends Controller
     {
         return Inertia::render('Admin/Promotions/Create', [
             'productItems' => ProductItem::where('status', 1)->get(['id', 'name']),
+            'pageTitle' => 'Add New Promotion'
         ]);
     }
 
@@ -72,6 +74,7 @@ class PromotionController extends Controller
             'promotion' => $promotion,
             'productItems' => ProductItem::where('status', 1)->get(['id', 'name']),
             'selectedItems' => $promotion->items->pluck('id'),
+            'pageTitle' => 'Edit Promotion: ' . $promotion->name
         ]);
     }
 

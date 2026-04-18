@@ -1,6 +1,4 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
-
         <Head :title="pageTitle" />
 
         <div class="max-w-6xl mx-auto space-y-6">
@@ -156,7 +154,6 @@
                 </div>
             </div>
         </div>
-    </AdminLayout>
 </template>
 
 <script setup>
@@ -165,6 +162,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import PermissionRow from './Partials/PermissionRow.vue'
 import PermissionTreeNode from './Partials/PermissionTreeNode.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     user: Object,

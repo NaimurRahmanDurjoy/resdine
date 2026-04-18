@@ -107,7 +107,8 @@ defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   promotions: Object,
-  filters: Object
+  filters: Object,
+  pageTitle: String
 })
 
 const headers = [
