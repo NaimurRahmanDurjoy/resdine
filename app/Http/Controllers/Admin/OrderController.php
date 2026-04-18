@@ -25,14 +25,26 @@ class OrderController extends Controller {
         $this->recipeService = $recipeService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+        $sort = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
+
         $orders = OrderMaster::with(['customer', 'table'])
-            ->latest()
-            ->paginate(10);
+            ->when($search, function ($query, $search) {
+                $query->where('order_number', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Admin/Orders/Index', [
             'orders' => $orders,
+            'filters' => $request->only(['search', 'sort', 'direction']),
             'pageTitle' => 'Orders'
         ]);
     }
@@ -81,11 +93,8 @@ class OrderController extends Controller {
                     'item_id' => $itemData['item_id'],
                     'modifiers' => $itemData['modifiers'] ?? null,
                     'quantity' => $itemData['quantity'],
-                    'price' => $itemData['price'],
                     'unit_price' => $itemData['price'],
-                    'total' => $itemTotal,
                     'total_price' => $itemTotal,
-                    'notes' => $itemData['notes'] ?? null,
                 ]);
 
                 // Deduct stock
