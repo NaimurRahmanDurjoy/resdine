@@ -45,7 +45,7 @@
           </div>
           <div class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
             <span class="material-symbols-outlined text-base mr-1">table_restaurant</span>
-            <span>{{ order.table ? order.table.table_name : 'Takeaway' }}</span>
+            <span>{{ order.table ? order.table.name : 'Takeaway' }}</span>
             <span v-if="order.customer" class="ml-2 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs rounded-lg truncate max-w-[120px]">
               {{ order.customer.name }}
             </span>

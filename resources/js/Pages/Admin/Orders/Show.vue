@@ -69,7 +69,7 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div
-                        class="px-8 py-6 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30">
+                        class="px-8 py-4 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30">
                         <h2 class="text-sm font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
                             <span class="material-symbols-outlined text-lg text-indigo-500">flatware</span>
                             Manifest
@@ -83,16 +83,16 @@
                         <thead>
                             <tr
                                 class="text-left text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 dark:border-gray-700">
-                                <th class="px-8 py-5">Item Description</th>
-                                <th class="px-8 py-5 text-center">Qty</th>
-                                <th class="px-8 py-5 text-right">Unit Price</th>
-                                <th class="px-8 py-5 text-right font-black text-indigo-500">Total</th>
+                                <th class="px-8 py-4">Item Description</th>
+                                <th class="px-8 py-4 text-center">Qty</th>
+                                <th class="px-8 py-4 text-right">Unit Price</th>
+                                <th class="px-8 py-4 text-right font-black text-indigo-500">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             <tr v-for="item in order.items" :key="item.id"
                                 class="hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-colors">
-                                <td class="px-8 py-6">
+                                <td class="px-8 py-2">
                                     <div class="font-black text-gray-800 dark:text-gray-100 text-lg">{{
                                         item.product?.name }}</div>
                                     <div v-if="item.notes"
@@ -101,20 +101,20 @@
                                         {{ item.notes }}
                                     </div>
                                 </td>
-                                <td class="px-8 py-6 text-center">
+                                <td class="px-8 py-2 text-center">
                                     <span
                                         class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-xl font-black text-gray-700 dark:text-gray-300">
                                         {{ item.quantity }}
                                     </span>
                                 </td>
-                                <td class="px-8 py-6 text-right text-gray-500 font-medium">${{ item.price }}</td>
-                                <td class="px-8 py-6 text-right font-black text-gray-900 dark:text-white text-lg">${{
+                                <td class="px-8 py-2 text-right text-gray-500 font-medium">${{ item.price }}</td>
+                                <td class="px-8 py-2 text-right font-black text-gray-900 dark:text-white text-lg">${{
                                     item.total_price }}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="bg-gray-50/50 dark:bg-gray-900/50 px-8 py-10">
+                    <div class="bg-gray-50/50 dark:bg-gray-900/50 px-8 py-6">
                         <div class="max-w-xs ml-auto space-y-4">
                             <div class="flex justify-between items-center text-gray-500">
                                 <span class="text-sm font-bold uppercase tracking-tighter">Subtotal</span>
@@ -128,7 +128,7 @@
                                 class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-end">
                                 <span class="text-xs font-black text-indigo-500 uppercase tracking-widest">Grand
                                     Total</span>
-                                <span class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">${{
+                                <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">${{
                                     order.total_amount }}</span>
                             </div>
                         </div>
@@ -175,7 +175,7 @@
                                     </span>
                                 </td>
                                 <td class="px-8 py-5 text-xs text-gray-400 uppercase font-mono tracking-tighter">{{
-                                    payment.transaction_reference || 'N/A' }}</td>
+                                    payment.payment_reference || 'N/A' }}</td>
                                 <td class="px-8 py-5 text-right font-black text-green-600 dark:text-green-400">${{
                                     payment.amount }}</td>
                             </tr>
@@ -413,10 +413,3 @@ const paymentMethodIcon = (method) => {
 }
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
-:deep(*) {
-    font-family: 'Outfit', sans-serif;
-}
-</style>

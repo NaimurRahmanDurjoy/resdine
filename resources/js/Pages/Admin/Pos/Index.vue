@@ -84,7 +84,7 @@
             <div class="flex-1 relative">
               <select v-model="selectedTableId" class="w-full text-sm rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 pl-3 pr-8 appearance-none bg-white">
                 <option :value="null">Select Table...</option>
-                <option v-for="table in tables" :key="table.id" :value="table.id">{{ table.table_name }}</option>
+                <option v-for="table in tables" :key="table.id" :value="table.id">{{ table.name }}</option>
               </select>
               <span class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-400 material-symbols-outlined text-sm">expand_more</span>
             </div>
@@ -285,7 +285,7 @@ const processPaymentClick = async () => {
     subtotal: cartSubtotal.value,
     discount: cartDiscount.value,
     total_amount: cartTotal.value,
-    payment_type: 'cash', // Hardcoded for simplicity in this flow
+    payment_method: 1, // Hardcoded for simplicity in this flow
     items: cart.value.map(c => ({
       item_id: c.item_id,
       variant_id: c.variant_id,

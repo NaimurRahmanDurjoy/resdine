@@ -113,6 +113,7 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         // Kitchen Display System
         Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
+        Route::post('updateitemstatus',[kdsController::class, 'updateItemStatus'])->name('kds.item.status');
 
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');

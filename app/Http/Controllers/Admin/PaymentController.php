@@ -38,8 +38,7 @@ class PaymentController extends Controller
                 'order_master_id' => $order->id,
                 'method' => $request->payment_method,
                 'amount' => $request->amount,
-                'collect_amount' => $request->amount,
-                'transaction_reference' => $request->transaction_reference,
+                'payment_reference' => $request->transaction_reference,
                 'status' => 1, // Paid
                 'paid_at' => now(),
             ]);

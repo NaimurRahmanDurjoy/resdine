@@ -42,7 +42,7 @@ class PosController extends Controller
             'subtotal' => 'required|numeric',
             'discount' => 'required|numeric',
             'total_amount' => 'required|numeric',
-            'payment_type' => 'required|string', // cash, card, etc.
+            'payment_method' => 'required|integer', // cash, card, etc.
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:product_items,id',
             'items.*.variant_id' => 'nullable|exists:product_variants,id',
@@ -53,7 +53,7 @@ class PosController extends Controller
         try {
             DB::transaction(function () use ($validated, &$orderMaster) {
                 // Determine branch_id from logged in admin (assuming simplified context, or fetch branch 1)
-                $branchId = 1; 
+                $branchId = auth()->user()->branch_id ?? ''; 
 
                 // Create Order Master
                 $orderMaster = OrderMaster::create([
@@ -77,8 +77,8 @@ class PosController extends Controller
                         'item_id' => $itemData['item_id'],
                         'variant_id' => $itemData['variant_id'] ?? null,
                         'quantity' => $itemData['quantity'],
-                        'price' => $itemData['price'],
-                        'total' => $itemData['price'] * $itemData['quantity'],
+                        'unit_price' => $itemData['price'],
+                        'total_price' => $itemData['price'] * $itemData['quantity'],
                         'preparation_status' => 'pending' // Feeds KDS
                     ]);
                 }
@@ -86,10 +86,10 @@ class PosController extends Controller
                 // Create Payment Record (Simplified)
                 OrderPayment::create([
                     'order_master_id' => $orderMaster->id,
-                    'type' => $validated['payment_type'],
-                    'status' => 'paid',
+                    'method' => $validated['payment_method'],
+                    'status' => 1, // Paid
                     'amount' => $validated['total_amount'],
-                    'date' => now()
+                    'paid_at' => now()
                 ]);
             });
 
