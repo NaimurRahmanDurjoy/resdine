@@ -17,20 +17,36 @@ class NotificationService
         if (!Auth::check()) {
             return [
                 'total' => 0,
-                'groups' => []
+                'groups' => [],
+                'items' => []
             ];
         }
 
+        $inventory = $this->getInventoryAlerts();
+        $orders = $this->getOrderAlerts(); 
+
         $groups = [
-            'inventory' => $this->getInventoryAlerts(),
-            'orders' => $this->getOrderAlerts(), 
+            'inventory' => [
+                'count' => $inventory['count'],
+                'label' => $inventory['label'],
+                'url' => $inventory['url']
+            ],
+            'orders' => [
+                'count' => $orders['count'],
+                'label' => $orders['label'],
+                'url' => $orders['url']
+            ]
         ];
+
+        // Merge all items for the dropdown
+        $items = array_merge($inventory['items'], $orders['items']);
 
         $total = array_sum(array_column($groups, 'count'));
 
         return [
             'total' => $total,
-            'groups' => $groups
+            'groups' => $groups,
+            'items' => $items
         ];
     }
 
@@ -39,42 +55,84 @@ class NotificationService
      */
     protected function getInventoryAlerts()
     {
-        // 1. Low Stock Count
-        $lowStockCount = StockSummary::whereHas('ingredient', function($q) {
-            $q->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
-        })->count();
+        $items = [];
 
-        // 2. Expiring Items Count (Next 30 days)
-        $expiringCount = DB::table('purchase_details')
+        // 1. Low Stock Logic
+        $lowStockQuery = StockSummary::with('ingredient')
+            ->whereHas('ingredient', function($q) {
+                $q->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
+            });
+            
+        $lowStockCount = $lowStockQuery->count();
+        
+        $lowStocks = $lowStockQuery->limit(10)->get();
+        foreach ($lowStocks as $stock) {
+            if ($stock->ingredient) {
+                $items[] = [
+                    'id' => 'ls_' . $stock->id,
+                    'type' => 'low_stock',
+                    'message' => $stock->ingredient->name . ' is low in stock (' . $stock->current_stock . ' left)',
+                    'url' => route('admin.stock.show', $stock->ingredient_id)
+                ];
+            }
+        }
+
+        // 2. Expiring Items Logic (Next 30 days)
+        $expiringQuery = \App\Models\PurchaseDetail::with(['ingredient', 'purchase'])
             ->whereNotNull('expiry_date')
             ->where('expiry_date', '<=', now()->addDays(30))
-            ->where('expiry_date', '>=', now())
-            ->count();
+            ->where('expiry_date', '>=', now());
+
+        $expiringCount = $expiringQuery->count();
+
+        $expiringItems = $expiringQuery->orderBy('expiry_date', 'asc')->limit(10)->get();
+        foreach ($expiringItems as $detail) {
+            if ($detail->ingredient && $detail->purchase) {
+                $days = now()->diffInDays($detail->expiry_date, false);
+                $dayStr = $days <= 0 ? 'today' : "in {$days} days";
+                $items[] = [
+                    'id' => 'exp_' . $detail->id,
+                    'type' => 'expiring',
+                    'message' => $detail->ingredient->name . " expires {$dayStr}",
+                    'url' => route('admin.purchase.show', $detail->purchase_id)
+                ];
+            }
+        }
 
         $count = $lowStockCount + $expiringCount;
 
         return [
             'count' => $count,
             'label' => 'Inventory Alerts',
-            'details' => [
-                'low_stock' => $lowStockCount,
-                'expiring' => $expiringCount
-            ],
-            'url' => route('admin.stock.index')
+            'url' => route('admin.stock.index'),
+            'items' => $items
         ];
     }
 
     /**
-     * Future: Calculate Order specific alerts (New/Pending)
+     * Calculate Order specific alerts (New/Pending)
      */
     protected function getOrderAlerts()
     {
-        $pendingCount = OrderMaster::where('order_status', 'pending')->count();
+        $items = [];
+        $pendingQuery = OrderMaster::where('order_status', 'pending');
+        $pendingCount = $pendingQuery->count();
+
+        $pendingOrders = $pendingQuery->orderBy('created_at', 'asc')->limit(10)->get();
+        foreach ($pendingOrders as $order) {
+            $items[] = [
+                'id' => 'ord_' . $order->id,
+                'type' => 'pending_order',
+                'message' => 'New Order #' . $order->order_number . ' pending',
+                'url' => route('admin.orders.show', $order->id)
+            ];
+        }
 
         return [
             'count' => $pendingCount,
             'label' => 'Pending Orders',
-            'url' => route('admin.orders.index')
+            'url' => route('admin.orders.index'),
+            'items' => $items
         ];
     }
 }
