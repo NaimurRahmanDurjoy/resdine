@@ -88,7 +88,10 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         <tr v-for="(item, index) in form.items" :key="index" class="group hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-colors">
                             <td class="px-6 py-4">
-                                <div class="font-bold text-gray-800 dark:text-gray-100">{{ getItemName(item.item_id) }}</div>
+                                <div class="font-bold text-gray-800 dark:text-gray-100">
+                                    {{ getItemName(item.item_id) }}
+                                    <span v-if="item.variant_name" class="text-xs text-indigo-500 ml-1">({{ item.variant_name }})</span>
+                                </div>
                                 <input 
                                     v-model="item.notes" 
                                     placeholder="Add special instructions..." 
@@ -229,13 +232,23 @@
         </div>
       </div>
     </form>
+
+    <!-- Variant Selection Modal Component -->
+    <VariantSelectionModal 
+        :show="!!selectedProductForVariant" 
+        :product="selectedProductForVariant" 
+        theme="indigo" 
+        @close="closeVariantModal" 
+        @selected="selectVariant" 
+    />
   </div>
 </template>
 
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import VariantSelectionModal from '@/Components/VariantSelectionModal.vue';
 
 defineOptions({ layout: AdminLayout });
 
@@ -265,15 +278,43 @@ const total = computed(() => {
     return Math.max(0, subtotal.value - (form.discount || 0));
 });
 
+// Variant State
+const selectedProductForVariant = ref(null);
+
 const addItem = (product) => {
-    const existingIndex = form.items.findIndex(i => i.item_id === product.id);
+    if (product.variants && product.variants.length > 0) {
+        selectedProductForVariant.value = product;
+        return;
+    }
+    
+    addToForm(product.id, null, null, product.price);
+};
+
+const selectVariant = (variant) => {
+    addToForm(
+        selectedProductForVariant.value.id,
+        variant.id,
+        variant.name,
+        variant.price || selectedProductForVariant.value.price
+    );
+    closeVariantModal();
+};
+
+const closeVariantModal = () => {
+    selectedProductForVariant.value = null;
+};
+
+const addToForm = (itemId, variantId, variantName, price) => {
+    const existingIndex = form.items.findIndex(i => i.item_id === itemId && i.variant_id === variantId);
     if (existingIndex > -1) {
         form.items[existingIndex].quantity++;
     } else {
         form.items.push({
-            item_id: product.id,
+            item_id: itemId,
+            variant_id: variantId,
+            variant_name: variantName,
             quantity: 1,
-            price: parseFloat(product.price),
+            price: parseFloat(price),
             notes: '',
             modifiers: {}
         });

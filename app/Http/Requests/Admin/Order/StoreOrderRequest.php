@@ -20,6 +20,7 @@ class StoreOrderRequest extends FormRequest
             'order_type' => 'required|in:1,2,3,4', // 1=dine-in, 2=takeaway, 3=delivery, 4=party
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:product_items,id',
+            'items.*.variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
             'items.*.modifiers' => 'nullable|array',

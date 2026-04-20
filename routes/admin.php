@@ -112,8 +112,11 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::post('pos/submit', [PosController::class, 'submitOrder'])->name('pos.submit');
 
         // Kitchen Display System
-        Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
-        Route::post('updateitemstatus',[kdsController::class, 'updateItemStatus'])->name('kds.item.status');
+        Route::prefix('kds')->name('kds.')->group(function () {
+            Route::get('/', [KdsController::class, 'index'])->name('index');
+            Route::post('item/{item}', [KdsController::class, 'updateItemStatus'])->name('item.status');
+            Route::post('{order}/ready', [KdsController::class, 'readyOrder'])->name('order.ready');
+        });
 
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');

@@ -91,6 +91,7 @@ class OrderController extends Controller {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $itemData['item_id'],
+                    'variant_id' => $itemData['variant_id'] ?? null,
                     'modifiers' => $itemData['modifiers'] ?? null,
                     'quantity' => $itemData['quantity'],
                     'unit_price' => $itemData['price'],
@@ -100,7 +101,7 @@ class OrderController extends Controller {
                 // Deduct stock
                 $this->recipeService->deductStockForProduct(
                     $itemData['item_id'],
-                    null, // User said no need add variant
+                    $itemData['variant_id'] ?? null,
                     $itemData['quantity'],
                     'order',
                     $order->id,

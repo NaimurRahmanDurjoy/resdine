@@ -104,6 +104,7 @@
             <div class="flex justify-between items-start">
               <div class="font-semibold text-gray-800 pr-2 leading-tight">
                 {{ cartItem.product.name }}
+                <div v-if="cartItem.variant_name" class="text-xs text-indigo-500 font-bold mt-0.5">{{ cartItem.variant_name }}</div>
               </div>
               <div class="font-bold text-gray-900 shrink-0">
                 ${{ (cartItem.price * cartItem.quantity).toFixed(2) }}
@@ -162,6 +163,15 @@
         </div>
       </div>
     </div>
+    
+    <!-- POS Variant Modal Component -->
+    <VariantSelectionModal 
+        :show="!!selectedProductForVariant" 
+        :product="selectedProductForVariant" 
+        theme="indigo" 
+        @close="closeVariantModal" 
+        @selected="selectVariant" 
+    />
   </div>
 </template>
 
@@ -171,6 +181,7 @@ import { usePage } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import VariantSelectionModal from '@/Components/VariantSelectionModal.vue'
 
 const page = usePage()
 const user = computed(() => page.props.auth?.user || { name: 'Guest' })
@@ -235,10 +246,35 @@ const cartTotal = computed(() => {
   return cartSubtotal.value - cartDiscount.value
 })
 
+// Variant State
+const selectedProductForVariant = ref(null)
+
 // Methods
 const addToCart = (product) => {
-  // Check if item exists (simple version without variants)
-  const existingIndex = cart.value.findIndex(i => i.product.id === product.id)
+  if (product.variants && product.variants.length > 0) {
+    selectedProductForVariant.value = product
+    return
+  }
+
+  doAddToCart(product, null, null, product.price)
+}
+
+const selectVariant = (variant) => {
+  doAddToCart(
+    selectedProductForVariant.value,
+    variant.id,
+    variant.name,
+    variant.price || selectedProductForVariant.value.price
+  )
+  closeVariantModal()
+}
+
+const closeVariantModal = () => {
+  selectedProductForVariant.value = null
+}
+
+const doAddToCart = (product, variantId, variantName, price) => {
+  const existingIndex = cart.value.findIndex(i => i.product.id === product.id && i.variant_id === variantId)
   
   if (existingIndex !== -1) {
     cart.value[existingIndex].quantity++
@@ -246,9 +282,10 @@ const addToCart = (product) => {
     cart.value.unshift({
       product: product,
       quantity: 1,
-      price: product.price,
+      price: parseFloat(price),
       item_id: product.id,
-      variant_id: null
+      variant_id: variantId,
+      variant_name: variantName
     })
   }
 

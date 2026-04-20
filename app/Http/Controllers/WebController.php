@@ -43,6 +43,7 @@ class WebController extends Controller
             'total_amount' => 'required|numeric',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:product_items,id',
+            'items.*.variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric',
         ]);
@@ -71,9 +72,10 @@ class WebController extends Controller
                     OrderItem::create([
                         'order_id' => $orderMaster->id,
                         'item_id' => $itemData['item_id'],
+                        'variant_id' => $itemData['variant_id'] ?? null,
                         'quantity' => $itemData['quantity'],
-                        'price' => $itemData['price'],
-                        'total' => $itemData['price'] * $itemData['quantity'],
+                        'unit_price' => $itemData['price'],
+                        'total_price' => $itemData['price'] * $itemData['quantity'],
                         'preparation_status' => 'pending'
                     ]);
                 }

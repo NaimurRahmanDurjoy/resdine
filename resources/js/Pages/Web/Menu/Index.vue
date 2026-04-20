@@ -127,7 +127,10 @@
                     </div>
                     
                     <div class="flex-1 min-w-0">
-                      <h4 class="font-bold text-slate-900 truncate">{{ item.product.name }}</h4>
+                      <h4 class="font-bold text-slate-900 truncate">
+                        {{ item.product.name }}
+                        <span v-if="item.variant_name" class="text-xs text-slate-500 font-normal ml-1 border-l pl-1 border-slate-300">{{ item.variant_name }}</span>
+                      </h4>
                       <div class="text-amber-600 font-black">${{ (item.price * item.quantity).toFixed(2) }}</div>
                     </div>
 
@@ -185,6 +188,14 @@
         </div>
       </div>
     </div>
+    <!-- Variant Modal (Web) Component -->
+    <VariantSelectionModal 
+        :show="!!selectedProductForVariant" 
+        :product="selectedProductForVariant" 
+        theme="amber" 
+        @close="closeVariantModal" 
+        @selected="selectVariant" 
+    />
   </WebLayout>
 </template>
 
@@ -193,6 +204,7 @@ import { ref, computed, reactive } from 'vue'
 import WebLayout from '@/Layouts/WebLayout.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import VariantSelectionModal from '@/Components/VariantSelectionModal.vue'
 
 const props = defineProps({
   categories: Array,
@@ -204,6 +216,7 @@ const activeCategory = ref(null)
 const isCartOpen = ref(false)
 const cart = ref([])
 const isSubmitting = ref(false)
+const selectedProductForVariant = ref(null)
 
 const form = reactive({
   customer_name: '',
@@ -225,15 +238,40 @@ const cartTotal = computed(() => cart.value.reduce((acc, curr) => acc + (curr.pr
 
 // Methods
 const addToCart = (product) => {
-  const existing = cart.value.find(i => i.item_id === product.id)
+  if (product.variants && product.variants.length > 0) {
+    selectedProductForVariant.value = product
+    return
+  }
+
+  doAddToCart(product, null, null, product.price)
+}
+
+const selectVariant = (variant) => {
+  doAddToCart(
+    selectedProductForVariant.value,
+    variant.id,
+    variant.name,
+    variant.price || selectedProductForVariant.value.price
+  )
+  closeVariantModal()
+}
+
+const closeVariantModal = () => {
+  selectedProductForVariant.value = null
+}
+
+const doAddToCart = (product, variantId, variantName, price) => {
+  const existing = cart.value.find(i => i.item_id === product.id && i.variant_id === variantId)
   if (existing) {
     existing.quantity++
   } else {
     cart.value.push({
       item_id: product.id,
       product: product,
-      price: product.price,
-      quantity: 1
+      price: parseFloat(price),
+      quantity: 1,
+      variant_id: variantId,
+      variant_name: variantName
     })
   }
 
@@ -275,6 +313,7 @@ const submitOrder = async () => {
     total_amount: cartTotal.value,
     items: cart.value.map(i => ({
       item_id: i.item_id,
+      variant_id: i.variant_id,
       quantity: i.quantity,
       price: i.price
     }))

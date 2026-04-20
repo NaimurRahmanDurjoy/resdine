@@ -32,13 +32,12 @@ class KdsController extends Controller
     /**
      * Update the preparation status of a specific order item.
      */
-    public function updateItemStatus(Request $request, $itemId)
+    public function updateItemStatus(Request $request, OrderItem $item)
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,preparing,ready,served'
         ]);
 
-        $item = OrderItem::findOrFail($itemId);
         $item->preparation_status = $validated['status'];
         $item->save();
 
