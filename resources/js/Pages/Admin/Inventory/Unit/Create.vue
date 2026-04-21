@@ -19,7 +19,7 @@
 
                 <!-- Form Body -->
                 <div class="p-8">
-                    <Form :unit="null" :isEdit="false" @submit="submit" />
+                    <Form :unit="null" :baseUnits="baseUnits" :isEdit="false" @submit="submit" />
                 </div>
             </div>
         </div>
@@ -32,6 +32,7 @@ import Form from './Form.vue'
 defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
+    baseUnits: Array,
     pageTitle: String
 })
 

@@ -26,6 +26,13 @@
             Search
           </button>
         </div>
+        <!-- Recipe List Btn -->
+        <Link :href="route('admin.recipes.index')"
+          class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 flex items-center space-x-2 transition">
+          <span class="material-symbols-outlined text-sm">restaurant_menu</span>
+          <span>Recipes</span>
+        </Link>
+
 
         <!-- Add new item -->
         <Link :href="route('admin.product.items.create')"

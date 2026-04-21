@@ -38,6 +38,9 @@
             <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Menu Item</th>
             <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Variant</th>
             <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ingredients</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Food Cost</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Sell Price</th>
+            <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">GP %</th>
             <th class="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Actions</th>
           </tr>
         </thead>
@@ -59,6 +62,20 @@
                   {{ item.ingredient?.name }}: {{ item.quantity }} {{ item.unit?.short_name || item.unit?.name }}
                 </span>
               </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right font-bold">
+              ${{ recipe.food_cost }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-right">
+              ${{ recipe.selling_price }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-black">
+              <span :class="[
+                recipe.gp_percentage >= 75 ? 'text-green-600' : 
+                recipe.gp_percentage >= 65 ? 'text-amber-500' : 'text-red-500'
+              ]">
+                {{ recipe.gp_percentage }}%
+              </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <div class="flex justify-end space-x-3">

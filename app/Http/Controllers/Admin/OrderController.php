@@ -11,18 +11,17 @@ use App\Models\SalesInvoice;
 use App\Services\LoyaltyService;
 use App\Services\RecipeService;
 use App\Http\Requests\Admin\Order\StoreOrderRequest;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class OrderController extends Controller {
-    protected $loyaltyService;
-    protected $recipeService;
+    protected $orderService;
 
-    public function __construct(LoyaltyService $loyaltyService, RecipeService $recipeService)
+    public function __construct(OrderService $orderService)
     {
-        $this->loyaltyService = $loyaltyService;
-        $this->recipeService = $recipeService;
+        $this->orderService = $orderService;
     }
 
     public function index(Request $request)
@@ -62,73 +61,12 @@ class OrderController extends Controller {
 
     public function store(StoreOrderRequest $request)
     {
-        return DB::transaction(function () use ($request) {
-            $subtotal = collect($request->items)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            });
-
-            $totalAmount = $subtotal - ($request->discount ?? 0);
-            
-            // Create Order Master
-            $order = OrderMaster::create([
-                'user_id' => auth()->id(),
-                'branch_id' => $request->branch_id,
-                'member_id' => $request->customer_id,
-                'table_id' => $request->table_id,
-                'order_type' => $request->order_type,
-                'order_status' => 0, // Pending
-                'subtotal' => $subtotal,
-                'discount' => $request->discount ?? 0,
-                'total_amount' => $totalAmount,
-                'due_amount' => $totalAmount,
-                'notes' => $request->notes,
-            ]);
-
-            // Create Order Items
-            foreach ($request->items as $itemData) {
-                $itemTotal = $itemData['price'] * $itemData['quantity'];
-                
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'item_id' => $itemData['item_id'],
-                    'variant_id' => $itemData['variant_id'] ?? null,
-                    'modifiers' => $itemData['modifiers'] ?? null,
-                    'quantity' => $itemData['quantity'],
-                    'unit_price' => $itemData['price'],
-                    'total_price' => $itemTotal,
-                ]);
-
-                // Deduct stock
-                $this->recipeService->deductStockForProduct(
-                    $itemData['item_id'],
-                    $itemData['variant_id'] ?? null,
-                    $itemData['quantity'],
-                    'order',
-                    $order->id,
-                    $request->branch_id
-                );
-            }
-
-            // Create Invoice
-            SalesInvoice::create([
-                'invoice_number' => 'INV-' . strtoupper(uniqid()),
-                'order_id' => $order->id,
-                'customer_id' => $request->customer_id,
-                'sub_total' => $subtotal,
-                'discount' => $request->discount ?? 0,
-                'due_amount' => $totalAmount,
-                'grand_total' => $totalAmount,
-                'status' => 1, // Pending
-                'issued_at' => now(),
-            ]);
-
-            // Update Table Status
-            if ($request->table_id) {
-                RestaurantTable::where('id', $request->table_id)->update(['status' => 0]); // Occupied
-            }
-
+        try {
+            $order = $this->orderService->createOrder($request->validated());
             return redirect()->route('admin.orders.show', $order->id)->with('success', 'Order created successfully.');
-        });
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to create order: ' . $e->getMessage()]);
+        }
     }
 
     public function show($id)
@@ -145,15 +83,13 @@ class OrderController extends Controller {
     public function updateStatus(Request $request, $id)
     {
         $request->validate(['status' => 'required|integer']);
-        $order = OrderMaster::findOrFail($id);
-        $order->update(['order_status' => $request->status]);
-
-        // If completed or cancelled, free the table
-        if (in_array($request->status, [4, 5]) && $order->table_id) {
-            RestaurantTable::where('id', $order->table_id)->update(['status' => 1]); // Free
+        
+        try {
+            $this->orderService->updateStatus($id, $request->status);
+            return back()->with('success', 'Order status updated.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to update status: ' . $e->getMessage()]);
         }
-
-        return back()->with('success', 'Order status updated.');
     }
 }
 

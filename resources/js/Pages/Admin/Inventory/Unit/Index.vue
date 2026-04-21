@@ -44,8 +44,14 @@
                     <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                         {{ unit.name }}
                     </td>
-                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {{ unit.short_name || 'N/A' }}
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                        <div v-if="unit.base_unit" class="flex items-center gap-1.5">
+                            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded font-bold text-xs ring-1 ring-gray-200 dark:ring-gray-700">Sub-unit</span>
+                            <span class="text-xs">1 {{ unit.name }} = {{ unit.conversion_factor }} {{ unit.base_unit.name }}</span>
+                        </div>
+                        <div v-else class="flex items-center gap-1.5">
+                            <span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded font-bold text-xs ring-1 ring-indigo-100 dark:ring-indigo-800">Base Unit</span>
+                        </div>
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap">
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
@@ -108,7 +114,7 @@ const props = defineProps({
 
 const headers = [
     { label: 'Name', key: 'name', sortable: true },
-    { label: 'Short Name', key: 'short_name', sortable: true },
+    { label: 'Relationship', key: 'base_unit_id', sortable: true },
     { label: 'Status', key: 'status', sortable: true },
     { label: 'Actions', key: 'actions', sortable: false }
 ]

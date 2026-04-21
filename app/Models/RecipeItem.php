@@ -11,6 +11,7 @@ class RecipeItem extends BaseModel
         'ingredient_id',
         'quantity',
         'unit_id',
+        'wastage_percentage',
     ];
 
     public function recipe()

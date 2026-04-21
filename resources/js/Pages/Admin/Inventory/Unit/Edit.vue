@@ -19,7 +19,7 @@
 
                 <!-- Form Body -->
                 <div class="p-8">
-                    <Form :unit="unit" :isEdit="true" @submit="submit" />
+                    <Form :unit="unit" :baseUnits="baseUnits" :isEdit="true" @submit="submit" />
                 </div>
             </div>
         </div>
@@ -33,6 +33,7 @@ defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     unit: Object,
+    baseUnits: Array,
     pageTitle: String
 })
 

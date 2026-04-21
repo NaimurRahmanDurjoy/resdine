@@ -27,6 +27,7 @@ class StoreRecipeRequest extends FormRequest
             'items.*.ingredient_id' => 'required|exists:ingredients,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_id' => 'nullable|exists:units,id',
+            'items.*.wastage_percentage' => 'nullable|numeric|min:0|max:99.99',
         ];
     }
 

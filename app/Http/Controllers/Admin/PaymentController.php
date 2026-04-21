@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
-    protected $loyaltyService;
+    protected $paymentService;
 
-    public function __construct(LoyaltyService $loyaltyService)
+    public function __construct(PaymentService $paymentService)
     {
-        $this->loyaltyService = $loyaltyService;
+        $this->paymentService = $paymentService;
     }
 
     public function store(Request $request, $orderId)
@@ -27,45 +27,22 @@ class PaymentController extends Controller
             'transaction_reference' => 'nullable|string',
         ]);
 
-        return DB::transaction(function () use ($request, $orderId) {
+        try {
             $order = OrderMaster::findOrFail($orderId);
 
             if ($request->amount > $order->due_amount) {
                 return back()->withErrors(['amount' => 'Payment amount exceeds due amount.']);
             }
 
-            OrderPayment::create([
-                'order_master_id' => $order->id,
-                'method' => $request->payment_method,
+            $this->paymentService->processPayment($order, [
                 'amount' => $request->amount,
-                'payment_reference' => $request->transaction_reference,
-                'status' => 1, // Paid
-                'paid_at' => now(),
+                'payment_method' => $request->payment_method,
+                'transaction_reference' => $request->transaction_reference,
             ]);
 
-            $order->due_amount -= $request->amount;
-            $order->collect_amount += $request->amount;
-            
-            if ($order->due_amount <= 0) {
-                $order->order_status = 4; // Completed
-                
-                // Accrue loyalty points on full payment
-                $this->loyaltyService->accruePoints($order);
-            }
-            $order->save();
-
-            // Update Invoice
-            $invoice = SalesInvoice::where('order_id', $order->id)->first();
-            if ($invoice) {
-                $invoice->collect_amount += $request->amount;
-                $invoice->due_amount -= $request->amount;
-                if ($invoice->due_amount <= 0) {
-                    $invoice->status = 2; // Paid
-                }
-                $invoice->save();
-            }
-
             return back()->with('success', 'Payment processed successfully.');
-        });
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to process payment: ' . $e->getMessage()]);
+        }
     }
 }
