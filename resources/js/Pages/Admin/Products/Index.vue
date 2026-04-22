@@ -26,20 +26,20 @@
             Search
           </button>
         </div>
-        <!-- Recipe List Btn -->
-        <Link :href="route('admin.recipes.index')"
-          class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 flex items-center space-x-2 transition">
-          <span class="material-symbols-outlined text-sm">restaurant_menu</span>
-          <span>Recipes</span>
-        </Link>
-
-
-        <!-- Add new item -->
-        <Link :href="route('admin.product.items.create')"
-          class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition">
-          <span class="material-symbols-outlined text-sm">add</span>
-          <span>Add Item</span>
-        </Link>
+        <div class="flex space-x-2">
+          <!-- Recipe List Btn -->
+          <Link :href="route('admin.recipes.index')"
+            class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 flex items-center space-x-2 transition">
+            <span class="material-symbols-outlined text-sm">restaurant_menu</span>
+            <span>Recipe List</span>
+          </Link>
+          <!-- Add new item -->
+          <Link :href="route('admin.product.items.create')"
+            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition">
+            <span class="material-symbols-outlined text-sm">add</span>
+            <span>Add Item</span>
+          </Link>
+        </div>
       </div>
     </div>
 
