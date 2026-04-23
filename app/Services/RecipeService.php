@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Recipe;
 use App\Models\RecipeItem;
 use App\Models\ProductItem;
-use App\Models\StockMaster;
+use App\Models\StockSummary;
 use App\Models\StockLedger;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -52,26 +52,38 @@ class RecipeService
      */
     public function getLatestIngredientCost(int $ingredientId, ?int $targetUnitId = null): float
     {
-        $latestPurchase = \App\Models\PurchaseDetail::where('ingredients_id', $ingredientId)
-            ->whereHas('purchase', function ($q) {
-                $q->where('status', 1); // Only approved purchases
-            })
-            ->latest()
-            ->first();
+        $ingredient = \App\Models\Ingredient::find($ingredientId);
+        if (!$ingredient) return 0;
 
-        if (!$latestPurchase) {
-            return 0;
+        // 1. Try to get Average Cost from Stock Summary (most accurate for current stock)
+        $stockSummary = \App\Models\StockSummary::where('ingredient_id', $ingredientId)->first();
+        $cost = 0;
+        
+        if ($stockSummary && $stockSummary->average_cost > 0) {
+            $cost = (float) $stockSummary->average_cost;
+        } else {
+            // 2. Fallback to latest purchase cost
+            $latestPurchase = \App\Models\PurchaseDetail::where('ingredients_id', $ingredientId)
+                ->whereHas('purchase', function ($q) {
+                    $q->where('status', 2); // 2 = Received/Approved in PurchaseController
+                })
+                ->latest()
+                ->first();
+
+            if ($latestPurchase) {
+                $cost = (float) $latestPurchase->unit_price;
+            } else {
+                // 3. Fallback to manual cost set on ingredient
+                $cost = (float) ($ingredient->cost ?? 0);
+            }
         }
 
-        $cost = (float) $latestPurchase->unit_price;
-        $purchaseUnitId = $latestPurchase->ingredient->unit_id; // Purchase price is usually for the ingredient's base/default unit
+        if ($cost <= 0) return 0;
 
-        if ($targetUnitId && $purchaseUnitId != $targetUnitId) {
-            // If the purchase price is $10 for 1KG, and target is 1G:
-            // We need to know how much 1G costs.
-            // convertQuantity(1, target, purchase) gives how many KG is in 1G (e.g. 0.001)
-            // Price per target unit = Price per purchase unit * (How many purchase units are in 1 target unit)
-            $conversionFactor = $this->convertQuantity(1, $targetUnitId, $purchaseUnitId);
+        $baseUnitId = $ingredient->unit_id;
+
+        if ($targetUnitId && $baseUnitId != $targetUnitId) {
+            $conversionFactor = $this->convertQuantity(1, $targetUnitId, $baseUnitId);
             return $cost * $conversionFactor;
         }
 
@@ -195,8 +207,10 @@ class RecipeService
                 if ($stockSummary) {
                     $stockSummary->current_stock -= $qty;
                 } else {
+                    $ingredient = \App\Models\Ingredient::find($ingredientId);
                     $stockSummary = \App\Models\StockSummary::create([
                         'ingredient_id' => $ingredientId,
+                        'unit_id' => $ingredient->unit_id ?? null,
                         'branch_id' => $branchId,
                         'current_stock' => -$qty,
                         'last_transaction_date' => now()
@@ -206,8 +220,10 @@ class RecipeService
                 if ($stockSummary) {
                     $stockSummary->current_stock += $qty;
                 } else {
+                    $ingredient = \App\Models\Ingredient::find($ingredientId);
                     $stockSummary = \App\Models\StockSummary::create([
                         'ingredient_id' => $ingredientId,
+                        'unit_id' => $ingredient->unit_id ?? null,
                         'branch_id' => $branchId,
                         'current_stock' => $qty,
                         'last_transaction_date' => now()

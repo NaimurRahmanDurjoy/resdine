@@ -216,16 +216,22 @@ const calculateItemCost = (item) => {
   const ingredient = props.ingredients.find(ing => ing.id == item.ingredient_id)
   if (!ingredient || !item.quantity) return 0
   
-  // Cost is stored per ingredient's default unit
+  // baseCost is per ingredient's default unit
   const baseCost = ingredient.latest_cost || 0
+  const ingredientUnit = props.units.find(u => u.id == ingredient.unit_id)
   const selectedUnit = props.units.find(u => u.id == item.unit_id)
   
-  // Normalize cost to selected unit if different
   let unitCost = baseCost
-  if (selectedUnit && selectedUnit.id != ingredient.unit_id) {
-    // If baseCost is for KG, and selected is G (factor 0.001)
-    // unitCost = 10 * 0.001 = 0.01 per Gram
-    unitCost = baseCost * (selectedUnit.conversion_factor || 1)
+  
+  if (selectedUnit && ingredientUnit && selectedUnit.id != ingredientUnit.id) {
+    // 1. Convert cost per ingredient unit to cost per absolute base unit
+    // If cost is $10 per KG (base), costPerBase = 10 / 1 = 10
+    // If cost is $0.01 per Gram (factor 0.001), costPerBase = 0.01 / 0.001 = 10
+    const costPerBase = baseCost / (ingredientUnit.conversion_factor || 1)
+    
+    // 2. Convert cost per base unit to cost per selected unit
+    // If costPerBase is $10 per KG, and selected is Gram (0.001), unitCost = 10 * 0.001 = 0.01
+    unitCost = costPerBase * (selectedUnit.conversion_factor || 1)
   }
 
   const wastage = parseFloat(item.wastage_percentage) || 0

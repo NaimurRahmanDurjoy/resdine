@@ -7,6 +7,7 @@ class Ingredient extends BaseModel
     protected $fillable = [
         'name',
         'unit_id',
+        'cost',
         'min_stock',
         'has_expiry',
         'status'

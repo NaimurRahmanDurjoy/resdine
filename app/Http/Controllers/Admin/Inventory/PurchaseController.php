@@ -142,16 +142,22 @@ class PurchaseController extends Controller
                     ])->lockForUpdate()->first();
                     
                     if ($stockSummary) {
+                        $oldStock = (float)$stockSummary->current_stock;
                         $stockSummary->current_stock += $item['quantity'];
-                        // Calculate new average cost (simplified)
-                        $totalStock = $stockSummary->current_stock;
-                        if ($totalStock > 0) {
-                            $stockSummary->average_cost = (($stockSummary->average_cost * ($totalStock - $item['quantity'])) + $totalPrice) / $totalStock;
+                        $newStock = (float)$stockSummary->current_stock;
+                        
+                        // Calculate new weighted average cost
+                        // Formula: ((Old Stock * Old Avg Cost) + (New Qty * New Cost)) / New Total Stock
+                        if ($newStock > 0) {
+                            $stockSummary->average_cost = (($oldStock * $stockSummary->average_cost) + $totalPrice) / $newStock;
+                        } else {
+                            $stockSummary->average_cost = $item['unit_price'];
                         }
+                        
                         $stockSummary->last_transaction_date = now();
                         $stockSummary->save();
                     } else {
-                        StockSummary::create([
+                        $stockSummary = StockSummary::create([
                             'ingredient_id' => $item['ingredient_id'],
                             'unit_id' => $ingredient->unit_id,
                             'branch_id' => $branchId,
@@ -162,6 +168,9 @@ class PurchaseController extends Controller
                             'last_transaction_date' => now()
                         ]);
                     }
+
+                    // Also update the fallback/last cost on the ingredient model
+                    $ingredient->update(['cost' => $item['unit_price']]);
 
                     // Insert to Stock Ledger
                     StockLedger::create([

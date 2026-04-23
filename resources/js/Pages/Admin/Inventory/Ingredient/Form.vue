@@ -26,6 +26,19 @@
                 </div>
             </div>
 
+            <!-- Default Cost -->
+            <div class="flex items-start gap-6">
+                <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Default Cost</label>
+                <div class="flex-1">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                        <input v-model="form.cost" type="number" step="0.01" min="0" placeholder="Estimated cost per base unit"
+                            class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition pl-8 pr-3 text-sm" />
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Fallback cost used for recipes when no purchase history exists</p>    
+                </div>
+            </div>
+
             <!-- Minimum Stock -->
             <div class="flex items-start gap-6">
                 <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Min Stock *</label>
@@ -111,6 +124,7 @@ const props = defineProps({
 const form = useForm({
     name: props.ingredient?.name || '',
     unit_id: props.ingredient?.unit_id || '',
+    cost: props.ingredient?.cost || 0,
     min_stock: props.ingredient?.min_stock || 0,
     has_expiry: props.ingredient?.has_expiry ?? 0,
     status: props.ingredient?.status ?? 1
