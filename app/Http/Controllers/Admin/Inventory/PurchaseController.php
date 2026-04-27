@@ -10,6 +10,8 @@ use App\Models\Supplier;
 use App\Models\Ingredient;
 use App\Models\StockSummary;
 use App\Models\StockLedger;
+use App\Models\Unit;
+use App\Services\RecipeService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +19,13 @@ use Exception;
 
 class PurchaseController extends Controller
 {
+    protected $recipeService;
+
+    public function __construct(RecipeService $recipeService)
+    {
+        $this->recipeService = $recipeService;
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -65,6 +74,7 @@ class PurchaseController extends Controller
         return Inertia::render('Admin/Inventory/Purchase/Create', [
             'suppliers' => Supplier::all(),
             'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
+            'units' => Unit::all(),
             'pageTitle' => 'New Purchase Order'
         ]);
     }
@@ -78,6 +88,7 @@ class PurchaseController extends Controller
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.ingredient_id' => 'required|exists:ingredients,id',
+            'items.*.unit_id' => 'required|exists:units,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.expiry_date' => 'nullable|date'
@@ -121,6 +132,13 @@ class PurchaseController extends Controller
                     $totalPrice = $item['quantity'] * $item['unit_price'];
                     $ingredient = Ingredient::findOrFail($item['ingredient_id']);
                     
+                    // Normalization: Convert purchase quantity to base unit quantity
+                    $normalizedQuantity = $this->recipeService->convertQuantity(
+                        (float)$item['quantity'], 
+                        $item['unit_id'] ?? $ingredient->unit_id, 
+                        $ingredient->unit_id
+                    );
+
                     // Normalize empty date string to null 
                     $expiryDate = !empty($item['expiry_date']) ? $item['expiry_date'] : null;
 
@@ -128,7 +146,9 @@ class PurchaseController extends Controller
                     PurchaseDetail::create([
                         'purchase_id' => $purchaseMaster->id,
                         'ingredients_id' => $item['ingredient_id'],
+                        'unit_id' => $item['unit_id'] ?? $ingredient->unit_id,
                         'quantity' => $item['quantity'],
+                        'normalized_quantity' => $normalizedQuantity,
                         'unit_price' => $item['unit_price'],
                         'total_price' => $totalPrice,
                         'expiry_date' => $expiryDate
@@ -143,15 +163,15 @@ class PurchaseController extends Controller
                     
                     if ($stockSummary) {
                         $oldStock = (float)$stockSummary->current_stock;
-                        $stockSummary->current_stock += $item['quantity'];
+                        $stockSummary->current_stock += $normalizedQuantity;
                         $newStock = (float)$stockSummary->current_stock;
                         
-                        // Calculate new weighted average cost
-                        // Formula: ((Old Stock * Old Avg Cost) + (New Qty * New Cost)) / New Total Stock
+                        // Calculate new weighted average cost based on base unit
+                        // Formula: ((Old Stock * Old Avg Cost) + (New Total Price)) / New Total Stock
                         if ($newStock > 0) {
                             $stockSummary->average_cost = (($oldStock * $stockSummary->average_cost) + $totalPrice) / $newStock;
                         } else {
-                            $stockSummary->average_cost = $item['unit_price'];
+                            $stockSummary->average_cost = $totalPrice / $normalizedQuantity;
                         }
                         
                         $stockSummary->last_transaction_date = now();
@@ -161,18 +181,18 @@ class PurchaseController extends Controller
                             'ingredient_id' => $item['ingredient_id'],
                             'unit_id' => $ingredient->unit_id,
                             'branch_id' => $branchId,
-                            'current_stock' => $item['quantity'],
-                            'average_cost' => $item['unit_price'],
+                            'current_stock' => $normalizedQuantity,
+                            'average_cost' => $totalPrice / $normalizedQuantity,
                             'batch_no' => null,
                             'expiry_date' => $expiryDate,
                             'last_transaction_date' => now()
                         ]);
                     }
 
-                    // Also update the fallback/last cost on the ingredient model
-                    $ingredient->update(['cost' => $item['unit_price']]);
+                    // Also update the fallback/last cost on the ingredient model (normalized to base unit)
+                    $ingredient->update(['cost' => $totalPrice / $normalizedQuantity]);
 
-                    // Insert to Stock Ledger
+                    // Insert to Stock Ledger (ALWAYS IN BASE UNIT)
                     StockLedger::create([
                         'ingredient_id' => $item['ingredient_id'],
                         'unit_id' => $ingredient->unit_id,
@@ -180,9 +200,9 @@ class PurchaseController extends Controller
                         'transaction_type' => 1, // 1=purchase
                         'reference_id' => $purchaseMaster->id,
                         'reference_type' => 'purchase',
-                        'qty_in' => $item['quantity'],
+                        'qty_in' => $normalizedQuantity,
                         'qty_out' => 0,
-                        'unit_cost' => $item['unit_price'],
+                        'unit_cost' => $totalPrice / $normalizedQuantity,
                         'batch_no' => null,
                         'expiry_date' => $expiryDate,
                         'transaction_date' => now()

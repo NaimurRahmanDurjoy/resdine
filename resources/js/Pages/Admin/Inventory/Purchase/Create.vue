@@ -78,10 +78,24 @@
                                     </div>
 
                                     <div class="w-full md:w-1/6">
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Qty * <span v-if="getUnitShortName(item.ingredient_id)">({{ getUnitShortName(item.ingredient_id) }})</span></label>
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Unit *</label>
+                                        <select v-model="item.unit_id"
+                                            class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2"
+                                            :disabled="!item.ingredient_id" required>
+                                            <option v-for="unit in getAvailableUnits(item.ingredient_id)" :key="unit.id" :value="unit.id">
+                                                {{ unit.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="w-full md:w-1/6">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Qty *</label>
                                         <input v-model.number="item.quantity" type="number" step="0.01" min="0.01"
                                             class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2"
                                             required />
+                                        <p v-if="item.unit_id && item.ingredient_id" class="text-[10px] text-indigo-600 mt-1 font-medium italic">
+                                            = {{ calculateNormalizedQty(item).toLocaleString() }} {{ getUnitShortName(item.ingredient_id) }} (Stock)
+                                        </p>
                                     </div>
 
                                     <div class="w-full md:w-1/6">
@@ -163,6 +177,7 @@ defineOptions({ layout : AdminLayout })
 const props = defineProps({
     suppliers: Array,
     ingredients: Array,
+    units: Array,
     pageTitle: String
 })
 
@@ -172,12 +187,12 @@ const form = useForm({
     invoice_number: '',
     notes: '',
     items: [
-        { ingredient_id: '', quantity: 1, unit_price: 0, expiry_date: '' }
+        { ingredient_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' }
     ]
 })
 
 const addItem = () => {
-    form.items.push({ ingredient_id: '', quantity: 1, unit_price: 0, expiry_date: '' })
+    form.items.push({ ingredient_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' })
 }
 
 const removeItem = (index) => {
@@ -196,13 +211,70 @@ const getUnitShortName = (id) => {
 }
 
 const handleIngredientChange = (index) => {
-    // Optional logic to prefill properties could go here
     const item = form.items[index];
     const ingredient = getIngredient(item.ingredient_id)
 
-    // Suggest we might not need an expiry manually if not tracked
-    if (ingredient && !ingredient.expiry_tracking) {
-        item.expiry_date = ''
+    if (ingredient) {
+        item.unit_id = ingredient.unit_id
+        if (!ingredient.expiry_tracking) {
+            item.expiry_date = ''
+        }
+    }
+}
+
+const getAvailableUnits = (ingredientId) => {
+    if (!ingredientId) return []
+    const ingredient = getIngredient(ingredientId)
+    if (!ingredient) return []
+    
+    const baseUnitId = ingredient.unit?.base_unit_id || ingredient.unit_id
+    return props.units.filter(u => u.id == baseUnitId || u.base_unit_id == baseUnitId)
+}
+
+const getAbsoluteBaseValue = (unit, quantity) => {
+    let currentValue = parseFloat(quantity)
+    let currentUnit = unit
+    const visited = [unit.id]
+
+    while (currentUnit.base_unit_id) {
+        currentValue *= parseFloat(currentUnit.conversion_factor)
+        const nextUnit = props.units.find(u => u.id == currentUnit.base_unit_id)
+        
+        if (!nextUnit || visited.includes(nextUnit.id)) {
+            break
+        }
+        
+        currentUnit = nextUnit
+        visited.push(currentUnit.id)
+    }
+
+    return {
+        value: currentValue,
+        root_unit_id: currentUnit.id,
+        root_unit_name: currentUnit.name
+    }
+}
+
+const calculateNormalizedQty = (item) => {
+    if (!item.ingredient_id || !item.unit_id || !item.quantity) return 0
+    const ingredient = getIngredient(item.ingredient_id)
+    const fromUnit = props.units.find(u => u.id == item.unit_id)
+    const toUnit = props.units.find(u => u.id == ingredient.unit_id)
+
+    if (!fromUnit || !toUnit) return item.quantity
+
+    // Conversion Logic (Matching Recursive RecipeService)
+    try {
+        const fromBase = getAbsoluteBaseValue(fromUnit, item.quantity)
+        const toBase = getAbsoluteBaseValue(toUnit, 1)
+
+        if (fromBase.root_unit_id !== toBase.root_unit_id) {
+            return 0 // Incompatible
+        }
+
+        return fromBase.value / toBase.value
+    } catch (e) {
+        return 0
     }
 }
 

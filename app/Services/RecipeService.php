@@ -261,26 +261,49 @@ class RecipeService
         $toUnit = \App\Models\Unit::find($toUnitId);
 
         if (!$fromUnit || !$toUnit) {
-            return $quantity;
+            throw new Exception("Invalid units provided for conversion.");
         }
 
-        // Logic: Convert fromUnit to base unit, then convert base unit to toUnit
-        // Case 1: fromUnit is a sub-unit, toUnit is its base unit
-        if ($fromUnit->base_unit_id == $toUnit->id) {
-            return $quantity * $fromUnit->conversion_factor;
+        // 1. Get the Absolute Base Value of 'from' unit (recursively)
+        $fromBaseData = $this->getAbsoluteBaseValue($fromUnit, $quantity);
+        
+        // 2. Get the Absolute Base Value of 'to' unit (recursively, for 1 unit)
+        $toBaseData = $this->getAbsoluteBaseValue($toUnit, 1);
+
+        // 3. Verify they share the same ultimate base unit root (e.g. Grams)
+        if ($fromBaseData['root_unit_id'] !== $toBaseData['root_unit_id']) {
+            throw new Exception("Incompatible units: Cannot convert {$fromUnit->name} (Root: {$fromBaseData['root_unit_name']}) to {$toUnit->name} (Root: {$toBaseData['root_unit_name']}).");
         }
 
-        // Case 2: toUnit is a sub-unit, fromUnit is its base unit
-        if ($toUnit->base_unit_id == $fromUnit->id) {
-            return $quantity / $toUnit->conversion_factor;
+        // 4. Calculate the converted quantity
+        return (float) ($fromBaseData['value'] / $toBaseData['value']);
+    }
+
+    /**
+     * Recursively calculate the value in the ultimate base unit.
+     */
+    protected function getAbsoluteBaseValue($unit, float $quantity): array
+    {
+        $currentValue = $quantity;
+        $currentUnit = $unit;
+        $visited = [$unit->id];
+
+        while ($currentUnit->base_unit_id) {
+            $currentValue *= (float) $currentUnit->conversion_factor;
+            $nextUnit = \App\Models\Unit::find($currentUnit->base_unit_id);
+            
+            if (!$nextUnit || in_array($nextUnit->id, $visited)) {
+                break; 
+            }
+            
+            $currentUnit = $nextUnit;
+            $visited[] = $currentUnit->id;
         }
 
-        // Case 3: Both are sub-units of the same base unit
-        if ($fromUnit->base_unit_id && $fromUnit->base_unit_id == $toUnit->base_unit_id) {
-            $baseQty = $quantity * $fromUnit->conversion_factor;
-            return $baseQty / $toUnit->conversion_factor;
-        }
-
-        return $quantity; // No conversion possible
+        return [
+            'value' => $currentValue,
+            'root_unit_id' => $currentUnit->id,
+            'root_unit_name' => $currentUnit->name
+        ];
     }
 }

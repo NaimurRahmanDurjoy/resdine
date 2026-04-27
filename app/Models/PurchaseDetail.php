@@ -9,11 +9,18 @@ class PurchaseDetail extends BaseModel
     protected $fillable = [
         'purchase_id',
         'ingredients_id',
+        'unit_id',
         'quantity',
+        'normalized_quantity',
         'unit_price',
         'total_price',
         'expiry_date'
     ];
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
 
     public function purchase()
     {
