@@ -2,7 +2,8 @@
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <!-- Page Header -->
     <div class="bg-white dark:bg-gray-800">
-      <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div
+        class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">Menu Variants</h1>
@@ -18,25 +19,18 @@
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span class="material-symbols-outlined text-gray-400">search</span>
             </span>
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Search variants..."
-              class="block w-full pl-10 pr-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-            />
+            <input v-model="search" type="text" placeholder="Search variants..."
+              class="block w-full pl-10 pr-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" />
           </div>
-          <button 
-            @click="performSearch"
-            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 transition"
-          >
+          <button @click="performSearch"
+            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 transition">
             Search
           </button>
         </div>
 
         <!-- Add new variant -->
         <Link :href="route('admin.product.variants.create')"
-          class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition"
-        >
+          class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition">
           <span class="material-symbols-outlined text-sm">add</span>
           <span>Add Variant</span>
         </Link>
@@ -45,24 +39,27 @@
 
     <!-- Variants Table -->
     <ListTable :headers="headers" :items="variants.data" :pagination="variants" :sort="filters.sort"
-                :direction="filters.direction" :loading="loading" @sort="sortColumn">
+      :direction="filters.direction" :loading="loading" @sort="sortColumn">
       <template #rows="{ items }">
-        <tr v-for="variant in items" :key="variant.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+        <tr v-for="variant in items" :key="variant.id"
+          class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
             {{ variant.name }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+          <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
             {{ variant.product_item?.name || 'N/A' }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
+          <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
             ${{ parseFloat(variant.price).toFixed(2) }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex space-x-2">
-              <Link :href="route('admin.product.variants.edit', variant.id)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+              <Link :href="route('admin.product.variants.edit', variant.id)"
+                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <span class="material-symbols-outlined">edit</span>
               </Link>
-              <button @click="deleteVariant(variant.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+              <button @click="deleteVariant(variant.id)"
+                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                 <span class="material-symbols-outlined">delete</span>
               </button>
             </div>
@@ -73,22 +70,18 @@
       <template #pagination>
         <div class="flex items-center justify-between w-full">
           <div class="text-sm text-gray-700 dark:text-gray-400">
-            Showing <span class="font-medium">{{ variants.from }}</span> to <span class="font-medium">{{ variants.to }}</span> of <span class="font-medium">{{ variants.total }}</span> entries
+            Showing <span class="font-medium">{{ variants.from }}</span> to <span class="font-medium">{{ variants.to
+              }}</span> of <span class="font-medium">{{ variants.total }}</span> entries
           </div>
           <div class="flex space-x-1">
-            <Link
-              v-for="(link, k) in variants.links"
-              :key="k"
-              :href="link.url || '#'"
-              v-html="link.label"
+            <Link v-for="(link, k) in variants.links" :key="k" :href="link.url || '#'" v-html="link.label"
               class="relative inline-flex items-center px-3 py-1 border text-xs font-medium transition-colors rounded shadow-sm"
               :class="[
-                link.active 
-                  ? 'z-10 bg-indigo-600 border-indigo-600 text-white' 
+                link.active
+                  ? 'z-10 bg-indigo-600 border-indigo-600 text-white'
                   : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700',
                 !link.url ? 'cursor-not-allowed opacity-50' : ''
-              ]"
-            />
+              ]" />
           </div>
         </div>
       </template>
@@ -118,54 +111,54 @@ const search = ref(props.filters.search)
 const loading = ref(false)
 
 function debounce(fn, delay) {
-    let timeoutId;
-    return (...args) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-    };
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
 }
 
 const performSearch = () => {
-    loading.value = true
-    router.get(route('admin.product.variants.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
-        preserveState: true,
-        replace: true,
-        onFinish: () => loading.value = false
-    })
+  loading.value = true
+  router.get(route('admin.product.variants.index'), { search: search.value, sort: props.filters.sort, direction: props.filters.direction }, {
+    preserveState: true,
+    replace: true,
+    onFinish: () => loading.value = false
+  })
 }
 
 watch(search, debounce(() => performSearch(), 500))
 
 function sortColumn(column) {
-    let direction = 'asc'
-    if (props.filters.sort === column) {
-        direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
-    }
-    loading.value = true
-    router.get(route('admin.product.variants.index'), { search: search.value, sort: column, direction: direction }, {
-        preserveState: true,
-        replace: true,
-        onFinish: () => loading.value = false
-    })
+  let direction = 'asc'
+  if (props.filters.sort === column) {
+    direction = props.filters.direction === 'asc' ? 'desc' : 'asc'
+  }
+  loading.value = true
+  router.get(route('admin.product.variants.index'), { search: search.value, sort: column, direction: direction }, {
+    preserveState: true,
+    replace: true,
+    onFinish: () => loading.value = false
+  })
 }
 
 const deleteVariant = (id) => {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Deleting a variant cannot be undone!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#4f46e5',
-        cancelButtonColor: '#ef4444',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            router.delete(route('admin.product.variants.destroy', id), {
-                onSuccess: () => {
-                    Swal.fire('Deleted!', 'Variant has been deleted.', 'success')
-                }
-            })
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "Deleting a variant cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#4f46e5',
+    cancelButtonColor: '#ef4444',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.delete(route('admin.product.variants.destroy', id), {
+        onSuccess: () => {
+          Swal.fire('Deleted!', 'Variant has been deleted.', 'success')
         }
-    })
+      })
+    }
+  })
 }
 </script>

@@ -32,9 +32,10 @@ class RecipeService
             $itemsData = array_map(function ($item) use ($recipe) {
                 return [
                     'recipe_id' => $recipe->id,
-                    'ingredient_id' => $item['ingredient_id'],
+                    'ingredient_id' => $item['ingredient_id'] ?: null,
+                    'sub_product_id' => $item['sub_product_id'] ?: null,
                     'quantity' => $item['quantity'],
-                    'unit_id' => $item['unit_id'] ?? null,
+                    'unit_id' => $item['unit_id'] ?: null,
                     'wastage_percentage' => $item['wastage_percentage'] ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -43,7 +44,7 @@ class RecipeService
 
             RecipeItem::insert($itemsData);
 
-            return $recipe->load('recipeItems.ingredient.unit');
+            return $recipe->load(['recipeItems.ingredient.unit', 'recipeItems.subProduct.recipe']);
         });
     }
 
@@ -99,7 +100,29 @@ class RecipeService
         $items = [];
 
         foreach ($recipe->recipeItems as $item) {
-            $unitCost = $this->getLatestIngredientCost($item->ingredient_id, $item->unit_id);
+            $unitCost = 0;
+            $name = 'Unknown';
+
+            if ($item->ingredient_id) {
+                $unitCost = $this->getLatestIngredientCost($item->ingredient_id, $item->unit_id);
+                $name = $item->ingredient->name;
+            } elseif ($item->sub_product_id) {
+                $subProduct = $item->subProduct;
+                $subRecipe = $subProduct->recipe;
+                
+                if ($subRecipe) {
+                    $baseCost = $this->calculateRecipeCost($subRecipe)['total_cost'];
+                    
+                    // Normalize cost if the unit used in this recipe differs from sub-product's base unit
+                    if ($item->unit_id && $subProduct->unit_id && $item->unit_id != $subProduct->unit_id) {
+                        $conversionFactor = $this->convertQuantity(1, $item->unit_id, $subProduct->unit_id);
+                        $unitCost = $baseCost * $conversionFactor;
+                    } else {
+                        $unitCost = $baseCost;
+                    }
+                }
+                $name = $subProduct->name;
+            }
             
             // Gross quantity = Net / (1 - Wastage%)
             $wastage = $item->wastage_percentage ?? 0;
@@ -110,7 +133,8 @@ class RecipeService
 
             $items[] = [
                 'ingredient_id' => $item->ingredient_id,
-                'ingredient_name' => $item->ingredient->name,
+                'sub_product_id' => $item->sub_product_id,
+                'name' => $name,
                 'quantity' => $item->quantity,
                 'wastage' => $wastage,
                 'unit_cost' => $unitCost,
@@ -140,14 +164,25 @@ class RecipeService
             $netQuantity = $recipeItem->quantity * $quantity;
             
             // Total gross quantity to deduct (Net / (1 - Wastage%))
-            // Example: 100g net with 10% wastage -> 100 / 0.9 = 111.11g
             $wastage = $recipeItem->wastage_percentage ?? 0;
             $grossQuantity = $wastage < 100 ? ($netQuantity / (1 - ($wastage / 100))) : $netQuantity;
 
-            // Convert to ingredient's base unit if necessary
-            $deductionQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $recipeItem->ingredient->unit_id);
+            if ($recipeItem->ingredient_id) {
+                // Convert to ingredient's base unit if necessary
+                $deductionQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $recipeItem->ingredient->unit_id);
+                $this->updateStock($recipeItem->ingredient_id, $deductionQuantity, $branchId, 'out', $referenceType, $referenceId);
+            } elseif ($recipeItem->sub_product_id) {
+                // RECURSIVE CALL: Explode sub-recipe
+                // We need to pass the quantity in the sub-product's base unit
+                $subProduct = $recipeItem->subProduct;
+                $normalizedQty = $grossQuantity;
+                
+                if ($recipeItem->unit_id && $subProduct->unit_id && $recipeItem->unit_id != $subProduct->unit_id) {
+                    $normalizedQty = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $subProduct->unit_id);
+                }
 
-            $this->updateStock($recipeItem->ingredient_id, $deductionQuantity, $branchId, 'out', $referenceType, $referenceId);
+                $this->deductStockForProduct($recipeItem->sub_product_id, null, $normalizedQty, $referenceType, $referenceId, $branchId);
+            }
         }
     }
 
@@ -167,9 +202,19 @@ class RecipeService
             $wastage = $recipeItem->wastage_percentage ?? 0;
             $grossQuantity = $wastage < 100 ? ($netQuantity / (1 - ($wastage / 100))) : $netQuantity;
 
-            $restorationQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $recipeItem->ingredient->unit_id);
+            if ($recipeItem->ingredient_id) {
+                $restorationQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $recipeItem->ingredient->unit_id);
+                $this->updateStock($recipeItem->ingredient_id, $restorationQuantity, $branchId, 'in', $referenceType, $referenceId);
+            } elseif ($recipeItem->sub_product_id) {
+                $subProduct = $recipeItem->subProduct;
+                $normalizedQty = $grossQuantity;
+                
+                if ($recipeItem->unit_id && $subProduct->unit_id && $recipeItem->unit_id != $subProduct->unit_id) {
+                    $normalizedQty = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $subProduct->unit_id);
+                }
 
-            $this->updateStock($recipeItem->ingredient_id, $restorationQuantity, $branchId, 'in', $referenceType, $referenceId);
+                $this->restoreStockForProduct($recipeItem->sub_product_id, null, $normalizedQty, $referenceType, $referenceId, $branchId);
+            }
         }
     }
 
@@ -178,13 +223,13 @@ class RecipeService
      */
     protected function getRecipe(int $productItemId, ?int $variantId): ?Recipe
     {
-        $recipe = Recipe::with('recipeItems.ingredient')
+        $recipe = Recipe::with(['recipeItems.ingredient', 'recipeItems.subProduct'])
             ->where('menu_item_id', $productItemId)
             ->where('variant_id', $variantId)
             ->first();
 
         if (!$recipe && $variantId) {
-             $recipe = Recipe::with('recipeItems.ingredient')
+             $recipe = Recipe::with(['recipeItems.ingredient', 'recipeItems.subProduct'])
                 ->where('menu_item_id', $productItemId)
                 ->whereNull('variant_id')
                 ->first();

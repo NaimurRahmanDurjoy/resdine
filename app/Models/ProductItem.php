@@ -40,4 +40,21 @@ class ProductItem extends BaseModel
     {
         return $this->hasOne(Recipe::class, 'menu_item_id');
     }
+    public function recipes()
+    {
+        return $this->hasMany(Recipe::class, 'menu_item_id');
+    }
+
+    /**
+     * Recipes where this product item is used as a sub-component.
+     */
+    public function usedInRecipes()
+    {
+        return $this->hasMany(RecipeItem::class, 'sub_product_id');
+    }
+
+    public function scopePrepItems($query)
+    {
+        return $query->where('is_prep_item', true);
+    }
 }

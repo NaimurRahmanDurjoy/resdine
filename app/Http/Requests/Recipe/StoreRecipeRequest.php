@@ -24,8 +24,9 @@ class StoreRecipeRequest extends FormRequest
             'variant_id' => 'nullable|exists:product_variants,id',
             'branch_id' => 'nullable|exists:branches,id',
             'items' => 'required|array|min:1',
-            'items.*.ingredient_id' => 'required|exists:ingredients,id',
-            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.ingredient_id' => 'required_without:items.*.sub_product_id|nullable|exists:ingredients,id',
+            'items.*.sub_product_id' => 'required_without:items.*.ingredient_id|nullable|exists:product_items,id',
+            'items.*.quantity' => 'required|numeric|min:0.001',
             'items.*.unit_id' => 'nullable|exists:units,id',
             'items.*.wastage_percentage' => 'nullable|numeric|min:0|max:99.99',
         ];

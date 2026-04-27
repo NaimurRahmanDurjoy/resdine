@@ -9,6 +9,7 @@ class RecipeItem extends BaseModel
     protected $fillable = [
         'recipe_id',
         'ingredient_id',
+        'sub_product_id',
         'quantity',
         'unit_id',
         'wastage_percentage',
@@ -22,6 +23,11 @@ class RecipeItem extends BaseModel
     public function ingredient()
     {
         return $this->belongsTo(Ingredient::class);
+    }
+
+    public function subProduct()
+    {
+        return $this->belongsTo(ProductItem::class, 'sub_product_id');
     }
 
     public function unit()

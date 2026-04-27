@@ -25,9 +25,13 @@ class RecipeController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $menuItemId = $request->input('menu_item_id');
         $perPage = min($request->input('perPage', 10), 100);
 
-        $recipes = Recipe::with(['menuItem:id,name,price', 'variant:id,name,price', 'recipeItems.ingredient:id,name', 'recipeItems.unit:id,name'])
+        $recipes = Recipe::with(['menuItem:id,name,price', 'variant:id,name,price', 'recipeItems.ingredient:id,name', 'recipeItems.subProduct:id,name', 'recipeItems.unit:id,name'])
+            ->when($menuItemId, function ($query) use ($menuItemId) {
+                $query->where('menu_item_id', $menuItemId);
+            })
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('menuItem', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
@@ -69,8 +73,16 @@ class RecipeController extends Controller
             return $ing;
         });
 
+        $prepItems = ProductItem::prepItems()->where('status', 1)->get(['id', 'name', 'unit_id']);
+        $prepItems->transform(function($item) {
+            $recipe = $item->recipe;
+            $item->latest_cost = $recipe ? $this->recipeService->calculateRecipeCost($recipe)['total_cost'] : 0;
+            return $item;
+        });
+
         return Inertia::render('Admin/Recipes/Create', [
             'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name', 'price']),
+            'prepItems' => $prepItems,
             'ingredients' => $ingredients,
             'units' => Unit::all(),
             'branches' => Branch::all(),
@@ -93,9 +105,17 @@ class RecipeController extends Controller
             return $ing;
         });
 
+        $prepItems = ProductItem::prepItems()->where('status', 1)->get(['id', 'name', 'unit_id']);
+        $prepItems->transform(function($item) {
+            $recipe = $item->recipe;
+            $item->latest_cost = $recipe ? $this->recipeService->calculateRecipeCost($recipe)['total_cost'] : 0;
+            return $item;
+        });
+
         return Inertia::render('Admin/Recipes/Edit', [
-            'recipe' => $recipe->load(['recipeItems.ingredient.unit', 'menuItem.variants', 'variant']),
+            'recipe' => $recipe->load(['recipeItems.ingredient.unit', 'recipeItems.subProduct.recipe', 'menuItem.variants', 'variant']),
             'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name', 'price']),
+            'prepItems' => $prepItems,
             'ingredients' => $ingredients,
             'units' => Unit::all(),
             'branches' => Branch::all(),

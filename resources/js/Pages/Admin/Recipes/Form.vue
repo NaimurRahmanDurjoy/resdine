@@ -44,12 +44,39 @@
         <div v-for="(item, index) in form.items" :key="index"
           class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative group">
 
-          <div class="flex-grow grid grid-cols-1 md:grid-cols-5 gap-4">
-            <!-- Ingredient -->
+          <div class="flex-grow grid grid-cols-1 md:grid-cols-7 gap-4">
+            <!-- Type Toggle -->
             <div class="space-y-1">
               <label
-                class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Ingredient</label>
-              <select v-model="item.ingredient_id"
+                class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Type</label>
+              <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button type="button" @click="item.type = 'ingredient'; item.sub_product_id = ''; item.unit_id = ''"
+                  class="flex-1 text-[10px] py-1 rounded transition-all font-bold"
+                  :class="item.type === 'ingredient' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600' : 'text-gray-500'">
+                  ING
+                </button>
+                <button type="button" @click="item.type = 'sub_product'; item.ingredient_id = ''; item.unit_id = ''"
+                  class="flex-1 text-[10px] py-1 rounded transition-all font-bold"
+                  :class="item.type === 'sub_product' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600' : 'text-gray-500'">
+                  PREP
+                </button>
+              </div>
+            </div>
+
+            <!-- Item Selection -->
+            <div class="space-y-1 md:col-span-2">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                {{ item.type === 'sub_product' ? 'Prep Item' : 'Ingredient' }}
+              </label>
+
+              <select v-if="item.type === 'sub_product'" v-model="item.sub_product_id"
+                class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
+                @change="onSubProductChange($event, index)">
+                <option value="">Select Prep Item</option>
+                <option v-for="p in prepItems" :key="p.id" :value="p.id">{{ p.name }}</option>
+              </select>
+
+              <select v-else v-model="item.ingredient_id"
                 class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
                 @change="onIngredientChange($event, index)">
                 <option value="">Select Ingredient</option>
@@ -71,8 +98,8 @@
                 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Unit</label>
               <select v-model="item.unit_id"
                 class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
-                :disabled="!item.ingredient_id">
-                <option v-for="unit in getAllowedUnits(item.ingredient_id)" :key="unit.id" :value="unit.id">
+                :disabled="!item.ingredient_id && !item.sub_product_id">
+                <option v-for="unit in getAllowedUnits(item)" :key="unit.id" :value="unit.id">
                   {{ unit.name }}
                 </option>
               </select>
@@ -91,8 +118,10 @@
 
             <!-- Item Cost -->
             <div class="space-y-1">
-              <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Row Cost</label>
-              <div class="px-3 py-1.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300 border border-transparent">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Row
+                Cost</label>
+              <div
+                class="px-3 py-1.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300 border border-transparent">
                 ${{ calculateItemCost(item).toFixed(2) }}
               </div>
             </div>
@@ -112,11 +141,13 @@
 
       <!-- Cost Summary Section -->
       <div v-if="form.items.length > 0" class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
+        <div
+          class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
           <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 mb-1">Total Food Cost</p>
           <div class="text-2xl font-black text-indigo-700 dark:text-indigo-300">${{ totalCost.toFixed(2) }}</div>
         </div>
-        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+        <div
+          class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
           <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-500 mb-1">Selling Price</p>
           <div class="text-2xl font-black text-emerald-700 dark:text-emerald-300">${{ sellingPrice.toFixed(2) }}</div>
         </div>
@@ -155,6 +186,7 @@ const props = defineProps({
   form: Object,
   menuItems: Array,
   ingredients: Array,
+  prepItems: Array,
   units: Array,
   branches: Array,
   isEdit: {
@@ -204,39 +236,45 @@ const currentIngredients = computed(() => {
 })
 
 // Methods
-const getAllowedUnits = (ingredientId) => {
-  const ingredient = props.ingredients.find(ing => ing.id == ingredientId)
-  if (!ingredient) return []
-  
-  const baseUnitId = ingredient.unit?.base_unit_id || ingredient.unit_id
+const getAllowedUnits = (item) => {
+  let source = null
+  if (item.sub_product_id) {
+    source = props.prepItems.find(p => p.id == item.sub_product_id)
+  } else {
+    source = props.ingredients.find(ing => ing.id == item.ingredient_id)
+  }
+
+  if (!source) return []
+
+  const baseUnitId = source.unit?.base_unit_id || source.unit_id
   return props.units.filter(u => u.id == baseUnitId || u.base_unit_id == baseUnitId)
 }
 
 const calculateItemCost = (item) => {
-  const ingredient = props.ingredients.find(ing => ing.id == item.ingredient_id)
-  if (!ingredient || !item.quantity) return 0
-  
-  // baseCost is per ingredient's default unit
-  const baseCost = ingredient.latest_cost || 0
-  const ingredientUnit = props.units.find(u => u.id == ingredient.unit_id)
+  let source = null
+  if (item.sub_product_id) {
+    source = props.prepItems.find(p => p.id == item.sub_product_id)
+  } else {
+    source = props.ingredients.find(ing => ing.id == item.ingredient_id)
+  }
+
+  if (!source || !item.quantity) return 0
+
+  // baseCost is per source's default unit
+  const baseCost = source.latest_cost || 0
+  const sourceUnit = props.units.find(u => u.id == source.unit_id)
   const selectedUnit = props.units.find(u => u.id == item.unit_id)
-  
+
   let unitCost = baseCost
-  
-  if (selectedUnit && ingredientUnit && selectedUnit.id != ingredientUnit.id) {
-    // 1. Convert cost per ingredient unit to cost per absolute base unit
-    // If cost is $10 per KG (base), costPerBase = 10 / 1 = 10
-    // If cost is $0.01 per Gram (factor 0.001), costPerBase = 0.01 / 0.001 = 10
-    const costPerBase = baseCost / (ingredientUnit.conversion_factor || 1)
-    
-    // 2. Convert cost per base unit to cost per selected unit
-    // If costPerBase is $10 per KG, and selected is Gram (0.001), unitCost = 10 * 0.001 = 0.01
+
+  if (selectedUnit && sourceUnit && selectedUnit.id != sourceUnit.id) {
+    const costPerBase = baseCost / (sourceUnit.conversion_factor || 1)
     unitCost = costPerBase * (selectedUnit.conversion_factor || 1)
   }
 
   const wastage = parseFloat(item.wastage_percentage) || 0
   const grossQty = wastage < 100 ? (item.quantity / (1 - (wastage / 100))) : item.quantity
-  
+
   return Number(unitCost * grossQty)
 }
 
@@ -252,9 +290,29 @@ const onIngredientChange = (event, index) => {
   }
 }
 
+const onSubProductChange = (event, index) => {
+  const subProductId = event.target.value
+  const subProduct = props.prepItems.find(p => p.id == subProductId)
+  if (subProduct) {
+    props.form.items[index].unit_id = subProduct.unit_id
+  }
+}
+
+const toggleItemType = (index) => {
+  const item = props.form.items[index]
+  if (item.ingredient_id) {
+    item.ingredient_id = ''
+  } else {
+    item.sub_product_id = ''
+  }
+  item.unit_id = ''
+}
+
 const addItem = () => {
   props.form.items.push({
+    type: 'ingredient',
     ingredient_id: '',
+    sub_product_id: '',
     quantity: 1,
     unit_id: '',
     wastage_percentage: 0

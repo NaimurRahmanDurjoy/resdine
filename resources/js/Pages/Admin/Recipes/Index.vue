@@ -63,7 +63,7 @@
             <div class="flex flex-wrap gap-1">
               <span v-for="item in recipe.recipe_items" :key="item.id"
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                {{ item.ingredient?.name }}: {{ item.quantity }} {{ item.unit?.short_name || item.unit?.name }}
+                {{ item.ingredient?.name || item.sub_product?.name }}: {{ item.quantity }} {{ item.unit?.short_name || item.unit?.name }}
               </span>
             </div>
           </td>

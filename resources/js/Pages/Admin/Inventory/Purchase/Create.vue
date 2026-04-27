@@ -90,12 +90,15 @@
 
                                     <div class="w-full md:w-1/6">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Qty *</label>
-                                        <input v-model.number="item.quantity" type="number" step="0.01" min="0.01"
-                                            class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2"
-                                            required />
-                                        <p v-if="item.unit_id && item.ingredient_id" class="text-[10px] text-indigo-600 mt-1 font-medium italic">
-                                            = {{ calculateNormalizedQty(item).toLocaleString() }} {{ getUnitShortName(item.ingredient_id) }} (Stock)
-                                        </p>
+                                        <div class="flex items-center gap-1">
+                                            <input v-model.number="item.quantity" type="number" step="0.01" min="0.01"
+                                                class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2"
+                                                required />
+                                            <span v-if="item.unit_id && item.ingredient_id"
+                                                class="text-[10px] text-indigo-600 whitespace-nowrap">
+                                                ≈ {{ calculateNormalizedQty(item) }} {{ getUnitShortName(item.ingredient_id) }}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div class="w-full md:w-1/6">

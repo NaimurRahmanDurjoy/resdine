@@ -59,6 +59,7 @@ const form = useForm({
   department_id: props.product.department_id,
   status: props.product.status,
   is_featured: props.product.is_featured,
+  is_prep_item: props.product.is_prep_item,
   menu_img: null,
   combo_items: props.comboItemIds || [],
   combo_discount: props.product.combo_discount || 0,
