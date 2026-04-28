@@ -32,10 +32,10 @@ class RecipeService
             $itemsData = array_map(function ($item) use ($recipe) {
                 return [
                     'recipe_id' => $recipe->id,
-                    'ingredient_id' => $item['ingredient_id'] ?: null,
-                    'sub_product_id' => $item['sub_product_id'] ?: null,
+                    'ingredient_id' => $item['ingredient_id'] ?? null,
+                    'sub_product_id' => $item['sub_product_id'] ?? null,
                     'quantity' => $item['quantity'],
-                    'unit_id' => $item['unit_id'] ?: null,
+                    'unit_id' => $item['unit_id'] ?? null,
                     'wastage_percentage' => $item['wastage_percentage'] ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),

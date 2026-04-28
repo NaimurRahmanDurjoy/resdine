@@ -36,7 +36,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('title');
-            $table->unsignedBigInteger('branch_id');
+            $table->unsignedBigInteger('branch_id'); 
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->integer('estimated_guests')->nullable();

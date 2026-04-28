@@ -38,8 +38,8 @@ const form = useForm({
   branch_id: props.recipe.branch_id || '',
   items: props.recipe.recipe_items.map(item => ({
     type: item.sub_product_id ? 'sub_product' : 'ingredient',
-    ingredient_id: item.ingredient_id || '',
-    sub_product_id: item.sub_product_id || '',
+    ingredient_id: item.ingredient_id || null,
+    sub_product_id: item.sub_product_id || null,
     quantity: item.quantity,
     unit_id: item.unit_id,
     wastage_percentage: item.wastage_percentage || 0
