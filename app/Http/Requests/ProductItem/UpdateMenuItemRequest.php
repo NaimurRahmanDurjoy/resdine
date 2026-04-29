@@ -29,6 +29,7 @@ class UpdateMenuItemRequest extends FormRequest
             'unit_id' => 'required|exists:units,id',
             'department_id' => 'required|exists:res_departments,id',
             'is_prep_item' => 'boolean',
+            'is_retail' => 'boolean',
             'description' => 'nullable|string',
             'menu_img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'status' => 'boolean',

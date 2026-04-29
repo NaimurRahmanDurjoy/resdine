@@ -30,27 +30,27 @@ class DashboardController extends Controller
         $data['topItemName'] = $topItem ? ProductItem::find($topItem->item_id)->name : 'N/A';
         
         // Accurate Low Stock Alerts (based on ingredient.min_stock)
-        $data['lowStock'] = StockSummary::with('ingredient')
-            ->whereHas('ingredient', function($q) {
-                $q->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
+        $data['lowStock'] = StockSummary::with('inventoryItem')
+            ->whereHas('inventoryItem', function($q) {
+                $q->whereColumn('stock_summary.current_stock', '<=', 'inventory_items.min_stock');
             })
             ->take(5)
             ->get()
             ->map(function($stock) {
                 return [
-                    'ingredient_name' => $stock->ingredient->name,
+                    'ingredient_name' => $stock->inventoryItem->name,
                     'quantity' => $stock->current_stock,
-                    'unit' => $stock->ingredient->unit->short_name ?? ''
+                    'unit' => $stock->inventoryItem->unit->short_name ?? ''
                 ];
             });
 
         // Expiring Items (within next 30 days)
         $data['expiringItems'] = DB::table('purchase_details')
-            ->join('ingredients', 'purchase_details.ingredients_id', '=', 'ingredients.id')
+            ->join('inventory_items', 'purchase_details.inventory_item_id', '=', 'inventory_items.id')
             ->whereNotNull('purchase_details.expiry_date')
             ->where('purchase_details.expiry_date', '<=', now()->addDays(30))
             ->where('purchase_details.expiry_date', '>=', now())
-            ->select('ingredients.name as ingredient_name', 'purchase_details.expiry_date', 'purchase_details.quantity')
+            ->select('inventory_items.name as ingredient_name', 'purchase_details.expiry_date', 'purchase_details.quantity')
             ->orderBy('purchase_details.expiry_date', 'asc')
             ->take(5)
             ->get();

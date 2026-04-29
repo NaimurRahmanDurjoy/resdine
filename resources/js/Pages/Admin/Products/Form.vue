@@ -81,6 +81,14 @@
                 Is Prep Item
               </label>
             </div>
+            <div class="flex items-center">
+              <input v-model="form.is_retail" type="checkbox" id="is_retail" :true-value="1" :false-value="0"
+                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer">
+              <label for="is_retail" class="ml-2 block text-sm text-gray-700 dark:text-gray-400 cursor-pointer">
+                Is Retail
+              </label>
+            </div>
+
           </div>
         </div>
       </div>

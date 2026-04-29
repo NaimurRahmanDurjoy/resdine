@@ -134,7 +134,7 @@ const getTransactionType  = (type) => {
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                            <template v-if="entry.transaction_type === 'purchase' && entry.reference_id">
+                            <template v-if="entry.transaction_type == 1 && entry.reference_id">
                                 <Link :href="route('admin.purchase.show', entry.reference_id)" class="hover:underline">
                                 PO-{{ entry.reference_id }}</Link>
                             </template>

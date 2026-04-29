@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('product_items', function (Blueprint $table) {
             $table->boolean('is_prep_item')->default(false)->after('type');
+            $table->boolean('is_retail')->default(false)->after('is_prep_item');
         });
 
         Schema::table('recipe_items', function (Blueprint $table) {
@@ -36,6 +37,7 @@ return new class extends Migration
 
         Schema::table('product_items', function (Blueprint $table) {
             $table->dropColumn('is_prep_item');
+            $table->dropColumn('is_retail');
         });
     }
 };

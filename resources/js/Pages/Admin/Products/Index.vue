@@ -119,7 +119,7 @@
         <div class="flex items-center justify-between w-full">
           <div class="text-sm text-gray-700 dark:text-gray-400">
             Showing <span class="font-medium">{{ products.from }}</span> to <span class="font-medium">{{ products.to
-            }}</span> of <span class="font-medium">{{ products.total }}</span> entries
+              }}</span> of <span class="font-medium">{{ products.total }}</span> entries
           </div>
           <div class="flex space-x-1">
             <Link v-for="(link, k) in products.links" :key="k" :href="link.url || '#'" v-html="link.label"

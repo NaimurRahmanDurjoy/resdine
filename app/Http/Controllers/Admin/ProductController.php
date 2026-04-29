@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ProductItem\StoreMenuItemRequest;
 use App\Http\Requests\ProductItem\UpdateMenuItemRequest;
 use App\Models\ProductItem;
+use App\Models\InventoryItem;
 use App\Models\ProductCategory;
 use App\Models\ComboItemDetail;
 use App\Models\Unit;
@@ -87,6 +88,19 @@ class ProductController extends Controller
             if ($menuItem->type == 2) {
                 $this->syncComboItems($menuItem, $comboItems);
             }
+            // If it's a retail item, create corresponding inventory item
+            if($menuItem->is_retail) {
+                $inventoryItem = InventoryItem::create([
+                    'name' => $menuItem->name,
+                    'sku' => 'PRD-' . str_pad($menuItem->id, 6, '0', STR_PAD_LEFT),
+                    'unit_id' => $menuItem->unit_id,
+                    'item_type' => 2, // Product/Retail
+                    'reference_id' => $menuItem->id,
+                    'min_stock' => 0,
+                    'cost' => $menuItem->price,
+                    'status' => 1
+                ]);
+            }            
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item created successfully.');
@@ -127,6 +141,23 @@ class ProductController extends Controller
             } else {
                 $item->comboItems()->delete();
             }
+            // If it's a retail item, update or create corresponding inventory item
+            if($item->is_retail) {
+                $inventoryItem = InventoryItem::updateOrCreate(
+                    ['reference_id' => $item->id, 'item_type' => 2],
+                    [
+                        'name' => $item->name,
+                        'sku' => 'PRD-' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
+                        'unit_id' => $item->unit_id,
+                        'min_stock' => 0,
+                        'cost' => $item->price,
+                        'status' => 1
+                    ]
+                );
+            } else {
+                // If it's no longer retail, delete the corresponding inventory item
+                InventoryItem::where('reference_id', $item->id)->where('item_type', 2)->delete();
+            }   
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item updated successfully.');
@@ -139,6 +170,8 @@ class ProductController extends Controller
         DB::transaction(function () use ($item) {
             $item->comboItems()->delete();
             $item->delete();
+            // If it's a retail item, delete the corresponding inventory item
+            InventoryItem::where('reference_id', $item->id)->where('item_type', 2)->delete();
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item deleted successfully.');

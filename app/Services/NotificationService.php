@@ -58,27 +58,27 @@ class NotificationService
         $items = [];
 
         // 1. Low Stock Logic
-        $lowStockQuery = StockSummary::with('ingredient')
-            ->whereHas('ingredient', function($q) {
-                $q->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
+        $lowStockQuery = StockSummary::with('inventoryItem')
+            ->whereHas('inventoryItem', function($q) {
+                $q->whereColumn('stock_summary.current_stock', '<=', 'inventory_items.min_stock');
             });
             
         $lowStockCount = $lowStockQuery->count();
         
         $lowStocks = $lowStockQuery->limit(10)->get();
         foreach ($lowStocks as $stock) {
-            if ($stock->ingredient) {
+            if ($stock->inventoryItem) {
                 $items[] = [
                     'id' => 'ls_' . $stock->id,
                     'type' => 'low_stock',
-                    'message' => $stock->ingredient->name . ' is low in stock (' . $stock->current_stock . ' left)',
-                    'url' => route('admin.stock.show', $stock->ingredient_id)
+                    'message' => $stock->inventoryItem->name . ' is low in stock (' . $stock->current_stock . ' left)',
+                    'url' => route('admin.stock.show', $stock->inventoryItem->id)
                 ];
             }
         }
 
         // 2. Expiring Items Logic (Next 30 days)
-        $expiringQuery = \App\Models\PurchaseDetail::with(['ingredient', 'purchase'])
+        $expiringQuery = \App\Models\PurchaseDetail::with(['inventoryItem', 'purchase'])
             ->whereNotNull('expiry_date')
             ->where('expiry_date', '<=', now()->addDays(30))
             ->where('expiry_date', '>=', now());
@@ -87,13 +87,13 @@ class NotificationService
 
         $expiringItems = $expiringQuery->orderBy('expiry_date', 'asc')->limit(10)->get();
         foreach ($expiringItems as $detail) {
-            if ($detail->ingredient && $detail->purchase) {
+            if ($detail->inventoryItem && $detail->purchase) {
                 $days = now()->diffInDays($detail->expiry_date, false);
                 $dayStr = $days <= 0 ? 'today' : "in {$days} days";
                 $items[] = [
                     'id' => 'exp_' . $detail->id,
                     'type' => 'expiring',
-                    'message' => $detail->ingredient->name . " expires {$dayStr}",
+                    'message' => $detail->inventoryItem->name . " expires {$dayStr}",
                     'url' => route('admin.purchase.show', $detail->purchase_id)
                 ];
             }

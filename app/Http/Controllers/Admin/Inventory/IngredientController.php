@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
+use App\Models\InventoryItem;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -54,7 +55,19 @@ class IngredientController extends Controller
             'status' => 'required|boolean'
         ]);
 
-        Ingredient::create($validated);
+        $ingredient = Ingredient::create($validated);
+        // Also create a corresponding inventory item for stock tracking
+        $inventoryItem = InventoryItem::create([
+            'name' => $validated['name'],
+            'sku' => 'ING-' . str_pad($ingredient->id, 6, '0', STR_PAD_LEFT),
+            'unit_id' => $validated['unit_id'],
+            'current_stock' => 0,
+            'min_stock' => $validated['min_stock'],
+            'has_expiry' => $validated['has_expiry'],
+            'status' => $validated['status'],
+            'reference_id' => $ingredient->id,
+            'item_type' => 1
+        ]);
 
         return redirect()->route('admin.ingredients.index')->with('success', 'Ingredient created successfully.');
     }
@@ -80,6 +93,15 @@ class IngredientController extends Controller
         ]);
 
         $ingredient->update($validated);
+        // Also update the corresponding inventory item
+        InventoryItem::where('reference_id', $ingredient->id)->where('item_type', 1)->update([
+            'name' => $validated['name'],
+            'sku' => 'ING-' . str_pad($ingredient->id, 6, '0', STR_PAD_LEFT),
+            'unit_id' => $validated['unit_id'],
+            'min_stock' => $validated['min_stock'],
+            'has_expiry' => $validated['has_expiry'],
+            'status' => $validated['status']
+        ]);
 
         return redirect()->route('admin.ingredients.index')->with('success', 'Ingredient updated successfully.');
     }
@@ -87,6 +109,9 @@ class IngredientController extends Controller
     public function destroy(Ingredient $ingredient)
     {
         $ingredient->delete();
+        // Also delete the corresponding inventory item
+        InventoryItem::where('reference_id', $ingredient->id)->where('item_type', 1)->delete();
+
         return redirect()->route('admin.ingredients.index')->with('success', 'Ingredient deleted successfully.');
     }
 }

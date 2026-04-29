@@ -224,7 +224,7 @@ class PurchaseController extends Controller
 
     public function show($id)
     {
-        $purchase = PurchaseMaster::with(['supplier', 'details.ingredient.unit', 'details.productItem.unit'])->findOrFail($id);
+        $purchase = PurchaseMaster::with(['supplier', 'details.inventoryItem.unit'])->findOrFail($id);
         
         if (request()->wantsJson()) {
             return response()->json($purchase);

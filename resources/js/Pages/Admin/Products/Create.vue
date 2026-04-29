@@ -46,6 +46,7 @@ const form = useForm({
   status: 1,
   is_featured: 0,
   is_prep_item: 0,
+  is_retail: 0,
   menu_img: null,
   combo_items: [],
   combo_discount: 0,
