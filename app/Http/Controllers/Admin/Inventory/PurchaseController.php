@@ -8,6 +8,7 @@ use App\Models\PurchaseMaster;
 use App\Models\PurchaseDetail;
 use App\Models\Supplier;
 use App\Models\Ingredient;
+use App\Models\ProductItem;
 use App\Models\StockSummary;
 use App\Models\StockLedger;
 use App\Models\Unit;
@@ -74,6 +75,7 @@ class PurchaseController extends Controller
         return Inertia::render('Admin/Inventory/Purchase/Create', [
             'suppliers' => Supplier::all(),
             'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
+            'productItems' => ProductItem::with('unit')->get(),
             'units' => Unit::all(),
             'pageTitle' => 'New Purchase Order'
         ]);
@@ -87,7 +89,8 @@ class PurchaseController extends Controller
             'invoice_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
-            'items.*.ingredient_id' => 'required|exists:ingredients,id',
+            'items.*.item_type' => 'required|in:1,2', // 1=Ingredient, 2=ProductItem
+            'items.*.item_id' => 'required',
             'items.*.unit_id' => 'required|exists:units,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
@@ -95,22 +98,14 @@ class PurchaseController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($validated, $request) {
-                // Determine branch_id safely
-                $branchId = auth()->user()->branch_id;
-                if (!$branchId) {
-                    // Fallback to first branch if admin has no branch assigned
-                    $branch = Branch::first();
-                    $branchId = $branch ? $branch->id : null;
-                }
+            DB::transaction(function () use ($validated) {
+                $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
 
                 if (!$branchId) {
                     throw new Exception('A branch must be assigned to store a purchase.');
                 }
 
                 $totalAmount = 0;
-                
-                // Preliminary calculation
                 foreach ($validated['items'] as $item) {
                     $totalAmount += ($item['quantity'] * $item['unit_price']);
                 }
@@ -124,29 +119,37 @@ class PurchaseController extends Controller
                     'invoice_number' => $validated['invoice_number'] ?? 'PO-' . time(),
                     'total_amount' => $totalAmount,
                     'notes' => $validated['notes'] ?? null,
-                    'status' => 2 // 2 = Received  
+                    'status' => 2 
                 ]);
 
                 // 2. Create Details and Update Stock
                 foreach ($validated['items'] as $item) {
                     $totalPrice = $item['quantity'] * $item['unit_price'];
-                    $ingredient = Ingredient::findOrFail($item['ingredient_id']);
+                    $itemType = $item['item_type'];
+                    $itemId = $item['item_id'];
                     
-                    // Normalization: Convert purchase quantity to base unit quantity
+                    $itemClass = $itemType == 1 ? Ingredient::class : ProductItem::class;
+                    $itemModel = $itemClass::with('inventoryItem')->findOrFail($itemId);
+                    $inventoryItem = $itemModel->inventoryItem;
+                    
+                    if (!$inventoryItem) {
+                        throw new Exception("Inventory item mapping missing for " . $itemModel->name);
+                    }
+
+                    // Normalization
                     $normalizedQuantity = $this->recipeService->convertQuantity(
                         (float)$item['quantity'], 
-                        $item['unit_id'] ?? $ingredient->unit_id, 
-                        $ingredient->unit_id
+                        $item['unit_id'] ?? $itemModel->unit_id, 
+                        $itemModel->unit_id
                     );
 
-                    // Normalize empty date string to null 
                     $expiryDate = !empty($item['expiry_date']) ? $item['expiry_date'] : null;
 
                     // Record detail
                     PurchaseDetail::create([
                         'purchase_id' => $purchaseMaster->id,
-                        'ingredients_id' => $item['ingredient_id'],
-                        'unit_id' => $item['unit_id'] ?? $ingredient->unit_id,
+                        'inventory_item_id' => $inventoryItem->id,
+                        'unit_id' => $item['unit_id'] ?? $itemModel->unit_id,
                         'quantity' => $item['quantity'],
                         'normalized_quantity' => $normalizedQuantity,
                         'unit_price' => $item['unit_price'],
@@ -156,7 +159,7 @@ class PurchaseController extends Controller
 
                     // Update Stock Summary
                     $stockSummary = StockSummary::where([
-                        'ingredient_id' => $item['ingredient_id'],
+                        'inventory_item_id' => $inventoryItem->id,
                         'branch_id' => $branchId,
                         'batch_no' => null 
                     ])->lockForUpdate()->first();
@@ -166,8 +169,6 @@ class PurchaseController extends Controller
                         $stockSummary->current_stock += $normalizedQuantity;
                         $newStock = (float)$stockSummary->current_stock;
                         
-                        // Calculate new weighted average cost based on base unit
-                        // Formula: ((Old Stock * Old Avg Cost) + (New Total Price)) / New Total Stock
                         if ($newStock > 0) {
                             $stockSummary->average_cost = (($oldStock * $stockSummary->average_cost) + $totalPrice) / $newStock;
                         } else {
@@ -178,8 +179,8 @@ class PurchaseController extends Controller
                         $stockSummary->save();
                     } else {
                         $stockSummary = StockSummary::create([
-                            'ingredient_id' => $item['ingredient_id'],
-                            'unit_id' => $ingredient->unit_id,
+                            'inventory_item_id' => $inventoryItem->id,
+                            'unit_id' => $itemModel->unit_id,
                             'branch_id' => $branchId,
                             'current_stock' => $normalizedQuantity,
                             'average_cost' => $totalPrice / $normalizedQuantity,
@@ -189,15 +190,18 @@ class PurchaseController extends Controller
                         ]);
                     }
 
-                    // Also update the fallback/last cost on the ingredient model (normalized to base unit)
-                    $ingredient->update(['cost' => $totalPrice / $normalizedQuantity]);
+                    // Update cost on item model and inventory item
+                    if ($itemType == 1) {
+                        $itemModel->update(['cost' => $totalPrice / $normalizedQuantity]);
+                    }
+                    $inventoryItem->update(['cost' => $totalPrice / $normalizedQuantity]);
 
-                    // Insert to Stock Ledger (ALWAYS IN BASE UNIT)
+                    // Insert to Stock Ledger
                     StockLedger::create([
-                        'ingredient_id' => $item['ingredient_id'],
-                        'unit_id' => $ingredient->unit_id,
+                        'inventory_item_id' => $inventoryItem->id,
+                        'unit_id' => $itemModel->unit_id,
                         'branch_id' => $branchId,
-                        'transaction_type' => 1, // 1=purchase
+                        'transaction_type' => 1,
                         'reference_id' => $purchaseMaster->id,
                         'reference_type' => 'purchase',
                         'qty_in' => $normalizedQuantity,
@@ -220,7 +224,7 @@ class PurchaseController extends Controller
 
     public function show($id)
     {
-        $purchase = PurchaseMaster::with(['supplier', 'details.ingredient.unit'])->findOrFail($id);
+        $purchase = PurchaseMaster::with(['supplier', 'details.ingredient.unit', 'details.productItem.unit'])->findOrFail($id);
         
         if (request()->wantsJson()) {
             return response()->json($purchase);

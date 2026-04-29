@@ -18,40 +18,29 @@ class StockController extends Controller
     {
         $search = $request->input('search');
         $filter = $request->input('filter');
-        $sortable = ['name', 'current_stock', 'created_at'];
-        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'name';
+        $sortable = ['current_stock', 'last_transaction_date'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'last_transaction_date';
         $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
         $perPage = min($request->input('perPage', 10), 100);
 
-        // We use Ingredient as the base to catch items with ZERO stock (no summary)
-        $query = Ingredient::with(['unit', 'stockSummary']);
+        $query = StockSummary::with(['inventoryItem.unit', 'unit']);
 
-        // Main Query with Search
-        $query->when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%");
-        });
+        // Search in unified inventory item name
+        if ($search) {
+            $query->whereHas('inventoryItem', function($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%");
+            });
+        }
 
         // Quick Filters
         if ($filter === 'low_stock') {
-            $query->where(function($q) {
-                $q->whereHas('stockSummary', function ($sq) {
-                    $sq->whereColumn('stock_summary.current_stock', '<=', 'ingredients.min_stock');
-                })->orWhereDoesntHave('stockSummary', function($sq) {
-                    $sq->where('min_stock', '>', 0);
-                });
+            $query->whereHas('inventoryItem', function($q) {
+                $q->whereColumn('stock_summary.current_stock', '<=', 'inventory_items.min_stock');
             });
         } elseif ($filter === 'expiring') {
-            $query->where('has_expiry', 1)
-                ->whereHas('purchaseDetails', function ($q) {
-                    $q->whereNotNull('expiry_date')
-                      ->where('expiry_date', '<=', now()->addDays(30))
-                      ->where('expiry_date', '>=', now());
-                })
-                ->with(['purchaseDetails' => function($q) {
-                    $q->whereNotNull('expiry_date')
-                      ->where('expiry_date', '<=', now()->addDays(30))
-                      ->orderBy('expiry_date', 'asc');
-                }]);
+            $query->whereNotNull('expiry_date')
+                ->where('expiry_date', '<=', now()->addDays(30))
+                ->where('expiry_date', '>=', now());
         }
 
         $stocks = $query->orderBy($sort, $direction)
@@ -71,20 +60,22 @@ class StockController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($type, $id)
     {
-        $ingredient = Ingredient::with(['unit', 'stockSummary'])->findOrFail($id);
+        $itemClass = $type == 1 ? \App\Models\Ingredient::class : \App\Models\ProductItem::class;
+        $sourceItem = $itemClass::with('inventoryItem')->findOrFail($id);
+        $inventoryItem = $sourceItem->inventoryItem;
         
-        $ledger = StockLedger::where('ingredient_id', $id)
+        $ledger = StockLedger::where('inventory_item_id', $inventoryItem->id)
             ->orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString();
 
         return Inertia::render('Admin/Inventory/Stock/History', [
-            'ingredient' => $ingredient,
+            'item' => $sourceItem,
             'ledger' => $ledger,
-            'pageTitle' => 'Stock Audit: ' . $ingredient->name
+            'pageTitle' => 'Stock Audit: ' . $sourceItem->name
         ]);
     }
 
@@ -93,12 +84,17 @@ class StockController extends Controller
     {
         $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
         
-        $ingredients = Ingredient::with(['unit', 'stockSummary' => function($q) use ($branchId) {
+        $ingredients = Ingredient::with(['unit', 'inventoryItem.stockSummary' => function($q) use ($branchId) {
             $q->where('branch_id', $branchId);
         }])->where('status', 1)->get();
+
+        $prepItems = \App\Models\ProductItem::with(['unit', 'inventoryItem.stockSummary' => function($q) use ($branchId) {
+            $q->where('branch_id', $branchId);
+        }])->where('is_prep_item', true)->get();
         
         return Inertia::render('Admin/Inventory/Stock/Adjust', [
             'ingredients' => $ingredients,
+            'prepItems' => $prepItems,
             'pageTitle' => 'Stock Adjustment'
         ]);
     }
@@ -106,7 +102,8 @@ class StockController extends Controller
     public function processAdjustment(Request $request)
     {
         $validated = $request->validate([
-            'ingredient_id' => 'required|exists:ingredients,id',
+            'item_type' => 'required|in:1,2', // 1=Ingredient, 2=ProductItem
+            'item_id' => 'required|numeric',
             'transaction_type' => 'required|in:in,out',
             'quantity' => 'required|numeric|min:0.01',
             'notes' => 'required|string|max:255'
@@ -120,11 +117,17 @@ class StockController extends Controller
                     throw new Exception('A branch must be assigned to perform stock adjustment.');
                 }
 
-                $ingredient = Ingredient::findOrFail($validated['ingredient_id']);
+                $itemClass = $validated['item_type'] == 1 ? Ingredient::class : \App\Models\ProductItem::class;
+                $sourceItem = $itemClass::with('inventoryItem')->findOrFail($validated['item_id']);
+                $inventoryItem = $sourceItem->inventoryItem;
+
+                if (!$inventoryItem) {
+                    throw new Exception("Inventory mapping missing.");
+                }
                 
                 // 1. Update/Create Stock Summary
                 $stockSummary = StockSummary::where([
-                    'ingredient_id' => $validated['ingredient_id'],
+                    'inventory_item_id' => $inventoryItem->id,
                     'branch_id' => $branchId,
                     'batch_no' => null
                 ])->lockForUpdate()->first();
@@ -136,11 +139,11 @@ class StockController extends Controller
                         $stockSummary->save();
                     } else {
                         StockSummary::create([
-                            'ingredient_id' => $validated['ingredient_id'],
-                            'unit_id' => $ingredient->unit_id,
+                            'inventory_item_id' => $inventoryItem->id,
+                            'unit_id' => $sourceItem->unit_id,
                             'branch_id' => $branchId,
                             'current_stock' => $validated['quantity'],
-                            'average_cost' => 0, // Adjustment might not have cost info
+                            'average_cost' => 0, 
                             'batch_no' => null,
                             'last_transaction_date' => now()
                         ]);
@@ -148,7 +151,7 @@ class StockController extends Controller
                     
                     $qtyIn = $validated['quantity'];
                     $qtyOut = 0;
-                    $transType = 5; // 5=adjustment_in
+                    $transType = 5; // adjustment_in
                 } else {
                     if (!$stockSummary || $stockSummary->current_stock < $validated['quantity']) {
                         throw new Exception('Insufficient stock for outward adjustment.');
@@ -160,13 +163,13 @@ class StockController extends Controller
                     
                     $qtyIn = 0;
                     $qtyOut = $validated['quantity'];
-                    $transType = 6; // 6=adjustment_out
+                    $transType = 6; // adjustment_out
                 }
 
                 // 2. Create Stock Ledger Entry
                 StockLedger::create([
-                    'ingredient_id' => $validated['ingredient_id'],
-                    'unit_id' => $ingredient->unit_id,
+                    'inventory_item_id' => $inventoryItem->id,
+                    'unit_id' => $sourceItem->unit_id,
                     'branch_id' => $branchId,
                     'transaction_type' => $transType,
                     'reference_type' => 'adjustment',

@@ -53,8 +53,8 @@ class ProductItem extends BaseModel
         return $this->hasMany(RecipeItem::class, 'sub_product_id');
     }
 
-    public function scopePrepItems($query)
+    public function inventoryItem()
     {
-        return $query->where('is_prep_item', true);
+        return $this->hasOne(InventoryItem::class, 'reference_id')->whereIn('item_type', [2, 3]);
     }
 }

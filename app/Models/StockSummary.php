@@ -7,7 +7,7 @@ class StockSummary extends BaseModel
     protected $table = 'stock_summary';
 
     protected $fillable = [
-        'ingredient_id',
+        'inventory_item_id',
         'unit_id',
         'branch_id',
         'current_stock',
@@ -17,13 +17,13 @@ class StockSummary extends BaseModel
         'last_transaction_date'
     ];
 
-    public function ingredient()
+    public function inventoryItem()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
 
     public function unit()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

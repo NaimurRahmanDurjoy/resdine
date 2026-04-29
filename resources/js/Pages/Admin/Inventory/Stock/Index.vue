@@ -153,31 +153,27 @@ function sortColumn(column) {
                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-transparent"
                         :class="{
-                            '!border-amber-500 bg-amber-50/30': stock.stock_summary && parseFloat(stock.stock_summary.current_stock) <= parseFloat(stock.min_stock),
-                            '!border-red-600 bg-red-50': !stock.stock_summary && parseFloat(stock.min_stock) > 0
+                            '!border-amber-500 bg-amber-50/30': stock.inventory_item && parseFloat(stock.current_stock) <= parseFloat(stock.inventory_item.min_stock),
+                            '!border-red-600 bg-red-50': !stock.inventory_item && parseFloat(stock.min_stock) > 0
                         }">
-                        {{ stock.name || 'Unknown' }}
-                        <span v-if="!stock.stock_summary && parseFloat(stock.min_stock) > 0"
-                            class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white animate-pulse">
-                            NEVER STOCKED
-                        </span>
+                        {{ stock.inventory_item?.name || 'Unknown' }}
                         <span
-                            v-else-if="stock.stock_summary && parseFloat(stock.stock_summary.current_stock) <= parseFloat(stock.min_stock)"
+                            v-if="stock.inventory_item && parseFloat(stock.current_stock) <= parseFloat(stock.inventory_item.min_stock)"
                             class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800">
                             Low Stock
                         </span>
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                        {{ stock.unit?.short_name || stock.unit?.name || 'N/A' }}
+                        {{ stock.inventory_item?.unit?.short_name || stock.inventory_item?.unit?.name || 'N/A' }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm font-bold"
-                        :class="!stock.stock_summary || parseFloat(stock.stock_summary.current_stock) <= parseFloat(stock.min_stock) ? 'text-amber-600' : 'text-indigo-600'">
-                        {{ stock.stock_summary ? parseFloat(stock.stock_summary.current_stock).toFixed(2) : '0.00' }}
+                        :class="parseFloat(stock.current_stock) <= (stock.inventory_item?.min_stock || 0) ? 'text-amber-600' : 'text-indigo-600'">
+                        {{ parseFloat(stock.current_stock).toFixed(2) }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm">
-                        <div v-if="stock.purchase_details && stock.purchase_details.length > 0"
+                        <div v-if="stock.inventory_item?.purchase_details && stock.inventory_item.purchase_details.length > 0"
                             class="flex flex-col gap-1">
-                            <div v-for="batch in stock.purchase_details" :key="batch.id"
+                            <div v-for="batch in stock.inventory_item.purchase_details" :key="batch.id"
                                 class="text-[10px] px-1.5 py-0.5 rounded border border-red-200 bg-red-50 text-red-700 flex items-center justify-between">
                                 <span>Expires: {{ new Date(batch.expiry_date).toLocaleDateString() }}</span>
                                 <span class="font-bold ml-1">({{ getDaysLeft(batch.expiry_date) }}d left)</span>
@@ -186,11 +182,10 @@ function sortColumn(column) {
                         <span v-else class="text-xs text-gray-400 italic">No batches expiring</span>
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-500 font-medium font-mono">
-                        {{ stock.stock_summary?.updated_at ? new
-                            Date(stock.stock_summary.updated_at).toLocaleDateString() : 'N/A' }}
+                        {{ stock.updated_at ? new Date(stock.updated_at).toLocaleDateString() : 'N/A' }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm">
-                        <Link :href="route('admin.stock.show', stock.id)"
+                        <Link :href="route('admin.stock.show', { type: stock.inventory_item?.item_type, id: stock.inventory_item?.reference_id })"
                             class="p-1 text-indigo-600 hover:bg-indigo-50 rounded transition-colors group"
                             title="View History">
                             <span

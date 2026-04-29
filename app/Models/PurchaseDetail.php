@@ -8,7 +8,7 @@ class PurchaseDetail extends BaseModel
 
     protected $fillable = [
         'purchase_id',
-        'ingredients_id',
+        'inventory_item_id',
         'unit_id',
         'quantity',
         'normalized_quantity',
@@ -27,8 +27,8 @@ class PurchaseDetail extends BaseModel
         return $this->belongsTo(PurchaseMaster::class, 'purchase_id');
     }
 
-    public function ingredient()
+    public function inventoryItem()
     {
-        return $this->belongsTo(Ingredient::class, 'ingredients_id');
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
 }

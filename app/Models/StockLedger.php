@@ -7,7 +7,7 @@ class StockLedger extends BaseModel
     protected $table = 'stock_ledger';
 
     protected $fillable = [
-        'ingredient_id',
+        'inventory_item_id',
         'unit_id',
         'branch_id',
         'transaction_type',
@@ -21,8 +21,13 @@ class StockLedger extends BaseModel
         'transaction_date'
     ];
 
-    public function ingredient()
+    public function inventoryItem()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

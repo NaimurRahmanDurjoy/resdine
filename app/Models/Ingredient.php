@@ -17,14 +17,9 @@ class Ingredient extends BaseModel
     {
         return $this->belongsTo(Unit::class);
     }
-    public function stockSummary()
+    public function inventoryItem()
     {
-        return $this->hasOne(StockSummary::class);
-    }
-
-    public function stockLedger()
-    {
-        return $this->hasMany(StockLedger::class);
+        return $this->hasOne(InventoryItem::class, 'reference_id')->where('item_type', 1);
     }
 
     public function purchaseDetails()

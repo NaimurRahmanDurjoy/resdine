@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\Inventory\PurchaseController;
 use App\Http\Controllers\Admin\Inventory\IngredientController;
 use App\Http\Controllers\Admin\Inventory\SupplierController;
 use App\Http\Controllers\Admin\Inventory\UnitController;
+use App\Http\Controllers\Admin\Inventory\ProductionController;
 use App\Http\Controllers\Admin\RecipeController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\EventController;
@@ -72,6 +73,7 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('ingredients', IngredientController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('purchase', PurchaseController::class);
+        Route::resource('production', ProductionController::class);
 
         Route::get('stock/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
         Route::post('stock/adjust', [StockController::class, 'processAdjustment'])->name('stock.adjust.process');
