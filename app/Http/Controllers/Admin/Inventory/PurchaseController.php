@@ -75,7 +75,7 @@ class PurchaseController extends Controller
         return Inertia::render('Admin/Inventory/Purchase/Create', [
             'suppliers' => Supplier::all(),
             'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
-            'productItems' => ProductItem::with('unit')->get(),
+            'productItems' => ProductItem::with('unit')->where('is_retail', 1)->get(),
             'units' => Unit::all(),
             'pageTitle' => 'New Purchase Order'
         ]);
@@ -119,7 +119,7 @@ class PurchaseController extends Controller
                     'invoice_number' => $validated['invoice_number'] ?? 'PO-' . time(),
                     'total_amount' => $totalAmount,
                     'notes' => $validated['notes'] ?? null,
-                    'status' => 2 
+                    'status' => 2 // Assuming 2 means 'Received'
                 ]);
 
                 // 2. Create Details and Update Stock

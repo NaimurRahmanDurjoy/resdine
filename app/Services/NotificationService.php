@@ -72,7 +72,10 @@ class NotificationService
                     'id' => 'ls_' . $stock->id,
                     'type' => 'low_stock',
                     'message' => $stock->inventoryItem->name . ' is low in stock (' . $stock->current_stock . ' left)',
-                    'url' => route('admin.stock.show', $stock->inventoryItem->id)
+                    'url' => route('admin.stock.show', [
+                        'id' => $stock->inventoryItem->id,
+                        'type' => $stock->inventoryItem->item_type 
+                    ])
                 ];
             }
         }

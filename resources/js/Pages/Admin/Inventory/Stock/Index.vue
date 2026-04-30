@@ -12,7 +12,8 @@ const props = defineProps({
     pageTitle: String
 })
 const headers = [
-    { label: 'Ingredient', key: 'name', sortable: true },
+    { label: 'Type', key: 'inventoryItem.item_type', sortable: true },
+    { label: 'Item', key: 'name', sortable: true },
     { label: 'Unit', key: 'unit.short_name' },
     { label: 'Current Stock', key: 'stock_summary.current_stock', sortable: true },
     { label: 'Expiry Status', key: 'has_expiry' },
@@ -151,6 +152,9 @@ function sortColumn(column) {
             <template #rows="{ items }">
                 <tr v-for="stock in items" :key="stock.id"
                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        {{ stock.inventory_item?.item_type == 1 ? 'ING' : 'PRD' || 'N/A' }}
+                    </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-transparent"
                         :class="{
                             '!border-amber-500 bg-amber-50/30': stock.inventory_item && parseFloat(stock.current_stock) <= parseFloat(stock.inventory_item.min_stock),
