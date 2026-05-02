@@ -7,6 +7,8 @@ use App\Models\RecipeItem;
 use App\Models\ProductItem;
 use App\Models\StockSummary;
 use App\Models\StockLedger;
+use App\Models\Ingredient;
+use App\Models\PurchaseDetail;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -53,18 +55,18 @@ class RecipeService
      */
     public function getLatestIngredientCost(int $ingredientId, ?int $targetUnitId = null): float
     {
-        $ingredient = \App\Models\Ingredient::find($ingredientId);
+        $ingredient = Ingredient::find($ingredientId);
         if (!$ingredient) return 0;
 
         // 1. Try to get Average Cost from Stock Summary (most accurate for current stock)
-        $stockSummary = \App\Models\StockSummary::where('ingredient_id', $ingredientId)->first();
+        $stockSummary = StockSummary::where('inventory_item_id', $ingredientId)->first();
         $cost = 0;
         
         if ($stockSummary && $stockSummary->average_cost > 0) {
             $cost = (float) $stockSummary->average_cost;
         } else {
             // 2. Fallback to latest purchase cost
-            $latestPurchase = \App\Models\PurchaseDetail::where('ingredients_id', $ingredientId)
+            $latestPurchase = PurchaseDetail::where('inventory_item_id', $ingredientId)
                 ->whereHas('purchase', function ($q) {
                     $q->where('status', 2); // 2 = Received/Approved in PurchaseController
                 })
@@ -72,7 +74,7 @@ class RecipeService
                 ->first();
 
             if ($latestPurchase) {
-                $cost = (float) $latestPurchase->unit_price;
+                $cost = (float) ($latestPurchase->total_price / $latestPurchase->normalized_quantity);
             } else {
                 // 3. Fallback to manual cost set on ingredient
                 $cost = (float) ($ingredient->cost ?? 0);

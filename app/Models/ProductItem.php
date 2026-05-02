@@ -57,4 +57,12 @@ class ProductItem extends BaseModel
     {
         return $this->hasOne(InventoryItem::class, 'reference_id')->whereIn('item_type', [2, 3]);
     }
+
+    // Scope to filter only preparation items (if needed in the future)
+    public function scopePrepItems($query)
+    {
+        return $query->where('is_prep_item', true);
+    }
+
+
 }

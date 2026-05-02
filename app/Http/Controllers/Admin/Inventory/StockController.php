@@ -63,8 +63,8 @@ class StockController extends Controller
 
     public function show($type, $id)
     {
-        $itemClass = $type == 1 ? \App\Models\Ingredient::class : \App\Models\ProductItem::class;
-        $sourceItem = $itemClass::with('inventoryItem')->findOrFail($id);
+        $itemClass = $type == 1 ? Ingredient::class : ProductItem::class;
+        $sourceItem = $itemClass::with(['unit', 'inventoryItem.stockSummary', 'inventoryItem.unit'])->findOrFail($id);
         $inventoryItem = $sourceItem->inventoryItem;
 
         $ledger = StockLedger::where('inventory_item_id', $inventoryItem->id)
