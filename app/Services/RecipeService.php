@@ -240,7 +240,29 @@ class RecipeService
             }
         }
 
-        // 2. Fallback to recipe validation (Ingredients)
+        // 2. Handle Combo Items (Type 2)
+        if ($product->type == 2) {
+            $comboErrors = [];
+            $comboItems = \App\Models\ComboItemDetail::where('combo_id', $productItemId)->get();
+            
+            if ($comboItems->isEmpty()) {
+                return ["Combo '{$product->name}' has no items assigned to it."];
+            }
+
+            foreach ($comboItems as $comboItem) {
+                // The combo item quantity is multiplied by the requested order quantity
+                $subItemErrors = $this->validateStockForRecipe(
+                    $comboItem->item_id, 
+                    null, // Combos currently don't map specific variants of sub-items in the DB structure
+                    $comboItem->quantity * $quantity, 
+                    $branchId
+                );
+                $comboErrors = array_merge($comboErrors, $subItemErrors);
+            }
+            return $comboErrors;
+        }
+
+        // 3. Fallback to recipe validation (Ingredients)
         $recipe = $this->getRecipe($productItemId, $variantId);
         if (!$recipe) {
             return ["No stock or recipe found for {$product->name}."];
@@ -298,7 +320,23 @@ class RecipeService
             }
         }
 
-        // Fallback to recipe
+        // 2. Handle Combo Items (Type 2)
+        if ($product->type == 2) {
+            $comboItems = \App\Models\ComboItemDetail::where('combo_id', $productItemId)->get();
+            foreach ($comboItems as $comboItem) {
+                $this->deductStockForProduct(
+                    $comboItem->item_id, 
+                    null, 
+                    $comboItem->quantity * $quantity, 
+                    $referenceType, 
+                    $referenceId, 
+                    $branchId
+                );
+            }
+            return;
+        }
+
+        // 3. Fallback to recipe
         $recipe = $this->getRecipe($productItemId, $variantId);
         if (!$recipe) return;
 
@@ -342,7 +380,23 @@ class RecipeService
             return;
         }
 
-        // Fallback to recipe
+        // 2. Handle Combo Items (Type 2)
+        if ($product->type == 2) {
+            $comboItems = \App\Models\ComboItemDetail::where('combo_id', $productItemId)->get();
+            foreach ($comboItems as $comboItem) {
+                $this->restoreStockForProduct(
+                    $comboItem->item_id, 
+                    null, 
+                    $comboItem->quantity * $quantity, 
+                    $referenceType, 
+                    $referenceId, 
+                    $branchId
+                );
+            }
+            return;
+        }
+
+        // 3. Fallback to recipe
         $recipe = $this->getRecipe($productItemId, $variantId);
         if (!$recipe) return;
 

@@ -89,13 +89,28 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason /
-                                Notes *</label>
-                            <input v-model="form.notes" type="text"
-                                placeholder="e.g., Spoilage, Inventory Count Sync, Damage"
+                        <!-- Wastage Reason (Only for Outward Adjustments) -->
+                        <div v-if="form.transaction_type === 'out'">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Wastage Reason *</label>
+                            <select v-model="form.reason"
                                 class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
-                                required />
+                                required>
+                                <option :value="null" disabled>Select a reason...</option>
+                                <option value="damaged">Damaged / Broken</option>
+                                <option value="expired">Expired</option>
+                                <option value="staff_meal">Staff Meal</option>
+                                <option value="spillage">Spillage</option>
+                                <option value="theft">Theft / Unaccounted</option>
+                                <option value="correction">Inventory Correction</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Additional Notes (Optional)</label>
+                            <input v-model="form.notes" type="text"
+                                placeholder="e.g., Dropped during prep, count sync"
+                                class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm" />
                         </div>
                     </div>
 
@@ -135,6 +150,7 @@ const form = reactive({
     inventory_item_id: '',
     transaction_type: 'out',
     quantity: '',
+    reason: null,
     notes: ''
 })
 

@@ -14,17 +14,34 @@ class KdsController extends Controller
     /**
      * Display the Kitchen Display System dashboard.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $deptId = $request->input('department_id');
+
         // Fetch active orders (Pending or Preparing)
-        // Adjust order_status based on migration: 0=pending, 1=preparing, 2=ready
-        $orders = OrderMaster::with(['items.product', 'table', 'customer'])
-            ->whereIn('order_status', [0, 1]) 
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $query = OrderMaster::with(['items' => function ($q) use ($deptId) {
+            $q->with('product');
+            if ($deptId) {
+                $q->whereHas('product', function ($pq) use ($deptId) {
+                    $pq->where('department_id', $deptId);
+                });
+            }
+        }, 'table', 'customer'])
+            ->whereIn('order_status', [0, 1]);
+
+        if ($deptId) {
+            // Only show orders that have at least one item in this department
+            $query->whereHas('items.product', function ($q) use ($deptId) {
+                $q->where('department_id', $deptId);
+            });
+        }
+
+        $orders = $query->orderBy('created_at', 'asc')->get();
 
         return Inertia::render('Admin/Kds/Index', [
             'orders' => $orders,
+            'departments' => \App\Models\ResDepartment::all(),
+            'currentDepartment' => $deptId,
             'pageTitle' => 'Kitchen Display System'
         ]);
     }

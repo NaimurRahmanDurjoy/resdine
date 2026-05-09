@@ -99,12 +99,13 @@ class StockController extends Controller
             'inventory_item_id' => 'required|exists:inventory_items,id',
             'transaction_type' => 'required|in:in,out',
             'quantity' => 'required|numeric|min:0.01',
-            'notes' => 'required|string|max:255'
+            'reason' => 'required_if:transaction_type,out|nullable|in:damaged,expired,staff_meal,spillage,theft,correction,other',
+            'notes' => 'nullable|string|max:255'
         ]);
 
         try {
             DB::transaction(function () use ($validated) {
-                $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
+                $branchId = auth()->user()->branch_id ?? \App\Models\Branch::first()?->id;
 
                 if (!$branchId) {
                     throw new Exception('A branch must be assigned to perform stock adjustment.');
@@ -162,7 +163,8 @@ class StockController extends Controller
                     'reference_type' => 'adjustment',
                     'qty_in' => $qtyIn,
                     'qty_out' => $qtyOut,
-                    'notes' => $validated['notes'],
+                    'reason' => $validated['reason'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
                     'transaction_date' => now()
                 ]);
             });

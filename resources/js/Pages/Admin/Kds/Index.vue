@@ -4,17 +4,28 @@
     <header class="bg-indigo-700 text-white shadow-md px-6 py-3 flex justify-between items-center shrink-0">
       <div class="flex items-center space-x-4">
         <span class="material-symbols-outlined text-3xl">restaurant</span>
-        <h1 class="text-2xl font-bold font-heading">Kitchen Display System</h1>
+        <h1 class="text-2xl font-bold font-heading tracking-tight">KDS <span class="text-indigo-300 font-light">Dashboard</span></h1>
+        
+        <!-- Department Filter -->
+        <div class="ml-8 flex bg-indigo-800/50 p-1 rounded-xl border border-indigo-400/20">
+          <button @click="changeDepartment(null)" 
+                  :class="!currentDepartment ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-200 hover:text-white'"
+                  class="px-4 py-1.5 rounded-lg text-sm font-black transition-all">ALL</button>
+          <button v-for="dept in departments" :key="dept.id"
+                  @click="changeDepartment(dept.id)"
+                  :class="currentDepartment == dept.id ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-200 hover:text-white'"
+                  class="px-4 py-1.5 rounded-lg text-sm font-black transition-all uppercase">{{ dept.name }}</button>
+        </div>
       </div>
       <div class="flex items-center space-x-6">
         <div class="flex flex-col items-end">
-          <span class="text-sm opacity-80">Active Orders</span>
-          <span class="text-xl font-bold">{{ orders.length }}</span>
+          <span class="text-xs uppercase tracking-widest opacity-60">Pending</span>
+          <span class="text-xl font-black leading-none">{{ orders.length }}</span>
         </div>
-        <div class="h-8 w-px bg-indigo-500"></div>
+        <div class="h-8 w-px bg-indigo-500/50"></div>
         <div class="flex flex-col items-end">
-          <span class="text-sm opacity-80">{{ currentTime }}</span>
-          <span class="text-xs uppercase tracking-widest opacity-60">Real-time update</span>
+          <span class="text-sm font-mono">{{ currentTime }}</span>
+          <span class="text-[10px] uppercase tracking-widest opacity-60">Live Sync Active</span>
         </div>
       </div>
     </header>
@@ -97,7 +108,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
-  orders: Array
+  orders: Array,
+  departments: Array,
+  currentDepartment: [String, Number]
 })
 
 const currentTime = ref('')
@@ -113,6 +126,13 @@ const statusClasses = {
 const formatTime = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+const changeDepartment = (id) => {
+  router.get(route('admin.kds.index'), { department_id: id }, {
+    preserveState: true,
+    preserveScroll: true
+  })
 }
 
 const toggleItemStatus = (item) => {
@@ -142,10 +162,10 @@ onMounted(() => {
   updateTime()
   timer.value = setInterval(updateTime, 1000)
   
-  // Polling every 15 seconds
+  // Polling every 10 seconds for faster updates
   polling.value = setInterval(() => {
     router.reload({ only: ['orders'] })
-  }, 15000)
+  }, 10000)
 })
 
 onUnmounted(() => {
