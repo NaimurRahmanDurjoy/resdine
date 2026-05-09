@@ -54,7 +54,7 @@ class PosController extends Controller
                 'subtotal' => 'required|numeric',
                 'discount' => 'required|numeric',
                 'total_amount' => 'required|numeric',
-                'payment_method' => 'required|integer', 
+                'payment_method' => 'nullable|integer', 
                 'items' => 'required|array|min:1',
                 'items.*.item_id' => 'required|exists:product_items,id',
                 'items.*.variant_id' => 'nullable|exists:product_variants,id',
@@ -67,8 +67,8 @@ class PosController extends Controller
 
                 // 1. Create Order via Service (Handles Stock Deduction & Invoicing)
                 $order = $this->orderService->createOrder([
-                    'customer_id' => $validated['customer_id'],
-                    'table_id' => $validated['table_id'],
+                    'customer_id' => $validated['customer_id'] ?? null,
+                    'table_id' => $validated['table_id'] ?? null,
                     'branch_id' => $branchId,
                     'order_type' => $validated['order_type'],
                     'items' => $validated['items'],
@@ -76,15 +76,20 @@ class PosController extends Controller
                     'order_status' => 0, // Pending
                 ]);
 
-                // 2. Record Payment via Service
-                $this->paymentService->processPayment($order, [
-                    'amount' => $validated['total_amount'],
-                    'payment_method' => $validated['payment_method'],
-                ]);
+                $message = 'Order sent to kitchen successfully!';
+
+                // 2. Record Payment via Service if provided
+                if (!empty($validated['payment_method'])) {
+                    $this->paymentService->processPayment($order, [
+                        'amount' => $validated['total_amount'],
+                        'payment_method' => $validated['payment_method'],
+                    ]);
+                    $message = 'Order placed and paid successfully!';
+                }
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Order placed and paid successfully!',
+                    'message' => $message,
                     'order_id' => $order->id,
                 ]);
             });

@@ -32,7 +32,27 @@ class OrderService
             $discount = $data['discount'] ?? 0;
             $totalAmount = $subtotal - $discount;
 
-            // 1. Create Order Master
+            // 1. Strict Stock Validation
+            $allErrors = [];
+            foreach ($data['items'] as $itemData) {
+                $itemErrors = $this->recipeService->validateStockForRecipe(
+                    $itemData['item_id'],
+                    $itemData['variant_id'] ?? null,
+                    $itemData['quantity'],
+                    $data['branch_id']
+                );
+                if (!empty($itemErrors)) {
+                    $allErrors = array_merge($allErrors, $itemErrors);
+                }
+            }
+
+            if (!empty($allErrors)) {
+                // Group by ingredient to avoid duplicates and join with commas
+                $uniqueErrors = array_unique($allErrors);
+                throw new \Exception("Insufficient stock: " . implode(", ", $uniqueErrors));
+            }
+
+            // 2. Create Order Master
             $order = OrderMaster::create([
                 'user_id' => $data['user_id'] ?? auth()->id(),
                 'branch_id' => $data['branch_id'],
@@ -48,7 +68,7 @@ class OrderService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            // 2. Create Order Items & Deduct Stock
+            // 3. Create Order Items & Deduct Stock
             foreach ($data['items'] as $itemData) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -71,7 +91,7 @@ class OrderService
                 );
             }
 
-            // 3. Create Invoice
+            // 4. Create Invoice
             SalesInvoice::create([
                 'invoice_number' => 'INV-' . strtoupper(uniqid()),
                 'order_id' => $order->id,
@@ -84,12 +104,12 @@ class OrderService
                 'issued_at' => now(),
             ]);
 
-            // 4. Update Table Status
+            // 5. Update Table Status
             if ($order->table_id) {
                 RestaurantTable::where('id', $order->table_id)->update(['status' => 0]); // Occupied
             }
 
-            // 5. Notify (e.g., KDS)
+            // 6. Notify (e.g., KDS)
             // $this->notificationService->notifyNewOrder($order);
 
             return $order;

@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\DB;
 class WebController extends Controller
 {
     protected $orderService;
+    protected $paymentService;
 
-    public function __construct(\App\Services\OrderService $orderService)
+    public function __construct(\App\Services\OrderService $orderService, \App\Services\PaymentService $paymentService)
     {
         $this->orderService = $orderService;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -48,6 +50,7 @@ class WebController extends Controller
             'table_number' => 'nullable|string', 
             'subtotal' => 'required|numeric',
             'total_amount' => 'required|numeric',
+            'payment_method' => 'nullable|integer',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|exists:product_items,id',
             'items.*.variant_id' => 'nullable|exists:product_variants,id',
@@ -56,28 +59,55 @@ class WebController extends Controller
         ]);
 
         try {
-            // Determine a default branch and user for public orders
-            $branchId = 1; 
-            $systemUserId = 1;
+            return DB::transaction(function () use ($validated) {
+                // Determine a default branch and user for public orders
+                $branchId = 1; 
+                $systemUserId = 1;
+                $tableId = null;
 
-            $notes = "Guest: " . $validated['customer_name'] . " (" . $validated['customer_phone'] . ")";
+                // Resolve table number to table_id if it's a dine-in order
+                if ($validated['order_type'] == 1 && !empty($validated['table_number'])) {
+                    $table = \App\Models\RestaurantTable::where('name', $validated['table_number'])->first();
+                    if ($table) {
+                        $tableId = $table->id;
+                        $branchId = $table->branch_id; // Inherit branch from table
+                    }
+                }
 
-            $order = $this->orderService->createOrder([
-                'user_id' => $systemUserId,
-                'branch_id' => $branchId,
-                'order_type' => $validated['order_type'],
-                'items' => $validated['items'],
-                'discount' => 0,
-                'order_status' => 0, // Pending
-                'collect_amount' => 0, // Unpaid
-                'notes' => $notes,
-            ]);
+                $notes = "Guest: " . $validated['customer_name'] . " (" . $validated['customer_phone'] . ")";
+                if ($validated['table_number']) {
+                    $notes .= " - Table: " . $validated['table_number'];
+                }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Your order has been placed successfully!',
-                'order_number' => $order->order_number,
-            ]);
+                // 1. Create Order
+                $order = $this->orderService->createOrder([
+                    'user_id' => $systemUserId,
+                    'branch_id' => $branchId,
+                    'table_id' => $tableId,
+                    'order_type' => $validated['order_type'],
+                    'items' => $validated['items'],
+                    'discount' => 0,
+                    'order_status' => 0, // Pending
+                    'collect_amount' => 0, 
+                    'notes' => $notes,
+                ]);
+
+                // 2. Handle Instant Payment for Takeaway/Delivery
+                if ($validated['payment_method']) {
+                    $this->paymentService->processPayment(
+                        $order->id,
+                        $validated['total_amount'],
+                        $validated['payment_method'],
+                        'WEB-' . strtoupper(uniqid())
+                    );
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Your order has been placed successfully!',
+                    'order_number' => $order->order_number,
+                ]);
+            });
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

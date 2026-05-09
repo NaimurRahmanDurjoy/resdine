@@ -179,16 +179,24 @@
           </div>
 
           <!-- Actions -->
-          <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-3">
+            <div class="grid grid-cols-2 gap-3">
+              <button @click="submitOrder(false)" :disabled="cart.length === 0 || isSubmitting"
+                class="py-3 px-4 bg-amber-50 text-amber-600 font-bold rounded-xl hover:bg-amber-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-amber-200 flex items-center justify-center space-x-2">
+                <span class="material-symbols-outlined text-sm" v-if="isSubmitting">autorenew</span>
+                <span v-else class="material-symbols-outlined text-sm">send_to_mobile</span>
+                <span class="text-xs">Send to Kitchen</span>
+              </button>
+              <button @click="submitOrder(true)" :disabled="cart.length === 0 || isSubmitting"
+                class="py-3 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                <span class="material-symbols-outlined text-sm" v-if="isSubmitting">autorenew</span>
+                <span v-else class="material-symbols-outlined text-sm">payments</span>
+                <span class="text-xs">Pay & Complete</span>
+              </button>
+            </div>
             <button @click="cart = []" :disabled="cart.length === 0"
-              class="py-3 px-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-red-200">
+              class="py-2 px-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 w-full">
               Clear Cart
-            </button>
-            <button @click="processPaymentClick" :disabled="cart.length === 0 || isSubmitting"
-              class="py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-              <span class="material-symbols-outlined text-sm" v-if="isSubmitting">autorenew</span>
-              <span v-else class="material-symbols-outlined text-sm">payments</span>
-              <span>PAY & SEND</span>
             </button>
           </div>
         </div>
@@ -331,7 +339,7 @@ const removeFromCart = (index) => {
   cart.value.splice(index, 1)
 }
 
-const processPaymentClick = async () => {
+const submitOrder = async (isPaid) => {
   if (cart.value.length === 0) return
 
   // Basic Validation
@@ -348,7 +356,7 @@ const processPaymentClick = async () => {
     subtotal: cartSubtotal.value,
     discount: cartDiscount.value,
     total_amount: cartTotal.value,
-    payment_method: 1, // Hardcoded for simplicity in this flow
+    payment_method: isPaid ? 1 : null, // 1 = Default Cash method
     items: cart.value.map(c => ({
       item_id: c.item_id,
       variant_id: c.variant_id,
@@ -363,7 +371,7 @@ const processPaymentClick = async () => {
     if (res.data.success) {
       Swal.fire({
         title: 'Success!',
-        text: 'Order placed and sent to kitchen!',
+        text: res.data.message,
         icon: 'success',
         timer: 1500,
         showConfirmButton: false

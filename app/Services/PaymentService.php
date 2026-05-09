@@ -49,6 +49,11 @@ class PaymentService
                 
                 // Accrue loyalty points only on full payment attainment
                 $this->loyaltyService->accruePoints($order);
+
+                // Free the table if occupied
+                if ($order->table_id) {
+                    \App\Models\RestaurantTable::where('id', $order->table_id)->update(['status' => 1]); // 1 = Free
+                }
             }
             $order->save();
 

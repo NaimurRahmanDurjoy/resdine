@@ -191,6 +191,22 @@
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                     </div>
 
+                    <div v-if="form.order_type === 2">
+                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method (Instant Pay)</label>
+                      <div class="grid grid-cols-2 gap-2">
+                        <button @click="form.payment_method = 1" type="button"
+                          :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
+                          class="flex items-center justify-center gap-2 py-3 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                          <span class="material-symbols-outlined text-sm">payments</span> Cash
+                        </button>
+                        <button @click="form.payment_method = 3" type="button"
+                          :class="form.payment_method === 3 ? 'bg-pink-600 text-white border-pink-600' : 'bg-white text-slate-600 border-slate-200'"
+                          class="flex items-center justify-center gap-2 py-3 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                          <span class="material-symbols-outlined text-sm">smartphone</span> bKash
+                        </button>
+                      </div>
+                    </div>
+
                     <div>
                       <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your
                         Name</label>
@@ -257,7 +273,8 @@ const form = reactive({
   customer_name: '',
   customer_phone: '',
   order_type: 1,
-  table_number: ''
+  table_number: '',
+  payment_method: null
 })
 
 // Computed
@@ -339,6 +356,11 @@ const submitOrder = async () => {
 
   if (form.order_type === 1 && !form.table_number) {
     Swal.fire('Required Fields', 'Please enter your table number for Dine In.', 'error')
+    return
+  }
+
+  if (form.order_type === 2 && !form.payment_method) {
+    Swal.fire('Required Fields', 'Please select a payment method for Takeaway.', 'error')
     return
   }
 
