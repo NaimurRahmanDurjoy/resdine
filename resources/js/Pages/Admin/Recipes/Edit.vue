@@ -8,7 +8,7 @@
       </div>
 
       <div class="p-4">
-        <RecipeForm :form="form" :menu-items="menuItems" :ingredients="ingredients" :prep-items="prepItems"
+        <RecipeForm :form="form" :menu-items="menuItems" :inventory-items="inventoryItems"
           :units="units" :branches="branches" is-edit @submit="submit" />
       </div>
     </div>
@@ -25,8 +25,7 @@ defineOptions({ layout: AdminLayout })
 const props = defineProps({
   recipe: Object,
   menuItems: Array,
-  ingredients: Array,
-  prepItems: Array,
+  inventoryItems: Array,
   units: Array,
   branches: Array
 })
@@ -37,9 +36,7 @@ const form = useForm({
   variant_id: props.recipe.variant_id || '',
   branch_id: props.recipe.branch_id || '',
   items: props.recipe.recipe_items.map(item => ({
-    type: item.sub_product_id ? 'sub_product' : 'ingredient',
-    ingredient_id: item.ingredient_id || null,
-    sub_product_id: item.sub_product_id || null,
+    inventory_item_id: item.inventory_item_id,
     quantity: item.quantity,
     unit_id: item.unit_id,
     wastage_percentage: item.wastage_percentage || 0

@@ -31,49 +31,23 @@
                 <form @submit.prevent="submit" class="space-y-6">
 
                     <div class="space-y-5">
-                        <!-- Type Selector -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Item Type *</label>
-                            <div class="flex gap-4">
-                                <button type="button" @click="form.item_type = 1; resetItemSelection()"
-                                    class="flex-1 py-2 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 font-bold text-xs"
-                                    :class="form.item_type === 1 ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'">
-                                    <span class="material-symbols-outlined text-base">kitchen</span>
-                                    Ingredients
-                                </button>
-                                <button type="button" @click="form.item_type = 2; resetItemSelection()"
-                                    class="flex-1 py-2 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 font-bold text-xs"
-                                    :class="form.item_type === 2 ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200'">
-                                    <span class="material-symbols-outlined text-base">restaurant_menu</span>
-                                    Retail/Prepped
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Item Selection -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Select {{ form.item_type === 1 ? 'Ingredient' : 'Retail Item' }} *
+                                Select Inventory Item *
                             </label>
-                            <select v-model="form.item_id" @change="updateCurrentStockDisplay"
+                            <select v-model="form.inventory_item_id" @change="updateCurrentStockDisplay"
                                 class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                                 required>
                                 <option value="">Choose item...</option>
-                                <template v-if="form.item_type === 1">
-                                    <option v-for="item in ingredients" :key="item.id" :value="item.id">
-                                        {{ item.name }}
-                                    </option>
-                                </template>
-                                <template v-else>
-                                    <option v-for="item in retailItems" :key="item.id" :value="item.id">
-                                        {{ item.name }}
-                                    </option>
-                                </template>
+                                <option v-for="item in inventoryItems" :key="item.id" :value="item.id">
+                                    {{ item.name }} ({{ item.sku }})
+                                </option>
                             </select>
                         </div>
 
                         <!-- Current stock visualization (readonly) -->
-                        <div v-if="form.item_id"
+                        <div v-if="form.inventory_item_id"
                             class="flex gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                             <div>
                                 <p class="text-xs text-gray-500 font-semibold uppercase">Current System Stock</p>
@@ -153,14 +127,12 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
-    ingredients: Array,
-    retailItems: Array,
+    inventoryItems: Array,
     pageTitle: String
 })
 
 const form = reactive({
-    item_type: 1, // 1=Ingredient, 2=ProductItem
-    item_id: '',
+    inventory_item_id: '',
     transaction_type: 'out',
     quantity: '',
     notes: ''
@@ -171,30 +143,28 @@ const currentStockValue = ref(0)
 const unitDisplay = ref('')
 
 const resetItemSelection = () => {
-    form.item_id = ''
+    form.inventory_item_id = ''
     currentStockDisplay.value = '0.00'
     currentStockValue.value = 0
     unitDisplay.value = ''
 }
 
 const updateCurrentStockDisplay = () => {
-    if (!form.item_id) {
+    if (!form.inventory_item_id) {
         currentStockDisplay.value = '0.00'
         currentStockValue.value = 0
         unitDisplay.value = ''
         return
     }
 
-    const items = form.item_type === 1 ? props.ingredients : props.retailItems
-    const item = items.find(i => i.id === form.item_id)
+    const item = props.inventoryItems.find(i => i.id === form.inventory_item_id)
     
     if (item) {
         unitDisplay.value = item.unit?.short_name || item.unit?.name || ''
         
-        // In Unified Architecture, we access via inventory_item relation
-        if (item.inventory_item?.stock_summary) {
-            currentStockValue.value = parseFloat(item.inventory_item.stock_summary.current_stock)
-            currentStockDisplay.value = parseFloat(item.inventory_item.stock_summary.current_stock).toFixed(2)
+        if (item.stock_summary) {
+            currentStockValue.value = parseFloat(item.stock_summary.current_stock)
+            currentStockDisplay.value = parseFloat(item.stock_summary.current_stock).toFixed(2)
         } else {
             currentStockValue.value = 0
             currentStockDisplay.value = '0.00'

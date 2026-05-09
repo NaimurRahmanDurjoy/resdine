@@ -45,42 +45,18 @@
           class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative group">
 
           <div class="flex-grow grid grid-cols-1 md:grid-cols-7 gap-4">
-            <!-- Type Toggle -->
-            <div class="space-y-1">
-              <label
-                class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Type</label>
-              <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
-                <button type="button" @click="item.type = 'ingredient'; item.sub_product_id = ''; item.unit_id = ''"
-                  class="flex-1 text-[10px] py-1 rounded transition-all font-bold"
-                  :class="item.type === 'ingredient' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600' : 'text-gray-500'">
-                  ING
-                </button>
-                <button type="button" @click="item.type = 'sub_product'; item.ingredient_id = ''; item.unit_id = ''"
-                  class="flex-1 text-[10px] py-1 rounded transition-all font-bold"
-                  :class="item.type === 'sub_product' ? 'bg-white dark:bg-gray-600 shadow-sm text-indigo-600' : 'text-gray-500'">
-                  PREP
-                </button>
-              </div>
-            </div>
-
-            <!-- Item Selection -->
-            <div class="space-y-1 md:col-span-2">
+            <!-- Inventory Item Selection -->
+            <div class="space-y-1 md:col-span-3">
               <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                {{ item.type === 'sub_product' ? 'Prep Item' : 'Ingredient' }}
+                Inventory Item
               </label>
-
-              <select v-if="item.type === 'sub_product'" v-model="item.sub_product_id"
+              <select v-model="item.inventory_item_id"
                 class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
-                @change="onSubProductChange($event, index)">
-                <option value="">Select Prep Item</option>
-                <option v-for="p in prepItems" :key="p.id" :value="p.id">{{ p.name }}</option>
-              </select>
-
-              <select v-else v-model="item.ingredient_id"
-                class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
-                @change="onIngredientChange($event, index)">
-                <option value="">Select Ingredient</option>
-                <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">{{ ing.name }}</option>
+                @change="onItemChange($event, index)">
+                <option value="">Select Item</option>
+                <option v-for="i in inventoryItems" :key="i.id" :value="i.id">
+                  {{ i.name }} ({{ i.item_type === 1 ? 'Ing' : (i.item_type === 3 ? 'Prep' : 'Other') }})
+                </option>
               </select>
             </div>
 
@@ -98,7 +74,7 @@
                 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Unit</label>
               <select v-model="item.unit_id"
                 class="block w-full px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
-                :disabled="!item.ingredient_id && !item.sub_product_id">
+                :disabled="!item.inventory_item_id">
                 <option v-for="unit in getAllowedUnits(item)" :key="unit.id" :value="unit.id">
                   {{ unit.name }}
                 </option>
@@ -185,8 +161,7 @@ import { useForm, Link } from '@inertiajs/vue3'
 const props = defineProps({
   form: Object,
   menuItems: Array,
-  ingredients: Array,
-  prepItems: Array,
+  inventoryItems: Array,
   units: Array,
   branches: Array,
   isEdit: {
@@ -237,13 +212,7 @@ const currentIngredients = computed(() => {
 
 // Methods
 const getAllowedUnits = (item) => {
-  let source = null
-  if (item.sub_product_id) {
-    source = props.prepItems.find(p => p.id == item.sub_product_id)
-  } else {
-    source = props.ingredients.find(ing => ing.id == item.ingredient_id)
-  }
-
+  const source = props.inventoryItems.find(i => i.id == item.inventory_item_id)
   if (!source) return []
 
   const baseUnitId = source.unit?.base_unit_id || source.unit_id
@@ -251,13 +220,7 @@ const getAllowedUnits = (item) => {
 }
 
 const calculateItemCost = (item) => {
-  let source = null
-  if (item.sub_product_id) {
-    source = props.prepItems.find(p => p.id == item.sub_product_id)
-  } else {
-    source = props.ingredients.find(ing => ing.id == item.ingredient_id)
-  }
-
+  const source = props.inventoryItems.find(i => i.id == item.inventory_item_id)
   if (!source || !item.quantity) return 0
 
   // baseCost is per source's default unit
@@ -282,37 +245,17 @@ const onProductChange = () => {
   props.form.variant_id = ''
 }
 
-const onIngredientChange = (event, index) => {
-  const ingredientId = event.target.value
-  const ingredient = props.ingredients.find(ing => ing.id == ingredientId)
-  if (ingredient) {
-    props.form.items[index].unit_id = ingredient.unit_id
+const onItemChange = (event, index) => {
+  const itemId = event.target.value
+  const item = props.inventoryItems.find(i => i.id == itemId)
+  if (item) {
+    props.form.items[index].unit_id = item.unit_id
   }
-}
-
-const onSubProductChange = (event, index) => {
-  const subProductId = event.target.value
-  const subProduct = props.prepItems.find(p => p.id == subProductId)
-  if (subProduct) {
-    props.form.items[index].unit_id = subProduct.unit_id
-  }
-}
-
-const toggleItemType = (index) => {
-  const item = props.form.items[index]
-  if (item.ingredient_id) {
-    item.ingredient_id = ''
-  } else {
-    item.sub_product_id = ''
-  }
-  item.unit_id = ''
 }
 
 const addItem = () => {
   props.form.items.push({
-    type: 'ingredient',
-    ingredient_id: '',
-    sub_product_id: '',
+    inventory_item_id: '',
     quantity: 1,
     unit_id: '',
     wastage_percentage: 0

@@ -11,8 +11,8 @@
           </div>
           <Link :href="route('admin.product.items.index')"
             class="text-gray-500 hover:text-gray-700 flex items-center space-x-1">
-            <span class="material-symbols-outlined text-sm">arrow_back</span>
-            <span>Back to Menu</span>
+          <span class="material-symbols-outlined text-sm">arrow_back</span>
+          <span>Back to Menu</span>
           </Link>
         </div>
       </div>
@@ -32,11 +32,11 @@
             Search
           </button>
         </div>
-        
+
         <Link :href="route('admin.recipes.create')"
-            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition">
-          <span class="material-symbols-outlined text-sm">add</span>
-          <span>Add Recipe</span>
+          class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-green-700 flex items-center space-x-2 transition">
+        <span class="material-symbols-outlined text-sm">add</span>
+        <span>Add Recipe</span>
         </Link>
       </div>
     </div>
@@ -63,7 +63,7 @@
             <div class="flex flex-wrap gap-1">
               <span v-for="item in recipe.recipe_items" :key="item.id"
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                {{ item.ingredient?.name || item.sub_product?.name }}: {{ item.quantity }} {{ item.unit?.short_name || item.unit?.name }}
+                {{ item.inventory_item?.name }}: {{ item.quantity }} {{ item.unit?.short_name || item.unit?.name }}
               </span>
             </div>
           </td>
@@ -134,7 +134,7 @@ const props = defineProps({
 const headers = [
   { label: 'Menu Item', key: 'menu_item', sortable: true },
   { label: 'Variant', key: 'variant', sortable: false },
-  { label: 'Ingredients', key: 'ingredients', sortable: false },
+  { label: 'Components', key: 'ingredients', sortable: false },
   { label: 'Food Cost', key: 'food_cost', sortable: true },
   { label: 'Sell Price', key: 'selling_price', sortable: true },
   { label: 'GP %', key: 'gp_percentage', sortable: true },

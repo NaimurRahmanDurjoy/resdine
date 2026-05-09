@@ -28,7 +28,7 @@ class RecipeController extends Controller
         $menuItemId = $request->input('menu_item_id');
         $perPage = min($request->input('perPage', 10), 100);
 
-        $recipes = Recipe::with(['menuItem:id,name,price', 'variant:id,name,price', 'recipeItems.ingredient:id,name', 'recipeItems.subProduct:id,name', 'recipeItems.unit:id,name'])
+        $recipes = Recipe::with(['menuItem:id,name,price', 'variant:id,name,price', 'recipeItems.inventoryItem.unit'])
             ->when($menuItemId, function ($query) use ($menuItemId) {
                 $query->where('menu_item_id', $menuItemId);
             })
@@ -68,22 +68,22 @@ class RecipeController extends Controller
     {
         $selectedProductId = $request->get('product_id');
         
-        $ingredients = Ingredient::with('unit')->where('status', 1)->get()->map(function($ing) {
-            $ing->latest_cost = $this->recipeService->getLatestIngredientCost($ing->id, $ing->unit_id);
-            return $ing;
-        });
-
-        $prepItems = ProductItem::prepItems()->where('status', 1)->get(['id', 'name', 'unit_id']);
-        $prepItems->transform(function($item) {
-            $recipe = $item->recipe;
-            $item->latest_cost = $recipe ? $this->recipeService->calculateRecipeCost($recipe)['total_cost'] : 0;
+        $inventoryItems = \App\Models\InventoryItem::with('unit')->where('status', 1)->get()->map(function($item) {
+            if ($item->item_type == 1) { // Raw Ingredient
+                $item->latest_cost = $this->recipeService->getLatestItemCost($item->id, $item->unit_id);
+            } elseif ($item->item_type == 3) { // Prep Item
+                $product = $item->productItem;
+                $recipe = $product ? $product->recipe : null;
+                $item->latest_cost = $recipe ? $this->recipeService->calculateRecipeCost($recipe)['total_cost'] : 0;
+            } else {
+                $item->latest_cost = $this->recipeService->getLatestItemCost($item->id, $item->unit_id);
+            }
             return $item;
         });
 
         return Inertia::render('Admin/Recipes/Create', [
             'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name', 'price']),
-            'prepItems' => $prepItems,
-            'ingredients' => $ingredients,
+            'inventoryItems' => $inventoryItems,
             'units' => Unit::all(),
             'branches' => Branch::all(),
             'initialProductId' => $selectedProductId,
@@ -100,23 +100,23 @@ class RecipeController extends Controller
 
     public function edit(Recipe $recipe)
     {
-        $ingredients = Ingredient::with('unit')->where('status', 1)->get()->map(function($ing) {
-            $ing->latest_cost = $this->recipeService->getLatestIngredientCost($ing->id, $ing->unit_id);
-            return $ing;
-        });
-
-        $prepItems = ProductItem::prepItems()->where('status', 1)->get(['id', 'name', 'unit_id']);
-        $prepItems->transform(function($item) {
-            $recipe = $item->recipe;
-            $item->latest_cost = $recipe ? $this->recipeService->calculateRecipeCost($recipe)['total_cost'] : 0;
+        $inventoryItems = \App\Models\InventoryItem::with('unit')->where('status', 1)->get()->map(function($item) {
+            if ($item->item_type == 1) {
+                $item->latest_cost = $this->recipeService->getLatestItemCost($item->id, $item->unit_id);
+            } elseif ($item->item_type == 3) {
+                $product = $item->productItem;
+                $subRecipe = $product ? $product->recipe : null;
+                $item->latest_cost = $subRecipe ? $this->recipeService->calculateRecipeCost($subRecipe)['total_cost'] : 0;
+            } else {
+                $item->latest_cost = $this->recipeService->getLatestItemCost($item->id, $item->unit_id);
+            }
             return $item;
         });
 
         return Inertia::render('Admin/Recipes/Edit', [
-            'recipe' => $recipe->load(['recipeItems.ingredient.unit', 'recipeItems.subProduct.recipe', 'menuItem.variants', 'variant']),
+            'recipe' => $recipe->load(['recipeItems.inventoryItem.unit', 'recipeItems.inventoryItem.productItem.recipe', 'menuItem.variants', 'variant']),
             'menuItems' => ProductItem::with('variants')->where('status', 1)->get(['id', 'name', 'price']),
-            'prepItems' => $prepItems,
-            'ingredients' => $ingredients,
+            'inventoryItems' => $inventoryItems,
             'units' => Unit::all(),
             'branches' => Branch::all(),
             'pageTitle' => 'Edit Recipe'

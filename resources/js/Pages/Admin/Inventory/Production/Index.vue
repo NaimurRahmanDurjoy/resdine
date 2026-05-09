@@ -28,10 +28,10 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center space-x-3">
                                 <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
-                                    {{ (batch.product_item?.name || '??').charAt(0).toUpperCase() }}
+                                    {{ (batch.inventory_item?.name || '??').charAt(0).toUpperCase() }}
                                 </div>
                                 <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                                    {{ batch.product_item?.name || 'Unknown Product' }}
+                                    {{ batch.inventory_item?.name || 'Unknown Item' }}
                                 </div>
                             </div>
                         </td>

@@ -50,7 +50,7 @@ class InventoryItem extends BaseModel
      */
     public function ingredient()
     {
-        return $this->belongsTo(Ingredient::class, 'reference_id')->where('item_type', 1);
+        return $this->belongsTo(Ingredient::class, 'reference_id');
     }
 
     /**
@@ -58,6 +58,6 @@ class InventoryItem extends BaseModel
      */
     public function productItem()
     {
-        return $this->belongsTo(ProductItem::class, 'reference_id')->whereIn('item_type', [2, 3]);
+        return $this->belongsTo(ProductItem::class, 'reference_id');
     }
 }

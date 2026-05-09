@@ -23,7 +23,7 @@ class ProductionController extends Controller
 
     public function index()
     {
-        $history = StockLedger::with(['ingredient', 'productItem'])
+        $history = StockLedger::with(['inventoryItem.unit'])
             ->where('reference_type', 'production')
             ->orderBy('transaction_date', 'desc')
             ->paginate(15);
@@ -36,7 +36,15 @@ class ProductionController extends Controller
 
     public function create()
     {
-        $prepItems = ProductItem::prepItems()->with(['unit', 'recipe'])->get();
+        $branchId = auth()->user()->branch_id ?? \App\Models\Branch::first()?->id;
+        $prepItems = ProductItem::prepItems()
+            ->with([
+                'unit', 
+                'recipe.recipeItems.inventoryItem.stockSummary' => function($q) use ($branchId) {
+                    $q->where('branch_id', $branchId);
+                },
+                'recipe.recipeItems.inventoryItem.unit'
+            ])->get();
         
         return Inertia::render('Admin/Inventory/Production/Create', [
             'prepItems' => $prepItems,
@@ -60,6 +68,12 @@ class ProductionController extends Controller
 
                 if (!$product->inventoryItem) {
                     throw new Exception("Inventory mapping missing for this product.");
+                }
+
+                // 0. Validate Stock Availability
+                $stockErrors = $this->recipeService->validateStockForRecipe($product->id, null, $validated['quantity'], $branchId);
+                if (count($stockErrors) > 0) {
+                    throw new Exception("Insufficient stock: " . implode(', ', $stockErrors));
                 }
 
                 // 1. Calculate cost and deduct raw ingredients

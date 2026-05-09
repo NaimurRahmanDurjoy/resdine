@@ -88,19 +88,20 @@ class ProductController extends Controller
             if ($menuItem->type == 2) {
                 $this->syncComboItems($menuItem, $comboItems);
             }
-            // If it's a retail item, create corresponding inventory item
-            if($menuItem->is_retail) {
-                $inventoryItem = InventoryItem::create([
+            // If it's a retail or prep item, create corresponding inventory item
+            if($menuItem->is_retail || $menuItem->is_prep_item) {
+                InventoryItem::create([
                     'name' => $menuItem->name,
                     'sku' => 'PRD-' . str_pad($menuItem->id, 6, '0', STR_PAD_LEFT),
                     'unit_id' => $menuItem->unit_id,
-                    'item_type' => 2, // Product/Retail
+                    'item_type' => $menuItem->is_prep_item ? 3 : 2, // 3 for Prep, 2 for Retail
                     'reference_id' => $menuItem->id,
                     'min_stock' => 0,
                     'cost' => $menuItem->price,
                     'status' => 1
                 ]);
-            }            
+            }
+            
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item created successfully.');
@@ -141,10 +142,11 @@ class ProductController extends Controller
             } else {
                 $item->comboItems()->delete();
             }
-            // If it's a retail item, update or create corresponding inventory item
-            if($item->is_retail) {
-                $inventoryItem = InventoryItem::updateOrCreate(
-                    ['reference_id' => $item->id, 'item_type' => 2],
+            // If it's a retail or prep item, update or create corresponding inventory item
+            if($item->is_retail || $item->is_prep_item) {
+                $type = $item->is_prep_item ? 3 : 2;
+                InventoryItem::updateOrCreate(
+                    ['reference_id' => $item->id, 'item_type' => $type],
                     [
                         'name' => $item->name,
                         'sku' => 'PRD-' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
@@ -154,10 +156,15 @@ class ProductController extends Controller
                         'status' => 1
                     ]
                 );
+                // Delete if it was previously the other type
+                InventoryItem::where('reference_id', $item->id)
+                    ->where('item_type', $item->is_prep_item ? 2 : 3)
+                    ->delete();
             } else {
-                // If it's no longer retail, delete the corresponding inventory item
-                InventoryItem::where('reference_id', $item->id)->where('item_type', 2)->delete();
-            }   
+                // If it's no longer retail or prep, delete the corresponding inventory item
+                InventoryItem::where('reference_id', $item->id)->whereIn('item_type', [2, 3])->delete();
+            }
+   
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item updated successfully.');
@@ -170,8 +177,8 @@ class ProductController extends Controller
         DB::transaction(function () use ($item) {
             $item->comboItems()->delete();
             $item->delete();
-            // If it's a retail item, delete the corresponding inventory item
-            InventoryItem::where('reference_id', $item->id)->where('item_type', 2)->delete();
+            // Delete corresponding inventory items (retail or prep)
+            InventoryItem::where('reference_id', $item->id)->whereIn('item_type', [2, 3])->delete();
         });
 
         return redirect()->route('admin.product.items.index')->with('success', 'Menu item deleted successfully.');

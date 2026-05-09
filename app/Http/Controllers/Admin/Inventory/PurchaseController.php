@@ -74,8 +74,10 @@ class PurchaseController extends Controller
     {
         return Inertia::render('Admin/Inventory/Purchase/Create', [
             'suppliers' => Supplier::all(),
-            'ingredients' => Ingredient::with('unit')->where('status', 1)->get(),
-            'productItems' => ProductItem::with('unit')->where('is_retail', 1)->get(),
+            'inventoryItems' => \App\Models\InventoryItem::with('unit')
+                ->where('status', 1)
+                ->where('item_type', '!=', 3) // Exclude Prep Items from purchase
+                ->get(),
             'units' => Unit::all(),
             'pageTitle' => 'New Purchase Order'
         ]);
@@ -88,9 +90,7 @@ class PurchaseController extends Controller
             'purchase_date' => 'required|date',
             'invoice_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
-            'items' => 'required|array|min:1',
-            'items.*.item_type' => 'required|in:1,2', // 1=Ingredient, 2=ProductItem
-            'items.*.item_id' => 'required',
+            'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
             'items.*.unit_id' => 'required|exists:units,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
@@ -125,22 +125,13 @@ class PurchaseController extends Controller
                 // 2. Create Details and Update Stock
                 foreach ($validated['items'] as $item) {
                     $totalPrice = $item['quantity'] * $item['unit_price'];
-                    $itemType = $item['item_type'];
-                    $itemId = $item['item_id'];
-                    
-                    $itemClass = $itemType == 1 ? Ingredient::class : ProductItem::class;
-                    $itemModel = $itemClass::with('inventoryItem')->findOrFail($itemId);
-                    $inventoryItem = $itemModel->inventoryItem;
-                    
-                    if (!$inventoryItem) {
-                        throw new Exception("Inventory item mapping missing for " . $itemModel->name);
-                    }
+                    $inventoryItem = \App\Models\InventoryItem::findOrFail($item['inventory_item_id']);
 
                     // Normalization
                     $normalizedQuantity = $this->recipeService->convertQuantity(
                         (float)$item['quantity'], 
-                        $item['unit_id'] ?? $itemModel->unit_id, 
-                        $itemModel->unit_id
+                        $item['unit_id'], 
+                        $inventoryItem->unit_id
                     );
 
                     $expiryDate = !empty($item['expiry_date']) ? $item['expiry_date'] : null;
@@ -149,7 +140,7 @@ class PurchaseController extends Controller
                     PurchaseDetail::create([
                         'purchase_id' => $purchaseMaster->id,
                         'inventory_item_id' => $inventoryItem->id,
-                        'unit_id' => $item['unit_id'] ?? $itemModel->unit_id,
+                        'unit_id' => $item['unit_id'],
                         'quantity' => $item['quantity'],
                         'normalized_quantity' => $normalizedQuantity,
                         'unit_price' => $item['unit_price'],
@@ -180,7 +171,7 @@ class PurchaseController extends Controller
                     } else {
                         $stockSummary = StockSummary::create([
                             'inventory_item_id' => $inventoryItem->id,
-                            'unit_id' => $itemModel->unit_id,
+                            'unit_id' => $inventoryItem->unit_id,
                             'branch_id' => $branchId,
                             'current_stock' => $normalizedQuantity,
                             'average_cost' => $totalPrice / $normalizedQuantity,
@@ -190,16 +181,16 @@ class PurchaseController extends Controller
                         ]);
                     }
 
-                    // Update cost on item model and inventory item
-                    if ($itemType == 1) {
-                        $itemModel->update(['cost' => $totalPrice / $normalizedQuantity]);
+                    // Update cost on source model and inventory item
+                    if ($inventoryItem->item_type == 1 && $inventoryItem->reference_id) {
+                        Ingredient::where('id', $inventoryItem->reference_id)->update(['cost' => $totalPrice / $normalizedQuantity]);
                     }
                     $inventoryItem->update(['cost' => $totalPrice / $normalizedQuantity]);
 
                     // Insert to Stock Ledger
                     StockLedger::create([
                         'inventory_item_id' => $inventoryItem->id,
-                        'unit_id' => $itemModel->unit_id,
+                        'unit_id' => $inventoryItem->unit_id,
                         'branch_id' => $branchId,
                         'transaction_type' => 1,
                         'reference_id' => $purchaseMaster->id,

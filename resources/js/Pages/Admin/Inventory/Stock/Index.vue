@@ -127,6 +127,12 @@ function sortColumn(column) {
                     </div>
 
                     <div class="flex gap-2">
+                        <Link :href="route('admin.production.create')"
+                            class="px-4 py-2 bg-white border border-gray-300 text-emerald-600 rounded-lg text-sm font-semibold hover:bg-emerald-50 flex items-center gap-2 transition-all shadow-sm">
+                            <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                            Start Production
+                        </Link>
+
                         <Link :href="route('admin.stock.adjust')"
                             class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 flex items-center gap-2 transition-all shadow-sm">
                             <span class="material-symbols-outlined text-sm">tune</span>

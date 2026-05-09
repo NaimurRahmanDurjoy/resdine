@@ -34,8 +34,7 @@ class RecipeService
             $itemsData = array_map(function ($item) use ($recipe) {
                 return [
                     'recipe_id' => $recipe->id,
-                    'ingredient_id' => $item['ingredient_id'] ?? null,
-                    'sub_product_id' => $item['sub_product_id'] ?? null,
+                    'inventory_item_id' => $item['inventory_item_id'],
                     'quantity' => $item['quantity'],
                     'unit_id' => $item['unit_id'] ?? null,
                     'wastage_percentage' => $item['wastage_percentage'] ?? 0,
@@ -46,29 +45,29 @@ class RecipeService
 
             RecipeItem::insert($itemsData);
 
-            return $recipe->load(['recipeItems.ingredient.unit', 'recipeItems.subProduct.recipe']);
+            return $recipe->load(['recipeItems.inventoryItem.unit', 'recipeItems.inventoryItem.productItem.recipe']);
         });
     }
 
     /**
-     * Get the latest purchase cost for an ingredient, normalized to a target unit.
+     * Get the latest purchase cost for an inventory item, normalized to a target unit.
      */
-    public function getLatestIngredientCost(int $ingredientId, ?int $targetUnitId = null): float
+    public function getLatestItemCost(int $inventoryItemId, ?int $targetUnitId = null): float
     {
-        $ingredient = Ingredient::find($ingredientId);
-        if (!$ingredient) return 0;
+        $item = \App\Models\InventoryItem::find($inventoryItemId);
+        if (!$item) return 0;
 
-        // 1. Try to get Average Cost from Stock Summary (most accurate for current stock)
-        $stockSummary = StockSummary::where('inventory_item_id', $ingredientId)->first();
+        // 1. Try to get Average Cost from Stock Summary
+        $stockSummary = StockSummary::where('inventory_item_id', $inventoryItemId)->first();
         $cost = 0;
         
         if ($stockSummary && $stockSummary->average_cost > 0) {
             $cost = (float) $stockSummary->average_cost;
         } else {
             // 2. Fallback to latest purchase cost
-            $latestPurchase = PurchaseDetail::where('inventory_item_id', $ingredientId)
+            $latestPurchase = PurchaseDetail::where('inventory_item_id', $inventoryItemId)
                 ->whereHas('purchase', function ($q) {
-                    $q->where('status', 2); // 2 = Received/Approved in PurchaseController
+                    $q->where('status', 2);
                 })
                 ->latest()
                 ->first();
@@ -76,14 +75,14 @@ class RecipeService
             if ($latestPurchase) {
                 $cost = (float) ($latestPurchase->total_price / $latestPurchase->normalized_quantity);
             } else {
-                // 3. Fallback to manual cost set on ingredient
-                $cost = (float) ($ingredient->cost ?? 0);
+                // 3. Fallback to manual cost set on inventory item or source
+                $cost = (float) ($item->cost ?? 0);
             }
         }
 
         if ($cost <= 0) return 0;
 
-        $baseUnitId = $ingredient->unit_id;
+        $baseUnitId = $item->unit_id;
 
         if ($targetUnitId && $baseUnitId != $targetUnitId) {
             $conversionFactor = $this->convertQuantity(1, $targetUnitId, $baseUnitId);
@@ -104,26 +103,32 @@ class RecipeService
         foreach ($recipe->recipeItems as $item) {
             $unitCost = 0;
             $name = 'Unknown';
+            $invItem = $item->inventoryItem;
 
-            if ($item->ingredient_id) {
-                $unitCost = $this->getLatestIngredientCost($item->ingredient_id, $item->unit_id);
-                $name = $item->ingredient->name;
-            } elseif ($item->sub_product_id) {
-                $subProduct = $item->subProduct;
-                $subRecipe = $subProduct->recipe;
+            if ($invItem) {
+                $name = $invItem->name;
                 
-                if ($subRecipe) {
-                    $baseCost = $this->calculateRecipeCost($subRecipe)['total_cost'];
+                if ($invItem->item_type == 1) { // Raw Ingredient
+                    $unitCost = $this->getLatestItemCost($invItem->id, $item->unit_id);
+                } elseif ($invItem->item_type == 3) { // Prep Item (Sub-Product)
+                    $subProduct = $invItem->productItem;
+                    $subRecipe = $subProduct ? $subProduct->recipe : null;
                     
-                    // Normalize cost if the unit used in this recipe differs from sub-product's base unit
-                    if ($item->unit_id && $subProduct->unit_id && $item->unit_id != $subProduct->unit_id) {
-                        $conversionFactor = $this->convertQuantity(1, $item->unit_id, $subProduct->unit_id);
-                        $unitCost = $baseCost * $conversionFactor;
-                    } else {
-                        $unitCost = $baseCost;
+                    if ($subRecipe) {
+                        $baseCost = $this->calculateRecipeCost($subRecipe)['total_cost'];
+                        
+                        // Normalize cost if units differ
+                        if ($item->unit_id && $subProduct->unit_id && $item->unit_id != $subProduct->unit_id) {
+                            $conversionFactor = $this->convertQuantity(1, $item->unit_id, $subProduct->unit_id);
+                            $unitCost = $baseCost * $conversionFactor;
+                        } else {
+                            $unitCost = $baseCost;
+                        }
                     }
+                } else {
+                    // Fallback for other types if they have no recipe
+                    $unitCost = $this->getLatestItemCost($invItem->id, $item->unit_id);
                 }
-                $name = $subProduct->name;
             }
             
             // Gross quantity = Net / (1 - Wastage%)
@@ -134,8 +139,7 @@ class RecipeService
             $totalCost += $itemCost;
 
             $items[] = [
-                'ingredient_id' => $item->ingredient_id,
-                'sub_product_id' => $item->sub_product_id,
+                'inventory_item_id' => $item->inventory_item_id,
                 'name' => $name,
                 'quantity' => $item->quantity,
                 'wastage' => $wastage,
@@ -151,23 +155,12 @@ class RecipeService
     }
 
     /**
-     * Helper to update stock summary and ledger using the Unified Inventory Item.
+     * Helper to update stock summary and ledger using the Unified Inventory Item ID.
      */
-    protected function updateStock($item, float $qty, int $branchId, string $direction, string $refType, int $refId): void
+    protected function updateStockByInventoryItem(int $inventoryItemId, float $qty, int $branchId, string $direction, string $refType, int $refId): void
     {
-        DB::transaction(function () use ($item, $qty, $branchId, $direction, $refType, $refId) {
-            // Get or create the unified inventory item for this ingredient/product
-            $inventoryItem = $item->inventoryItem;
-            
-            if (!$inventoryItem) {
-                // Should be created by migration, but fallback for safety
-                $inventoryItem = InventoryItem::create([
-                    'name' => $item->name,
-                    'unit_id' => $item->unit_id,
-                    'item_type' => ($item instanceof Ingredient) ? 1 : ($item->is_prep_item ? 3 : 2),
-                    'reference_id' => $item->id,
-                ]);
-            }
+        DB::transaction(function () use ($inventoryItemId, $qty, $branchId, $direction, $refType, $refId) {
+            $inventoryItem = \App\Models\InventoryItem::findOrFail($inventoryItemId);
 
             $stockSummary = StockSummary::where('inventory_item_id', $inventoryItem->id)
                 ->where('branch_id', $branchId)
@@ -179,7 +172,7 @@ class RecipeService
                 } else {
                     $stockSummary = StockSummary::create([
                         'inventory_item_id' => $inventoryItem->id,
-                        'unit_id' => $item->unit_id,
+                        'unit_id' => $inventoryItem->unit_id,
                         'branch_id' => $branchId,
                         'current_stock' => -$qty,
                         'last_transaction_date' => now()
@@ -191,7 +184,7 @@ class RecipeService
                 } else {
                     $stockSummary = StockSummary::create([
                         'inventory_item_id' => $inventoryItem->id,
-                        'unit_id' => $item->unit_id,
+                        'unit_id' => $inventoryItem->unit_id,
                         'branch_id' => $branchId,
                         'current_stock' => $qty,
                         'last_transaction_date' => now()
@@ -217,6 +210,71 @@ class RecipeService
     }
 
     /**
+     * @deprecated Use updateStockByInventoryItem
+     */
+    protected function updateStock($item, float $qty, int $branchId, string $direction, string $refType, int $refId): void
+    {
+        $this->updateStockByInventoryItem($item->inventoryItem->id, $qty, $branchId, $direction, $refType, $refId);
+    }
+
+    /**
+     * Validate stock availability for a recipe. Returns array of errors if insufficient.
+     */
+    public function validateStockForRecipe(int $productItemId, ?int $variantId, float $quantity, int $branchId): array
+    {
+        $product = ProductItem::with('inventoryItem')->find($productItemId);
+        if (!$product) return ["Product not found."];
+
+        // 1. Check for direct stock of the product first (Retail/Prep items)
+        if ($product->inventoryItem) {
+            $invItem = $product->inventoryItem;
+            $inventoryQuantity = $this->convertQuantity($quantity, $product->unit_id, $invItem->unit_id);
+            
+            $stockSummary = StockSummary::where('inventory_item_id', $invItem->id)
+                ->where('branch_id', $branchId)
+                ->first();
+
+            $currentStock = $stockSummary ? (float)$stockSummary->current_stock : 0;
+            if ($currentStock >= $inventoryQuantity) {
+                return []; // Direct stock is sufficient
+            }
+        }
+
+        // 2. Fallback to recipe validation (Ingredients)
+        $recipe = $this->getRecipe($productItemId, $variantId);
+        if (!$recipe) {
+            return ["No stock or recipe found for {$product->name}."];
+        }
+
+        $errors = [];
+        foreach ($recipe->recipeItems as $recipeItem) {
+            $netQuantity = $recipeItem->quantity * $quantity;
+            $wastage = $recipeItem->wastage_percentage ?? 0;
+            $grossQuantity = $wastage < 100 ? ($netQuantity / (1 - ($wastage / 100))) : $netQuantity;
+
+            $invItem = $recipeItem->inventoryItem;
+            if (!$invItem) continue;
+
+            if ($invItem->item_type == 1) { // Ingredient
+                $requiredQty = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $invItem->unit_id);
+                $stockSummary = StockSummary::where('inventory_item_id', $invItem->id)
+                    ->where('branch_id', $branchId)
+                    ->first();
+
+                $currentStock = $stockSummary ? (float)$stockSummary->current_stock : 0;
+                if ($currentStock < $requiredQty) {
+                    $shortage = round($requiredQty - $currentStock, 3);
+                    $errors[] = "{$invItem->name} (Missing {$shortage} " . ($invItem->unit->short_name ?? $invItem->unit->name) . ")";
+                }
+            } elseif ($invItem->item_type == 3) { // Prep Item (Sub-Product)
+                $subErrors = $this->validateStockForRecipe($invItem->reference_id, null, $grossQuantity, $branchId);
+                $errors = array_merge($errors, $subErrors);
+            }
+        }
+        return $errors;
+    }
+
+    /**
      * Deduct stock for a product, using Unified Inventory IDs.
      */
     public function deductStockForProduct(int $productItemId, ?int $variantId, float $quantity, string $referenceType, int $referenceId, int $branchId): void
@@ -226,12 +284,16 @@ class RecipeService
 
         // Check for direct stock of the product first (Unified)
         if ($product->inventoryItem) {
-            $stockSummary = StockSummary::where('inventory_item_id', $product->inventoryItem->id)
+            $invItem = $product->inventoryItem;
+            // Convert selling quantity to inventory unit quantity
+            $inventoryQuantity = $this->convertQuantity($quantity, $product->unit_id, $invItem->unit_id);
+
+            $stockSummary = StockSummary::where('inventory_item_id', $invItem->id)
                 ->where('branch_id', $branchId)
                 ->first();
 
-            if ($stockSummary && $stockSummary->current_stock >= $quantity) {
-                $this->updateStock($product, $quantity, $branchId, 'out', $referenceType, $referenceId);
+            if ($stockSummary && $stockSummary->current_stock >= $inventoryQuantity) {
+                $this->updateStockByInventoryItem($invItem->id, $inventoryQuantity, $branchId, 'out', $referenceType, $referenceId);
                 return;
             }
         }
@@ -245,12 +307,15 @@ class RecipeService
             $wastage = $recipeItem->wastage_percentage ?? 0;
             $grossQuantity = $wastage < 100 ? ($netQuantity / (1 - ($wastage / 100))) : $netQuantity;
 
-            if ($recipeItem->ingredient_id) {
-                $deductionQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $recipeItem->ingredient->unit_id);
-                $this->updateStock($recipeItem->ingredient, $deductionQuantity, $branchId, 'out', $referenceType, $referenceId);
-            } elseif ($recipeItem->sub_product_id) {
-                // Recursive deduction simplified for unified flow
-                $this->deductStockForProduct($recipeItem->sub_product_id, null, $grossQuantity, $referenceType, $referenceId, $branchId);
+            $invItem = $recipeItem->inventoryItem;
+            if (!$invItem) continue;
+
+            if ($invItem->item_type == 1) { // Ingredient
+                $deductionQuantity = $this->convertQuantity($grossQuantity, $recipeItem->unit_id, $invItem->unit_id);
+                $this->updateStockByInventoryItem($invItem->id, $deductionQuantity, $branchId, 'out', $referenceType, $referenceId);
+            } elseif ($invItem->item_type == 3) { // Prep Item (Sub-Product)
+                // Recursive deduction
+                $this->deductStockForProduct($invItem->reference_id, null, $grossQuantity, $referenceType, $referenceId, $branchId);
             }
         }
     }
@@ -271,7 +336,9 @@ class RecipeService
             ->first();
 
         if ($ledgerEntry) {
-            $this->updateStock($product, $quantity, $branchId, 'in', $referenceType, $referenceId);
+            $invItem = $product->inventoryItem;
+            $inventoryQuantity = $this->convertQuantity($quantity, $product->unit_id, $invItem->unit_id);
+            $this->updateStockByInventoryItem($invItem->id, $inventoryQuantity, $branchId, 'in', $referenceType, $referenceId);
             return;
         }
 
@@ -280,11 +347,15 @@ class RecipeService
         if (!$recipe) return;
 
         foreach ($recipe->recipeItems as $recipeItem) {
-            $grossQuantity = $recipeItem->quantity * $quantity; // Simplified for restore
-            if ($recipeItem->ingredient_id) {
-                $this->updateStock($recipeItem->ingredient, $grossQuantity, $branchId, 'in', $referenceType, $referenceId);
-            } elseif ($recipeItem->sub_product_id) {
-                $this->restoreStockForProduct($recipeItem->sub_product_id, null, $grossQuantity, $referenceType, $referenceId, $branchId);
+            $grossQuantity = $recipeItem->quantity * $quantity; 
+            
+            $invItem = $recipeItem->inventoryItem;
+            if (!$invItem) continue;
+
+            if ($invItem->item_type == 1) { // Ingredient
+                $this->updateStockByInventoryItem($invItem->id, $grossQuantity, $branchId, 'in', $referenceType, $referenceId);
+            } elseif ($invItem->item_type == 3) { // Prep Item (Sub-Product)
+                $this->restoreStockForProduct($invItem->reference_id, null, $grossQuantity, $referenceType, $referenceId, $branchId);
             }
         }
     }
@@ -294,7 +365,7 @@ class RecipeService
      */
     protected function getRecipe(int $productItemId, ?int $variantId): ?Recipe
     {
-        return Recipe::with(['recipeItems.ingredient', 'recipeItems.subProduct'])
+        return Recipe::with(['recipeItems.inventoryItem.unit'])
             ->where('menu_item_id', $productItemId)
             ->where(function($q) use ($variantId) {
                 $q->where('variant_id', $variantId)

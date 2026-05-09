@@ -58,34 +58,17 @@
                                 <div v-for="(item, index) in form.items" :key="index"
                                     class="flex flex-wrap md:flex-nowrap gap-4 items-end bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm relative group transition-all hover:shadow-md">
                                     
-                                    <!-- Item Type Selector -->
-                                    <div class="w-full md:w-32">
-                                        <label class="block text-xs font-medium text-gray-500 mb-1">Type</label>
-                                        <select v-model="item.item_type" @change="handleTypeChange(index)"
-                                            class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2">
-                                            <option :value="1">Ingredient</option>
-                                            <option :value="2">Product</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="grow min-w-[200px]">
+                                    <div class="grow min-w-[250px]">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">
-                                            Select {{ item.item_type === 1 ? 'Ingredient' : 'Retail Product' }}
+                                            Select Inventory Item
                                         </label>
-                                        <select v-model="item.item_id" @change="handleItemChange(index)"
+                                        <select v-model="item.inventory_item_id" @change="handleItemChange(index)"
                                             class="w-full h-9 border rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm px-2"
                                             required>
                                             <option value="" disabled>Choose item...</option>
-                                            <template v-if="item.item_type === 1">
-                                                <option v-for="ing in ingredients" :key="ing.id" :value="ing.id">
-                                                    {{ ing.name }}
-                                                </option>
-                                            </template>
-                                            <template v-else>
-                                                <option v-for="prod in productItems" :key="prod.id" :value="prod.id">
-                                                    {{ prod.name }}
-                                                </option>
-                                            </template>
+                                            <option v-for="i in inventoryItems" :key="i.id" :value="i.id">
+                                                {{ i.name }} ({{ i.item_type === 1 ? 'Ing' : (i.item_type === 3 ? 'Prep' : 'Product') }})
+                                            </option>
                                         </select>
                                     </div>
 
@@ -187,8 +170,7 @@ defineOptions({ layout : AdminLayout })
 
 const props = defineProps({
     suppliers: Array,
-    ingredients: Array,
-    productItems: Array,
+    inventoryItems: Array,
     units: Array,
     pageTitle: String
 })
@@ -199,12 +181,12 @@ const form = useForm({
     invoice_number: '',
     notes: '',
     items: [
-        { item_type: 1, item_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' }
+        { inventory_item_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' }
     ]
 })
 
 const addItem = () => {
-    form.items.push({ item_type: 1, item_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' })
+    form.items.push({ inventory_item_id: '', unit_id: '', quantity: 1, unit_price: 0, expiry_date: '' })
 }
 
 const removeItem = (index) => {
@@ -214,34 +196,23 @@ const removeItem = (index) => {
 }
 
 // Helpers
-const getModel = (type, id) => {
-    if (type === 1) return props.ingredients.find(i => i.id === id)
-    return props.productItems.find(p => p.id === id)
-}
-
-const handleTypeChange = (index) => {
-    const item = form.items[index];
-    item.item_id = ''
-    item.unit_id = ''
-}
-
 const handleItemChange = (index) => {
     const item = form.items[index];
-    const model = getModel(item.item_type, item.item_id)
+    const inventoryItem = props.inventoryItems.find(i => i.id === item.inventory_item_id)
 
-    if (model) {
-        item.unit_id = model.unit_id
+    if (inventoryItem) {
+        item.unit_id = inventoryItem.unit_id
     }
 }
 
 const getAvailableUnits = (index) => {
     const item = form.items[index]
-    if (!item.item_id) return []
+    if (!item.inventory_item_id) return []
     
-    const model = getModel(item.item_type, item.item_id)
-    if (!model) return []
+    const inventoryItem = props.inventoryItems.find(i => i.id === item.inventory_item_id)
+    if (!inventoryItem) return []
     
-    const baseUnitId = model.unit?.base_unit_id || model.unit_id
+    const baseUnitId = inventoryItem.unit?.base_unit_id || inventoryItem.unit_id
     return props.units.filter(u => u.id == baseUnitId || u.base_unit_id == baseUnitId)
 }
 

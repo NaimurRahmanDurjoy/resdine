@@ -63,9 +63,7 @@ class StockController extends Controller
 
     public function show($type, $id)
     {
-        $itemClass = $type == 1 ? Ingredient::class : ProductItem::class;
-        $sourceItem = $itemClass::with(['unit', 'inventoryItem.stockSummary', 'inventoryItem.unit'])->findOrFail($id);
-        $inventoryItem = $sourceItem->inventoryItem;
+        $inventoryItem = \App\Models\InventoryItem::with(['unit', 'stockSummary'])->findOrFail($id);
 
         $ledger = StockLedger::where('inventory_item_id', $inventoryItem->id)
             ->orderBy('transaction_date', 'desc')
@@ -74,9 +72,9 @@ class StockController extends Controller
             ->withQueryString();
 
         return Inertia::render('Admin/Inventory/Stock/History', [
-            'item' => $sourceItem,
+            'item' => $inventoryItem,
             'ledger' => $ledger,
-            'pageTitle' => 'Stock Audit: ' . $sourceItem->name
+            'pageTitle' => 'Stock Audit: ' . $inventoryItem->name
         ]);
     }
 
@@ -85,17 +83,12 @@ class StockController extends Controller
     {
         $branchId = auth()->user()->branch_id ?? Branch::first()?->id;
 
-        $ingredients = Ingredient::with(['unit', 'inventoryItem.stockSummary' => function ($q) use ($branchId) {
+        $inventoryItems = \App\Models\InventoryItem::with(['unit', 'stockSummary' => function ($q) use ($branchId) {
             $q->where('branch_id', $branchId);
         }])->where('status', 1)->get();
 
-        $retailItems = ProductItem::with(['unit', 'inventoryItem.stockSummary' => function ($q) use ($branchId) {
-            $q->where('branch_id', $branchId);
-        }])->where('is_retail', true)->get();
-
         return Inertia::render('Admin/Inventory/Stock/Adjust', [
-            'ingredients' => $ingredients,
-            'retailItems' => $retailItems,
+            'inventoryItems' => $inventoryItems,
             'pageTitle' => 'Stock Adjustment'
         ]);
     }
@@ -103,8 +96,7 @@ class StockController extends Controller
     public function processAdjustment(Request $request)
     {
         $validated = $request->validate([
-            'item_type' => 'required|in:1,2', // 1=Ingredient, 2=ProductItem
-            'item_id' => 'required|numeric',
+            'inventory_item_id' => 'required|exists:inventory_items,id',
             'transaction_type' => 'required|in:in,out',
             'quantity' => 'required|numeric|min:0.01',
             'notes' => 'required|string|max:255'
@@ -118,13 +110,7 @@ class StockController extends Controller
                     throw new Exception('A branch must be assigned to perform stock adjustment.');
                 }
 
-                $itemClass = $validated['item_type'] == 1 ? Ingredient::class : ProductItem::class;
-                $sourceItem = $itemClass::with('inventoryItem')->findOrFail($validated['item_id']);
-                $inventoryItem = $sourceItem->inventoryItem;
-
-                if (!$inventoryItem) {
-                    return redirect()->back()->withErrors(['error' => 'Inventory item not found for the given source item.']);
-                }
+                $inventoryItem = \App\Models\InventoryItem::findOrFail($validated['inventory_item_id']);
 
                 // 1. Update/Create Stock Summary
                 $stockSummary = StockSummary::where([
@@ -141,7 +127,7 @@ class StockController extends Controller
                     } else {
                         StockSummary::create([
                             'inventory_item_id' => $inventoryItem->id,
-                            'unit_id' => $sourceItem->unit_id,
+                            'unit_id' => $inventoryItem->unit_id,
                             'branch_id' => $branchId,
                             'current_stock' => $validated['quantity'],
                             'average_cost' => 0,
@@ -170,7 +156,7 @@ class StockController extends Controller
                 // 2. Create Stock Ledger Entry
                 StockLedger::create([
                     'inventory_item_id' => $inventoryItem->id,
-                    'unit_id' => $sourceItem->unit_id,
+                    'unit_id' => $inventoryItem->unit_id,
                     'branch_id' => $branchId,
                     'transaction_type' => $transType,
                     'reference_type' => 'adjustment',
