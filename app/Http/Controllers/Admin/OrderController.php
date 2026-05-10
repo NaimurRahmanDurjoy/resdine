@@ -91,6 +91,20 @@ class OrderController extends Controller {
             return back()->withErrors(['error' => 'Failed to update status: ' . $e->getMessage()]);
         }
     }
+
+    public function refundItem(Request $request, $orderDetailId)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        try {
+            $this->orderService->refundOrderItem($orderDetailId, $request->quantity);
+            return back()->with('success', 'Item refunded successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to refund item: ' . $e->getMessage()]);
+        }
+    }
 }
 
 

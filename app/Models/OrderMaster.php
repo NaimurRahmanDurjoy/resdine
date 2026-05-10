@@ -5,6 +5,27 @@ namespace App\Models;
 class OrderMaster extends BaseModel
 {
 
+    protected $fillable = [
+        'order_number',
+        'user_id',
+        'branch_id',
+        'register_id',
+        'promotion_id',
+        'member_id',
+        'table_id',
+        'order_type',
+        'order_status',
+        'subtotal',
+        'discount',
+        'collect_amount',
+        'due_amount',
+        'total_amount',
+        'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by'
+    ];
+
     protected $casts = [
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',

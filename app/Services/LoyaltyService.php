@@ -65,4 +65,17 @@ class LoyaltyService
             ]);
         }
     }
+
+    /**
+     * Redeem points for a customer.
+     */
+    public function redeemPoints(Customer $customer, float $pointsToRedeem)
+    {
+        $loyalty = $customer->loyaltyPoints;
+        if (!$loyalty || ($loyalty->points_earned - $loyalty->points_redeemed) < $pointsToRedeem) {
+            throw new \Exception("Insufficient loyalty points.");
+        }
+
+        $loyalty->increment('points_redeemed', $pointsToRedeem);
+    }
 }

@@ -25,6 +25,10 @@
 
       <div class="flex items-center space-x-3">
         <span class="text-sm opacity-90 mr-2 hidden lg:block">{{ currentTime }}</span>
+        <Link :href="route('admin.pos.register.close')"
+          class="bg-red-600/50 hover:bg-red-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all mr-2 flex items-center gap-1 border border-red-500/30">
+          <span class="material-symbols-outlined text-xs">logout</span> Close Shift
+        </Link>
         <div
           class="bg-indigo-600 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-inner cursor-pointer hover:bg-indigo-500 transition">
           <span class="material-symbols-outlined text-sm mr-1">person</span>{{ user.name }}
@@ -194,6 +198,18 @@
                 <span class="text-xs">Pay & Complete</span>
               </button>
             </div>
+
+            <!-- Loyalty Point Redemption Button -->
+            <div v-if="selectedCustomerId && activeCustomerPoints >= cartTotal" class="w-full">
+              <button @click="submitOrder(true, 5)" :disabled="isSubmitting"
+                class="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition active:scale-95 shadow-md flex items-center justify-center space-x-2">
+                <span class="material-symbols-outlined text-sm">redeem</span>
+                <span class="text-xs">Pay with {{ cartTotal.toFixed(0) }} Points (Bal: {{ activeCustomerPoints }})</span>
+              </button>
+            </div>
+            <div v-else-if="selectedCustomerId" class="text-center">
+               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Points Balance: {{ activeCustomerPoints }} (Insufficient for this order)</span>
+            </div>
             <button @click="cart = []" :disabled="cart.length === 0"
               class="py-2 px-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 w-full">
               Clear Cart
@@ -280,6 +296,13 @@ const cartTotal = computed(() => {
   return cartSubtotal.value - cartDiscount.value
 })
 
+const activeCustomerPoints = computed(() => {
+  if (!selectedCustomerId.value) return 0
+  const customer = props.customers.find(c => c.id === selectedCustomerId.value)
+  if (!customer || !customer.loyalty_points) return 0
+  return parseFloat(customer.loyalty_points.points_earned) - parseFloat(customer.loyalty_points.points_redeemed)
+})
+
 // Variant State
 const selectedProductForVariant = ref(null)
 
@@ -339,7 +362,7 @@ const removeFromCart = (index) => {
   cart.value.splice(index, 1)
 }
 
-const submitOrder = async (isPaid) => {
+const submitOrder = async (isPaid, paymentMethodId = 1) => {
   if (cart.value.length === 0) return
 
   // Basic Validation
@@ -356,7 +379,7 @@ const submitOrder = async (isPaid) => {
     subtotal: cartSubtotal.value,
     discount: cartDiscount.value,
     total_amount: cartTotal.value,
-    payment_method: isPaid ? 1 : null, // 1 = Default Cash method
+    payment_method: isPaid ? paymentMethodId : null,
     items: cart.value.map(c => ({
       item_id: c.item_id,
       variant_id: c.variant_id,

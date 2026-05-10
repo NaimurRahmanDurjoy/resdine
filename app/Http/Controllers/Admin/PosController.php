@@ -29,10 +29,20 @@ class PosController extends Controller
 
     public function index()
     {
+        // 0. Check for active register
+        $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
+            ->where('branch_id', auth()->user()->branch_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$activeRegister) {
+            return redirect()->route('admin.pos.register.open');
+        }
+
         $categories = ProductCategory::where('status', 1)->get();
         // Return items with variants to easily calculate pricing on frontend
         $items = ProductItem::with('variants', 'category')->where('status', 1)->get();
-        $customers = Customer::where('status', 1)->get();
+        $customers = Customer::with('loyaltyPoints')->where('status', 1)->get();
         $tables = RestaurantTable::where('status', 1)->get(); 
 
         return Inertia::render('Admin/Pos/Index', [
@@ -65,11 +75,17 @@ class PosController extends Controller
             return DB::transaction(function () use ($validated) {
                 $branchId = auth()->user()->branch_id ?? 1;
 
+                $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
+                    ->where('branch_id', $branchId)
+                    ->where('status', 1)
+                    ->firstOrFail();
+
                 // 1. Create Order via Service (Handles Stock Deduction & Invoicing)
                 $order = $this->orderService->createOrder([
                     'customer_id' => $validated['customer_id'] ?? null,
                     'table_id' => $validated['table_id'] ?? null,
                     'branch_id' => $branchId,
+                    'register_id' => $activeRegister->id,
                     'order_type' => $validated['order_type'],
                     'items' => $validated['items'],
                     'discount' => $validated['discount'],

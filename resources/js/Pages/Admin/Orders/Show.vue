@@ -102,14 +102,27 @@
                                     </div>
                                 </td>
                                 <td class="px-8 py-2 text-center">
-                                    <span
-                                        class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-xl font-black text-gray-700 dark:text-gray-300">
-                                        {{ item.quantity }}
-                                    </span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span
+                                            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-xl font-black text-gray-700 dark:text-gray-300">
+                                            {{ item.quantity }}
+                                        </span>
+                                        <span v-if="item.refunded_qty > 0" class="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                                            {{ item.refunded_qty }} Refunded
+                                        </span>
+                                    </div>
                                 </td>
-                                <td class="px-8 py-2 text-right text-gray-500 font-medium">${{ item.price }}</td>
-                                <td class="px-8 py-2 text-right font-black text-gray-900 dark:text-white text-lg">${{
-                                    item.total_price }}</td>
+                                <td class="px-8 py-2 text-right text-gray-500 font-medium">${{ item.unit_price || item.price }}</td>
+                                <td class="px-8 py-2 text-right font-black text-gray-900 dark:text-white text-lg">
+                                    <div class="flex flex-col items-end">
+                                        <span>${{ item.total_price }}</span>
+                                        <button v-if="item.quantity > item.refunded_qty" @click="refundItem(item)"
+                                            class="text-[10px] font-black text-red-500 hover:text-red-700 uppercase tracking-widest mt-1 flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-xs">keyboard_return</span>
+                                            Refund Item
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -327,6 +340,7 @@ import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import PaymentModal from '@/Components/Admin/Orders/PaymentModal.vue';
+import Swal from 'sweetalert2';
 
 defineOptions({ layout: AdminLayout });
 
@@ -336,6 +350,41 @@ const props = defineProps({
 });
 
 const showPaymentModal = ref(false);
+
+const refundItem = (item) => {
+    Swal.fire({
+        title: 'Refund Item',
+        text: `How many ${item.product.name} would you like to refund?`,
+        input: 'number',
+        inputAttributes: {
+            min: 1,
+            max: item.quantity - item.refunded_qty,
+            step: 1
+        },
+        inputValue: 1,
+        showCancelButton: true,
+        confirmButtonText: 'Process Refund',
+        confirmButtonColor: '#ef4444',
+        showLoaderOnConfirm: true,
+        preConfirm: (qty) => {
+            if (!qty || qty < 1 || qty > (item.quantity - item.refunded_qty)) {
+                Swal.showValidationMessage(`Please enter a valid quantity (1 to ${item.quantity - item.refunded_qty})`);
+            }
+            return qty;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.post(route('admin.orders.item.refund', item.id), {
+                quantity: result.value
+            }, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    Swal.fire('Refunded!', 'Item has been successfully refunded.', 'success');
+                }
+            });
+        }
+    });
+};
 
 const statuses = {
     0: 'Pending',

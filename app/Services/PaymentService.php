@@ -39,6 +39,16 @@ class PaymentService
                 'paid_at' => now(),
             ]);
 
+            // Handle Loyalty Point Redemption (Method 5)
+            if ($data['payment_method'] == 5) {
+                if (!$order->member_id) {
+                    throw new \Exception("Loyalty point redemption requires a customer.");
+                }
+                $customer = \App\Models\Customer::find($order->member_id);
+                // Assuming 1 point = $1 for simplicity. You can adjust this conversion logic.
+                $this->loyaltyService->redeemPoints($customer, $amount);
+            }
+
             // 2. Update Order Master Financials
             $order->due_amount -= $amount;
             $order->collect_amount += $amount;

@@ -150,11 +150,60 @@ class OrderService
             $this->recipeService->restoreStockForProduct(
                 $item->item_id,
                 $item->variant_id,
-                $item->quantity,
+                $item->quantity - $item->refunded_qty, // Only restore what wasn't already refunded
                 'order_cancellation',
                 $order->id,
                 $order->branch_id
             );
         }
+    }
+
+    /**
+     * Refund a specific quantity of an order item.
+     */
+    public function refundOrderItem(int $orderDetailId, int $quantityToRefund): OrderItem
+    {
+        return DB::transaction(function () use ($orderDetailId, $quantityToRefund) {
+            $item = OrderItem::with('order')->findOrFail($orderDetailId);
+            $order = $item->order;
+
+            if ($quantityToRefund > ($item->quantity - $item->refunded_qty)) {
+                throw new \Exception("Refund quantity exceeds available quantity.");
+            }
+
+            // 1. Update refunded quantity
+            $item->increment('refunded_qty', $quantityToRefund);
+
+            // 2. Recalculate Order Master Totals
+            $refundAmount = $item->unit_price * $quantityToRefund;
+            
+            $order->subtotal -= $refundAmount;
+            $order->total_amount -= $refundAmount;
+            
+            // Adjust due_amount but don't go below 0 (excess would be a credit/cash refund)
+            $order->due_amount = max(0, $order->due_amount - $refundAmount);
+            $order->save();
+
+            // 3. Restore Stock
+            $this->recipeService->restoreStockForProduct(
+                $item->item_id,
+                $item->variant_id,
+                $quantityToRefund,
+                'order_refund',
+                $order->id,
+                $order->branch_id
+            );
+
+            // 4. Update Invoice
+            $invoice = SalesInvoice::where('order_id', $order->id)->first();
+            if ($invoice) {
+                $invoice->sub_total = $order->subtotal;
+                $invoice->grand_total = $order->total_amount;
+                $invoice->due_amount = $order->due_amount;
+                $invoice->save();
+            }
+
+            return $item;
+        });
     }
 }

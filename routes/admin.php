@@ -88,6 +88,7 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->name('orders.payments.store');
         Route::get('orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
         Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
+        Route::post('orders/item/{orderDetailId}/refund', [OrderController::class, 'refundItem'])->name('orders.item.refund');
 
         // Customers
         Route::resource('customers', CustomerController::class);
@@ -111,12 +112,22 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::put('profile/password', [UserController::class, 'updatePassword'])->name('profile.password.update');
 
         // POS (Point of Sale)
-        Route::get('pos', [PosController::class, 'index'])->name('pos.index');
-        Route::post('pos/submit', [PosController::class, 'submitOrder'])->name('pos.submit');
+        Route::prefix('pos')->name('pos.')->group(function () {
+            Route::get('/', [PosController::class, 'index'])->name('index');
+            Route::post('submit', [PosController::class, 'submitOrder'])->name('submit');
+            
+            // Register Shifts
+            Route::get('register/open', [PosRegisterController::class, 'showOpen'])->name('register.open');
+            Route::post('register/open', [PosRegisterController::class, 'open'])->name('register.open.submit');
+            Route::get('register/close', [PosRegisterController::class, 'showClose'])->name('register.close');
+            Route::post('register/close', [PosRegisterController::class, 'close'])->name('register.close.submit');
+        });
 
         // Kitchen Display System
         Route::prefix('kds')->name('kds.')->group(function () {
             Route::get('/', [KdsController::class, 'index'])->name('index');
+            Route::get('expo', [KdsController::class, 'expo'])->name('expo');
+            Route::get('ready-items', [KdsController::class, 'fetchReadyItems'])->name('ready-items');
             Route::post('item/{item}', [KdsController::class, 'updateItemStatus'])->name('item.status');
             Route::post('{order}/ready', [KdsController::class, 'readyOrder'])->name('order.ready');
         });

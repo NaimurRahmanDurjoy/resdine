@@ -47,6 +47,29 @@ class KdsController extends Controller
     }
 
     /**
+     * Display the Expo screen for waiters.
+     */
+    public function expo()
+    {
+        return Inertia::render('Admin/Kds/Expo', [
+            'pageTitle' => 'Waiter Expo Display'
+        ]);
+    }
+
+    /**
+     * Fetch all ready items for the expo screen.
+     */
+    public function fetchReadyItems()
+    {
+        $items = OrderItem::with(['product', 'order.table', 'order.customer'])
+            ->where('preparation_status', 'ready')
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        return response()->json($items);
+    }
+
+    /**
      * Update the preparation status of a specific order item.
      */
     public function updateItemStatus(Request $request, OrderItem $item)
