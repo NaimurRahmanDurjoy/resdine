@@ -38,12 +38,13 @@ import GlobalModal from '@/Components/GlobalModal.vue'
 
 const props = defineProps({
   notifications: { type: Object, default: () => ({ total: 0, groups: {} }) },
+  title: { type: String, default: null }
 })
 
 const page = usePage()
 const menus = computed(() => page.props.menus || [])
 const user = computed(() => page.props.auth?.user || { name: 'Guest' })
-const pageTitle = computed(() => page.props.pageTitle || 'Dashboard')
+const pageTitle = computed(() => props.title || page.props.pageTitle || 'Dashboard')
 
 const sidebarOpen = ref(false)
 const darkMode = ref(false)

@@ -27,7 +27,10 @@ return new class extends Migration
             // Voucher Date
             $table->date('voucher_date');
 
-            // External Reference
+            // Branch Link
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
+
+            // External Reference & Drill-down
             $table->string('reference_no')->nullable();
             $table->decimal('total_debit', 15, 2)->default(0);
             $table->decimal('total_credit', 15, 2)->default(0);

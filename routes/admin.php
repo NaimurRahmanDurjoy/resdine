@@ -32,9 +32,13 @@ use App\Http\Controllers\Admin\BusinessConfigController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\KdsController;
+use App\Http\Controllers\Admin\PosRegisterController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\Account\ChartOfAccountController;
+use App\Http\Controllers\Admin\Account\VoucherController;
+use App\Http\Controllers\Admin\Account\AccountReportController;
 
 // ----------------------------
 // Software Admin Panel Routes
@@ -130,6 +134,24 @@ Route::middleware('web')->name('admin.')->group(function () {
             Route::get('ready-items', [KdsController::class, 'fetchReadyItems'])->name('ready-items');
             Route::post('item/{item}', [KdsController::class, 'updateItemStatus'])->name('item.status');
             Route::post('{order}/ready', [KdsController::class, 'readyOrder'])->name('order.ready');
+        });
+
+        // Accounting Module
+        Route::prefix('accounts')->name('accounts.')->group(function () {
+            // Chart of Accounts
+            Route::post('coa/post-opening', [ChartOfAccountController::class, 'postOpeningBalances'])->name('coa.post-opening');
+            Route::resource('coa', ChartOfAccountController::class);
+            
+            // Vouchers
+            Route::resource('vouchers', VoucherController::class);
+            Route::post('vouchers/{voucher}/approve', [VoucherController::class, 'approve'])->name('vouchers.approve');
+
+            // Reports
+            Route::prefix('reports')->name('reports.')->group(function () {
+                Route::get('ledger', [AccountReportController::class, 'generalLedger'])->name('ledger');
+                Route::get('trial-balance', [AccountReportController::class, 'trialBalance'])->name('trial-balance');
+                Route::get('profit-loss', [AccountReportController::class, 'profitAndLoss'])->name('profit-loss');
+            });
         });
 
         // Reports

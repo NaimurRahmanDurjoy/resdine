@@ -10,10 +10,12 @@ use Illuminate\Support\Facades\DB;
 class PaymentService
 {
     protected $loyaltyService;
+    protected $accountingService;
 
-    public function __construct(LoyaltyService $loyaltyService)
+    public function __construct(LoyaltyService $loyaltyService, AccountingService $accountingService)
     {
         $this->loyaltyService = $loyaltyService;
+        $this->accountingService = $accountingService;
     }
 
     /**
@@ -77,6 +79,15 @@ class PaymentService
                     $invoice->status = 2; // Paid
                 }
                 $invoice->save();
+            }
+
+            // 4. Accounting Posting (Auto-create Receipt Voucher)
+            try {
+                $this->accountingService->postReceiptForPayment($order, $payment);
+            } catch (\Exception $e) {
+                \Log::error("Accounting auto-posting failed for order {$order->id}: " . $e->getMessage());
+                // We don't throw the exception here to avoid breaking the customer checkout, 
+                // but in production, we should have a dashboard to find missing postings.
             }
 
             return $payment;
