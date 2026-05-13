@@ -70,7 +70,7 @@ const props = defineProps({
   menus: { type: Array, required: true }
 })
 
-const openMenus = ref([])
+const openMenus = ref(props.menus.filter(m => m.isActive).map(m => m.id))
 
 const toggleMenu = (id) => {
   const index = openMenus.value.indexOf(id)

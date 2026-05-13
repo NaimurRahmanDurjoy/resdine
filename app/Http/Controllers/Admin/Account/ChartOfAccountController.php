@@ -109,6 +109,8 @@ class ChartOfAccountController extends Controller
 
         $account->delete();
         return back()->with('success', 'Chart of Account deleted successfully.');
+    }
+    
     public function postOpeningBalances()
     {
         try {

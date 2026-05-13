@@ -45,9 +45,9 @@ class SoftwareInternalLinkController extends Controller
 
     public function create()
     {
-        $menus = SoftwareMenu::where('is_active', true)->orderBy('name')->get();
+        $menus = SoftwareMenu::where('is_active', true)->orderBy('created_at', 'desc')->get();
         return Inertia::render('DevAdmin/SystemConfig/SoftwareInternalLink/Form', [
-            'menus' => $menus,
+            'softwareMenus' => $menus,
             'isEdit' => false
         ]);
     }
@@ -88,10 +88,10 @@ class SoftwareInternalLinkController extends Controller
 
     public function edit(SoftwareMenuAction $internalLink)
     {
-        $menus = SoftwareMenu::where('is_active', true)->orderBy('name')->get();
+        $menus = SoftwareMenu::where('is_active', true)->orderBy('created_at', 'desc')->get();
         return Inertia::render('DevAdmin/SystemConfig/SoftwareInternalLink/Form', [
             'action' => $internalLink->load('softwareMenu'),
-            'menus' => $menus,
+            'softwareMenus' => $menus,
             'isEdit' => true
         ]);
     }

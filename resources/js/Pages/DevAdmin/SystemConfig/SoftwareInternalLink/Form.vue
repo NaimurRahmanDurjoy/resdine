@@ -35,7 +35,7 @@
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
                             :class="{ 'border-red-500 focus:ring-red-500': form.errors.software_menu_id }">
                             <option value="">-- Select a menu --</option>
-                            <option v-for="menu in menus" :key="menu.id" :value="menu.id">
+                            <option v-for="menu in softwareMenus" :key="menu.id" :value="menu.id">
                                 {{ menu.name }}
                             </option>
                         </select>
@@ -189,7 +189,7 @@ import { useRouteGeneration } from '@/composables/useRouteGeneration'
 
 const props = defineProps({
     action: { type: Object, default: () => ({}) },
-    menus: { type: Array, default: () => [] },
+    softwareMenus: { type: Array, default: () => [] },
     isEdit: { type: Boolean, default: false }
 })
 
@@ -207,7 +207,7 @@ const form = useForm({
 })
 
 const selectedMenu = computed(() => {
-    return props.menus.find(menu => String(menu.id) === String(form.software_menu_id)) || null
+    return props.softwareMenus.find(menu => String(menu.id) === String(form.software_menu_id)) || null
 })
 
 const baseRoute = computed(() => {
