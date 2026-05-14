@@ -20,4 +20,9 @@ class Branch extends BaseModel
     {
         return $this->hasMany(RestaurantTable::class);
     }
+
+    public function setting()
+    {
+        return $this->hasOne(BranchSetting::class, 'branch_id', 'id');
+    }
 }

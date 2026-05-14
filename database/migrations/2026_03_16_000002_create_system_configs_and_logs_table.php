@@ -11,14 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('business_configs', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('key')->unique();
-            $table->text('value')->nullable();
-            $table->string('group')->default('general'); // general, financial, etc.
-            $table->timestamps();
-        });
-
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->nullable();
@@ -38,7 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('business_configs');
         Schema::dropIfExists('activity_logs');
     }
 };

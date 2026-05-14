@@ -62,7 +62,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'business' => [
-                'currency_symbol' => \App\Models\BusinessConfig::get('currency', '$'),
+                'currency_symbol' => \App\Models\BranchSetting::with('currency')->first()?->currency?->symbol ?? '$',
             ],
             'notifications' => $notifications,
             'menus' => $menus,
