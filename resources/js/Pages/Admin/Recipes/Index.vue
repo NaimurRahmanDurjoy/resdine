@@ -68,10 +68,10 @@
             </div>
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-bold">
-            ${{ recipe.food_cost }}
+            {{ currency() }}{{ recipe.food_cost }}
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-            ${{ recipe.selling_price }}
+            {{ currency() }}{{ recipe.selling_price }}
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-sm font-black">
             <span :class="[

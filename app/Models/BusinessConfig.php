@@ -21,4 +21,9 @@ class BusinessConfig extends Model
             ['value' => $value, 'group' => $group]
         );
     }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'value', 'code')->where('key', 'currency');
+    }
 }

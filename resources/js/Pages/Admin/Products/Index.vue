@@ -70,7 +70,7 @@
             <span v-else class="text-gray-400 italic text-sm">No image</span>
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
-            ${{ parseFloat(product.price).toFixed(2) }}
+            {{ currency() }}{{ parseFloat(product.price).toFixed(2) }}
           </td>
           <td class="px-6 py-2 whitespace-nowrap">
             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"

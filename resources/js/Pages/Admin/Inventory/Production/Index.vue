@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
 
@@ -89,9 +89,7 @@ const headers = [
 ]
 
 const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value)
+    const symbol = usePage().props.business?.currency_symbol || '$'
+    return `${symbol}${Number(value).toFixed(2)}`
 }
 </script>

@@ -50,7 +50,7 @@
               </span>
             </td>
             <td class="px-6 py-2 whitespace-nowrap text-right text-sm text-gray-900 font-bold">
-              ${{ parseFloat(account.opening_balance).toLocaleString() }}
+              {{ currency() }}{{ parseFloat(account.opening_balance).toLocaleString() }}
             </td>
             <td class="px-6 py-2 whitespace-nowrap">
               <span :class="account.balance_type === 'D' ? 'text-blue-600' : 'text-green-600'"

@@ -31,7 +31,7 @@
                 <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Default Cost</label>
                 <div class="flex-1">
                     <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{{ currency() }}</span>
                         <input v-model="form.cost" type="number" step="0.01" min="0" placeholder="Estimated cost per base unit"
                             class="w-full h-10 border rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition pl-8 pr-3 text-sm" />
                     </div>

@@ -61,7 +61,7 @@
           </td>
           <td class="px-6 py-3 whitespace-nowrap">
             <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
-              ${{ order.total_amount }}
+              {{ currency() }}{{ order.total_amount }}
             </div>
           </td>
           <td class="px-6 py-3 whitespace-nowrap">

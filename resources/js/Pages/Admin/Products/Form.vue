@@ -103,7 +103,7 @@
           <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Price *</label>
           <div class="flex-1 space-y-1">
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">$</span>
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">{{ currency() }}</span>
               <input v-model="form.price" type="number" step="0.01" placeholder="0.00"
                 class="w-full h-10 pl-8 border rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm"
                 :class="{ 'border-red-500 focus:ring-red-500': form.errors.price }" required />
@@ -116,7 +116,7 @@
         <div class="flex items-start gap-6">
           <label class="w-32 pt-2 text-sm font-medium text-gray-700 dark:text-gray-300">Cost Price</label>
           <div class="flex-1 relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">$</span>
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">{{ currency() }}</span>
             <input v-model="form.cost_price" type="number" step="0.01" placeholder="0.00"
               class="w-full h-10 pl-8 border rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition px-3 text-sm" />
           </div>
@@ -181,7 +181,7 @@
                   class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                 <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
                   {{ item.name }}
-                  <span class="text-gray-400 dark:text-gray-500 ml-1">(${{ parseFloat(item.price).toFixed(2) }})</span>
+                  <span class="text-gray-400 dark:text-gray-500 ml-1">({{ currency() }}{{ parseFloat(item.price).toFixed(2) }})</span>
                 </span>
               </label>
             </div>
@@ -203,7 +203,7 @@
           <div class="space-y-1">
             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Final Combo Price</label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">$</span>
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">{{ currency() }}</span>
               <input v-model="form.combo_final_price" type="number" step="0.01" placeholder="0.00"
                 class="w-full h-10 pl-8 border rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-bold text-indigo-600" />
             </div>

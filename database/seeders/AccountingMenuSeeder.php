@@ -22,7 +22,7 @@ class AccountingMenuSeeder extends Seeder
             ]
         );
 
-        // 2. Create Submenus
+        // 2. Create Core Submenus
         $submenus = [
             [
                 'name' => 'Chart of Accounts',
@@ -36,18 +36,6 @@ class AccountingMenuSeeder extends Seeder
                 'icon' => 'payments',
                 'order' => 2,
             ],
-            [
-                'name' => 'Reports',
-                'route' => 'admin.accounts.reports.ledger',
-                'icon' => 'analytics',
-                'order' => 3,
-            ],
-            /*[
-                'name' => 'General Ledger',
-                'route' => 'admin.accounts.ledger.index',
-                'icon' => 'menu_book',
-                'order' => 3,
-            ]*/
         ];
 
         foreach ($submenus as $sub) {
@@ -63,9 +51,59 @@ class AccountingMenuSeeder extends Seeder
             );
         }
 
-        // 3. Optional: Grant access to all users for testing (In production, use Roles)
+        // 3. Create Accounts Report Parent (Inside Accounting)
+        $reportsParent = SoftwareMenu::updateOrCreate(
+            ['name' => 'Accounts Report'],
+            [
+                'parent_id' => $accounting->id,
+                'icon' => 'analytics',
+                'route' => null,
+                'order' => 3,
+                'is_active' => true,
+            ]
+        );
+
+        // 4. Create Submenus under Reports Parent
+        $reportSubmenus = [
+            [
+                'name' => 'General Ledger',
+                'route' => 'admin.accounts.reports.ledger',
+                'icon' => 'menu_book',
+                'order' => 1,
+            ],
+            [
+                'name' => 'Trial Balance',
+                'route' => 'admin.accounts.reports.trial-balance',
+                'icon' => 'account_balance_wallet',
+                'order' => 2,
+            ],
+            [
+                'name' => 'Profit & Loss',
+                'route' => 'admin.accounts.reports.profit-loss',
+                'icon' => 'monitoring',
+                'order' => 3,
+            ],
+        ];
+
+        foreach ($reportSubmenus as $sub) {
+            SoftwareMenu::updateOrCreate(
+                ['route' => $sub['route']],
+                [
+                    'name' => $sub['name'],
+                    'icon' => $sub['icon'],
+                    'parent_id' => $reportsParent->id,
+                    'order' => $sub['order'],
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        // 5. Grant Access
         $users = \App\Models\User::all();
-        $menus = SoftwareMenu::where('name', 'Accounting')->orWhere('parent_id', $accounting->id)->get();
+        $menus = SoftwareMenu::where('parent_id', $accounting->id)
+            ->orWhere('parent_id', $reportsParent->id)
+            ->orWhere('id', $accounting->id)
+            ->get();
 
         foreach ($users as $user) {
             foreach ($menus as $menu) {

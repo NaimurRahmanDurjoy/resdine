@@ -48,7 +48,7 @@
                     <span class="material-symbols-outlined text-indigo-300 text-4xl">restaurant</span>
                  </div>
                  <div class="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-indigo-600 shadow-sm border border-indigo-100 dark:border-indigo-900/50">
-                    ${{ product.price }}
+                    {{ currency() }}{{ product.price }}
                  </div>
               </div>
               <span class="font-bold text-sm text-gray-800 dark:text-gray-200 line-clamp-1 truncate w-full">{{ product.name }}</span>
@@ -107,9 +107,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-black text-gray-900 dark:text-white">
-                                    ${{ (item.price * item.quantity).toFixed(2) }}
+                                    {{ currency() }}{{ (item.price * item.quantity).toFixed(2) }}
                                 </div>
-                                <div class="text-[10px] text-gray-400">${{ item.price }} / unit</div>
+                                <div class="text-[10px] text-gray-400">{{ currency() }}{{ item.price }} / unit</div>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <button @click.prevent="removeItem(index)" class="p-2 text-gray-300 hover:text-red-500 transition-colors">
@@ -185,7 +185,7 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center opacity-80">
                         <span class="text-sm">Subtotal</span>
-                        <span class="font-bold text-lg">${{ subtotal.toFixed(2) }}</span>
+                        <span class="font-bold text-lg">{{ currency() }}{{ subtotal.toFixed(2) }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center group">
@@ -194,7 +194,7 @@
                             <span class="text-[10px] text-indigo-400">Manual adjustment</span>
                         </div>
                         <div class="relative w-24">
-                            <span class="absolute left-2 top-2 text-indigo-400 text-xs">$</span>
+                            <span class="absolute left-2 top-2 text-indigo-400 text-xs">{{ currency() }}</span>
                             <input v-model.number="form.discount" type="number" step="0.01" class="w-full bg-white/10 hover:bg-white/20 border-none rounded-lg text-right text-sm font-bold pl-5 focus:ring-2 focus:ring-indigo-400 transition-all py-2">
                         </div>
                     </div>
@@ -203,7 +203,7 @@
                         <div class="flex justify-between items-end">
                             <div class="flex flex-col">
                                 <span class="text-xs font-bold text-indigo-400 uppercase tracking-tighter">Amount to Collect</span>
-                                <span class="text-4xl font-black text-white">${{ total.toFixed(2) }}</span>
+                                <span class="text-4xl font-black text-white">{{ currency() }}{{ total.toFixed(2) }}</span>
                             </div>
                             <div class="text-[10px] text-indigo-500 font-bold bg-white/10 px-2 py-1 rounded mb-1">VAT INCL.</div>
                         </div>

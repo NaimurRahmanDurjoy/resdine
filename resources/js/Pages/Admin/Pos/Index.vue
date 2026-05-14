@@ -70,7 +70,7 @@
                 <!-- Price Badge overlay -->
                 <div
                   class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-sm font-bold shadow-lg">
-                  ${{ item.price }}
+                  {{ currency() }}{{ item.price }}
                 </div>
               </div>
               <div class="p-3 text-center flex-1 flex flex-col justify-center bg-gradient-to-t from-gray-50 to-white">
@@ -136,7 +136,7 @@
                   cartItem.variant_name }}</div>
               </div>
               <div class="font-bold text-gray-900 shrink-0">
-                ${{ (cartItem.price * cartItem.quantity).toFixed(2) }}
+                {{ currency() }}{{ (cartItem.price * cartItem.quantity).toFixed(2) }}
               </div>
             </div>
 
@@ -170,15 +170,15 @@
           <div class="space-y-1.5 mb-4 text-sm px-1">
             <div class="flex justify-between text-gray-600">
               <span>Subtotal</span>
-              <span class="font-semibold">${{ cartSubtotal.toFixed(2) }}</span>
+              <span class="font-semibold">{{ currency() }}{{ cartSubtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
               <span>Discount</span>
-              <span class="font-semibold text-green-600">-${{ cartDiscount.toFixed(2) }}</span>
+              <span class="font-semibold text-green-600">-{{ currency() }}{{ cartDiscount.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between items-end mt-2 pt-2 border-t border-gray-200 border-dashed">
               <span class="text-lg font-bold text-gray-800">Total</span>
-              <span class="text-2xl font-black text-indigo-700">${{ cartTotal.toFixed(2) }}</span>
+              <span class="text-2xl font-black text-indigo-700">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
             </div>
           </div>
 

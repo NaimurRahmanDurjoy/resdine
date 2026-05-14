@@ -46,7 +46,7 @@
           Price *
         </label>
         <div class="flex-1 relative">
-          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">$</span>
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">{{ currency() }}</span>
           <input
             v-model="form.price"
             type="number"

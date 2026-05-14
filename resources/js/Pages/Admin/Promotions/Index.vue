@@ -44,7 +44,7 @@
           </td>
           <td class="px-6 py-2 whitespace-nowrap">
             <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ promotion.type === 'percentage' ? promotion.value + '%' : '$' + promotion.value }}
+              {{ promotion.type === 'percentage' ? promotion.value + '%' : currency() + promotion.value }}
             </span>
           </td>
           <td class="px-6 py-2 whitespace-nowrap">

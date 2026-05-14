@@ -106,7 +106,7 @@
                                     <div class="w-full md:w-32 text-right">
                                         <label class="block text-xs font-medium text-gray-700 mb-1 font-bold">Line Total</label>
                                         <div class="h-9 flex items-center justify-end font-bold text-gray-800 px-2 bg-gray-100 rounded-md border border-gray-200 text-sm">
-                                            $ {{ calculateLineTotal(item) }}
+                                            {{ currency() }}{{ calculateLineTotal(item) }}
                                         </div>
                                     </div>
 
@@ -127,7 +127,7 @@
                             <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                                 <div class="text-right">
                                     <span class="text-sm text-gray-500 mr-4">Grand Total:</span>
-                                    <span class="text-2xl font-bold text-indigo-700 dark:text-indigo-400">${{ grandTotal }}</span>
+                                    <span class="text-2xl font-bold text-indigo-700 dark:text-indigo-400">{{ currency() }}{{ grandTotal }}</span>
                                 </div>
                             </div>
                         </div>

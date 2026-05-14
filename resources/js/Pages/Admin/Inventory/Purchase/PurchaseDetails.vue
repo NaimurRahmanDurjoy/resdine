@@ -69,14 +69,14 @@
                                 detail.inventory_item?.unit?.name || '' }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700 dark:text-gray-300">
-                            ${{ parseFloat(detail.unit_price).toFixed(2) }}
+                            {{ currency() }}{{ parseFloat(detail.unit_price).toFixed(2) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 pl-8">
                             {{ detail.expiry_date ? new Date(detail.expiry_date).toLocaleDateString() : '--' }}
                         </td>
                         <td
                             class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right text-gray-900 dark:text-gray-100 bg-gray-50/30 dark:bg-gray-800/30">
-                            ${{ parseFloat(detail.total_price).toFixed(2) }}
+                            {{ currency() }}{{ parseFloat(detail.total_price).toFixed(2) }}
                         </td>
                     </tr>
                 </tbody>
@@ -88,7 +88,7 @@
                         </td>
                         <td
                             class="px-6 py-4 text-right text-lg font-black text-indigo-700 dark:text-indigo-400 border-t-2 border-indigo-200 dark:border-indigo-900/50">
-                            ${{ parseFloat(purchase.total_amount).toFixed(2) }}
+                            {{ currency() }}{{ parseFloat(purchase.total_amount).toFixed(2) }}
                         </td>
                     </tr>
                 </tfoot>

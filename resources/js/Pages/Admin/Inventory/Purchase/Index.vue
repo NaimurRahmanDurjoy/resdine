@@ -51,7 +51,7 @@
                         {{ purchase.supplier?.name || purchase.supplier?.company_name || 'N/A' }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100">
-                        ${{ parseFloat(purchase.total_amount).toFixed(2) }}
+                        {{ currency() }}{{ parseFloat(purchase.total_amount).toFixed(2) }}
                     </td>
                     <td class="px-6 py-2 whitespace-nowrap">
                         <span

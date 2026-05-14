@@ -113,7 +113,7 @@
               </div>
             </div>
             <div class="text-right">
-              <div class="font-bold text-gray-900">${{ parseFloat(item.total_amount).toFixed(2) }}</div>
+              <div class="font-bold text-gray-900">{{ currency() }}{{ parseFloat(item.total_amount).toFixed(2) }}</div>
               <div class="text-[10px] uppercase font-bold text-green-600">{{ item.order_status }}</div>
             </div>
           </Link>
@@ -163,7 +163,7 @@ const topItemSold = 0; // Or passed from backend
 
 const chartDatasets = computed(() => [
   {
-    label: 'Sales ($)',
+    label: 'Sales ({{ currency() }})',
     data: props.salesData,
     backgroundColor: 'rgba(99, 102, 241, 0.1)',
     borderColor: 'rgba(99, 102, 241, 1)',

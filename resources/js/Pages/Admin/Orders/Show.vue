@@ -112,10 +112,10 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-2 text-right text-gray-500 font-medium">${{ item.unit_price || item.price }}</td>
+                                <td class="px-8 py-2 text-right text-gray-500 font-medium">{{ currency() }}{{ item.unit_price || item.price }}</td>
                                 <td class="px-8 py-2 text-right font-black text-gray-900 dark:text-white text-lg">
                                     <div class="flex flex-col items-end">
-                                        <span>${{ item.total_price }}</span>
+                                        <span>{{ currency() }}{{ item.total_price }}</span>
                                         <button v-if="item.quantity > item.refunded_qty" @click="refundItem(item)"
                                             class="text-[10px] font-black text-red-500 hover:text-red-700 uppercase tracking-widest mt-1 flex items-center gap-1">
                                             <span class="material-symbols-outlined text-xs">keyboard_return</span>
@@ -131,17 +131,17 @@
                         <div class="max-w-xs ml-auto space-y-4">
                             <div class="flex justify-between items-center text-gray-500">
                                 <span class="text-sm font-bold uppercase tracking-tighter">Subtotal</span>
-                                <span class="font-black">${{ order.subtotal }}</span>
+                                <span class="font-black">{{ currency() }}{{ order.subtotal }}</span>
                             </div>
                             <div v-if="order.discount > 0" class="flex justify-between items-center text-red-500">
                                 <span class="text-sm font-bold uppercase tracking-tighter">Discount</span>
-                                <span class="font-black">-${{ order.discount }}</span>
+                                <span class="font-black">-{{ currency() }}{{ order.discount }}</span>
                             </div>
                             <div
                                 class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-end">
                                 <span class="text-xs font-black text-indigo-500 uppercase tracking-widest">Grand
                                     Total</span>
-                                <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">${{
+                                <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">{{ currency() }}{{
                                     order.total_amount }}</span>
                             </div>
                         </div>
@@ -189,7 +189,7 @@
                                 </td>
                                 <td class="px-8 py-5 text-xs text-gray-400 uppercase font-mono tracking-tighter">{{
                                     payment.payment_reference || 'N/A' }}</td>
-                                <td class="px-8 py-5 text-right font-black text-green-600 dark:text-green-400">${{
+                                <td class="px-8 py-5 text-right font-black text-green-600 dark:text-green-400">{{ currency() }}{{
                                     payment.amount }}</td>
                             </tr>
                         </tbody>
@@ -258,14 +258,14 @@
                         <div class="flex justify-between items-center group">
                             <span class="text-sm font-bold text-indigo-200 uppercase tracking-tighter">Gross
                                 Revenue</span>
-                            <span class="font-black text-2xl tracking-tighter">${{ order.total_amount }}</span>
+                            <span class="font-black text-2xl tracking-tighter">{{ currency() }}{{ order.total_amount }}</span>
                         </div>
 
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-bold text-indigo-200 uppercase tracking-tighter">Clearing
                                 Fund</span>
                             <div class="flex flex-col items-end">
-                                <span class="font-black text-2xl text-green-300 tracking-tighter">${{
+                                <span class="font-black text-2xl text-green-300 tracking-tighter">{{ currency() }}{{
                                     order.collect_amount }}</span>
                                 <span
                                     class="text-[10px] font-black uppercase tracking-widest text-green-300 opacity-60">Success</span>
@@ -278,7 +278,7 @@
                                     class="text-xs font-black text-white uppercase tracking-widest mb-1">Exposure</span>
                                 <span class="font-black text-3xl tracking-tighter"
                                     :class="order.due_amount > 0 ? 'text-orange-400' : 'text-green-300'">
-                                    ${{ order.due_amount }}
+                                    {{ currency() }}{{ order.due_amount }}
                                 </span>
                             </div>
                             <div v-if="order.due_amount > 0" class="flex flex-col items-end">

@@ -58,7 +58,7 @@
                           theme === 'amber' ? 'text-amber-600' : 'text-indigo-600 dark:text-indigo-400'
                         ]"
                       >
-                        ${{ variant.price || product.price }}
+                        {{ currency() }}{{ variant.price || product.price }}
                       </span>
                   </button>
               </div>

@@ -45,8 +45,8 @@
             <thead>
               <tr class="bg-gray-50 border-b border-gray-100">
                 <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase">Account Head</th>
-                <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase text-right w-32">Debit ($)</th>
-                <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase text-right w-32">Credit ($)</th>
+                <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase text-right w-32">Debit ({{ currency() }})</th>
+                <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase text-right w-32">Credit ({{ currency() }})</th>
                 <th class="px-4 py-3 text-xs font-bold text-gray-600 uppercase">Row Memo</th>
                 <th class="px-4 py-3 w-12"></th>
               </tr>
@@ -82,10 +82,10 @@
                     <span class="material-symbols-outlined text-sm">add_circle</span> Add Row
                   </button>
                 </td>
-                <td class="px-4 py-3 text-right text-indigo-600 font-black">${{ totalDebit.toFixed(2) }}</td>
-                <td class="px-4 py-3 text-right text-indigo-600 font-black">${{ totalCredit.toFixed(2) }}</td>
+                <td class="px-4 py-3 text-right text-indigo-600 font-black">{{ currency() }}{{ totalDebit.toFixed(2) }}</td>
+                <td class="px-4 py-3 text-right text-indigo-600 font-black">{{ currency() }}{{ totalCredit.toFixed(2) }}</td>
                 <td colspan="2" class="px-4 py-3 text-right">
-                  <span v-if="difference !== 0" class="text-red-500 text-[10px] uppercase italic font-bold">Unbalanced: ${{ Math.abs(difference).toFixed(2) }}</span>
+                  <span v-if="difference !== 0" class="text-red-500 text-[10px] uppercase italic font-bold">Unbalanced: {{ currency() }}{{ Math.abs(difference).toFixed(2) }}</span>
                   <span v-else class="text-green-600 text-[10px] uppercase font-bold">Balanced</span>
                 </td>
               </tr>

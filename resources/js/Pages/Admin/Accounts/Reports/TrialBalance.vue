@@ -1,20 +1,33 @@
 <template>
   <AdminLayout :title="pageTitle">
     <div class="space-y-6">
-      <!-- Filters -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex justify-between items-end">
-        <form @submit.prevent="applyFilter" class="flex gap-4 items-end">
-          <div class="space-y-1">
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">As Of Date</label>
-            <input v-model="form.as_of_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+      <!-- Page Header -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <div>
+              <h1 class="text-xl font-bold text-gray-800">Trial Balance</h1>
+              <p class="text-gray-600 text-sm mt-1">Snapshot of all account balances for audit verification</p>
+            </div>
+            <button @click="window.print()" class="px-4 py-2 bg-white text-gray-600 rounded-md text-xs font-bold border border-gray-200 hover:bg-gray-50 transition flex items-center gap-2 shadow-sm">
+              <span class="material-symbols-outlined text-sm">print</span>
+              Print Report
+            </button>
           </div>
-          <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 transition shadow-sm">
-            Generate Trial Balance
-          </button>
-        </form>
-        <button @click="window.print()" class="px-4 py-2 bg-gray-50 text-gray-600 rounded text-sm font-bold border border-gray-200 hover:bg-gray-100 transition">
-          Print Report
-        </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-6">
+          <form @submit.prevent="applyFilter" class="flex gap-4 items-end">
+            <div class="space-y-1">
+              <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">As Of Date</label>
+              <input v-model="form.as_of_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 transition shadow-sm">
+              Generate Trial Balance
+            </button>
+          </form>
+        </div>
       </div>
 
       <!-- Trial Balance Table -->
@@ -29,8 +42,8 @@
             <tr class="bg-gray-50 border-b border-gray-100">
               <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Code & Name</th>
               <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Type</th>
-              <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-48">Debit ($)</th>
-              <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-48">Credit ($)</th>
+              <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-48">Debit ({{ currency() }})</th>
+              <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-48">Credit ({{ currency() }})</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
@@ -54,15 +67,15 @@
           <tfoot class="bg-indigo-600 text-white font-black">
             <tr>
               <td colspan="2" class="px-8 py-4 text-sm uppercase tracking-widest">Total Trial Balance</td>
-              <td class="px-8 py-4 text-right text-lg">${{ totalDebit.toLocaleString(undefined, {minimumFractionDigits: 2}) }}</td>
-              <td class="px-8 py-4 text-right text-lg">${{ totalCredit.toLocaleString(undefined, {minimumFractionDigits: 2}) }}</td>
+              <td class="px-8 py-4 text-right text-lg">{{ currency() }}{{ totalDebit.toLocaleString(undefined, {minimumFractionDigits: 2}) }}</td>
+              <td class="px-8 py-4 text-right text-lg">{{ currency() }}{{ totalCredit.toLocaleString(undefined, {minimumFractionDigits: 2}) }}</td>
             </tr>
           </tfoot>
         </table>
 
         <!-- Validation Message -->
         <div v-if="Math.abs(totalDebit - totalCredit) > 0.01" class="p-4 bg-red-50 border-t border-red-100 text-center">
-           <p class="text-red-600 font-bold text-sm">Warning: Trial Balance is NOT equal! Difference: ${{ Math.abs(totalDebit - totalCredit).toFixed(2) }}</p>
+           <p class="text-red-600 font-bold text-sm">Warning: Trial Balance is NOT equal! Difference: {{ currency() }}{{ Math.abs(totalDebit - totalCredit).toFixed(2) }}</p>
         </div>
         <div v-else class="p-4 bg-green-50 border-t border-green-100 text-center">
            <p class="text-green-600 font-bold text-sm">The Trial Balance is perfectly balanced.</p>

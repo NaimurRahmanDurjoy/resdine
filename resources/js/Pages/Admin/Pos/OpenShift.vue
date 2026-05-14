@@ -11,7 +11,7 @@
 
       <form @submit.prevent="submit" class="space-y-6">
         <div>
-          <label class="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1">Opening Cash Amount ($)</label>
+          <label class="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 ml-1">Opening Cash Amount ({{ currency() }})</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 material-symbols-outlined">payments</span>
             <input v-model="form.opening_cash" type="number" step="0.01" required

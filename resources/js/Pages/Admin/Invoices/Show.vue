@@ -48,8 +48,8 @@
                                 <div v-if="item.notes" class="text-xs text-gray-400 italic">{{ item.notes }}</div>
                             </td>
                             <td class="py-4 text-center text-gray-600">{{ item.quantity }}</td>
-                            <td class="py-4 text-right text-gray-600">${{ item.price }}</td>
-                            <td class="py-4 text-right font-bold text-gray-800">${{ item.total_price }}</td>
+                            <td class="py-4 text-right text-gray-600">{{ currency() }}{{ item.price }}</td>
+                            <td class="py-4 text-right font-bold text-gray-800">{{ currency() }}{{ item.total_price }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -61,23 +61,23 @@
                     <div class="w-full max-w-xs space-y-3">
                         <div class="flex justify-between text-sm text-gray-600">
                             <span>Subtotal</span>
-                            <span class="font-bold text-gray-800">${{ invoice.sub_total }}</span>
+                            <span class="font-bold text-gray-800">{{ currency() }}{{ invoice.sub_total }}</span>
                         </div>
                         <div v-if="invoice.discount > 0" class="flex justify-between text-sm text-red-500">
                             <span>Discount</span>
-                            <span class="font-bold">-${{ invoice.discount }}</span>
+                            <span class="font-bold">-{{ currency() }}{{ invoice.discount }}</span>
                         </div>
                         <div class="flex justify-between text-xl font-black pt-3 border-t border-gray-200">
                             <span class="text-indigo-900">Total</span>
-                            <span class="text-indigo-900">${{ invoice.grand_total }}</span>
+                            <span class="text-indigo-900">{{ currency() }}{{ invoice.grand_total }}</span>
                         </div>
                         <div class="flex justify-between text-sm text-green-600 pt-2">
                             <span>Paid Amount</span>
-                            <span class="font-bold">${{ invoice.collect_amount }}</span>
+                            <span class="font-bold">{{ currency() }}{{ invoice.collect_amount }}</span>
                         </div>
                         <div v-if="invoice.due_amount > 0" class="flex justify-between text-sm text-orange-600">
                             <span>Amount Due</span>
-                            <span class="font-bold">${{ invoice.due_amount }}</span>
+                            <span class="font-bold">{{ currency() }}{{ invoice.due_amount }}</span>
                         </div>
                     </div>
                 </div>

@@ -50,8 +50,8 @@
              <thead>
                <tr class="bg-white border-b border-gray-100">
                  <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Head & Memo</th>
-                 <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-40">Debit ($)</th>
-                 <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-40">Credit ($)</th>
+                 <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-40">Debit ({{ currency() }})</th>
+                 <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right w-40">Credit ({{ currency() }})</th>
                </tr>
              </thead>
              <tbody class="divide-y divide-gray-50">
@@ -72,10 +72,10 @@
                <tr>
                  <td class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Voucher Amount</td>
                  <td class="px-8 py-4 text-sm text-indigo-600 text-right font-black border-t-2 border-indigo-100">
-                   ${{ parseFloat(voucher.total_debit).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                   {{ currency() }}{{ parseFloat(voucher.total_debit).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
                  </td>
                  <td class="px-8 py-4 text-sm text-indigo-600 text-right font-black border-t-2 border-indigo-100">
-                   ${{ parseFloat(voucher.total_credit).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                   {{ currency() }}{{ parseFloat(voucher.total_credit).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
                  </td>
                </tr>
              </tfoot>

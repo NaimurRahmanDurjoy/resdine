@@ -50,7 +50,7 @@
             {{ variant.product_item?.name || 'N/A' }}
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
-            ${{ parseFloat(variant.price).toFixed(2) }}
+            {{ currency() }}{{ parseFloat(variant.price).toFixed(2) }}
           </td>
           <td class="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex space-x-2">

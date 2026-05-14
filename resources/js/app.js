@@ -20,6 +20,9 @@ createInertiaApp({
         app.component('Head', Head)
 
         app.config.globalProperties.route = (name, params, absolute) => route(name, params, absolute) // optional ziggy
+        app.config.globalProperties.currency = () => {
+            return props.initialPage.props.business?.currency_symbol || '$'
+        }
         app.mount(el)
     },
 })

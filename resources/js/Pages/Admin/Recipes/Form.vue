@@ -98,7 +98,7 @@
                 Cost</label>
               <div
                 class="px-3 py-1.5 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300 border border-transparent">
-                ${{ calculateItemCost(item).toFixed(2) }}
+                {{ currency() }}{{ calculateItemCost(item).toFixed(2) }}
               </div>
             </div>
           </div>
@@ -120,12 +120,12 @@
         <div
           class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
           <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 mb-1">Total Food Cost</p>
-          <div class="text-2xl font-black text-indigo-700 dark:text-indigo-300">${{ totalCost.toFixed(2) }}</div>
+          <div class="text-2xl font-black text-indigo-700 dark:text-indigo-300">{{ currency() }}{{ totalCost.toFixed(2) }}</div>
         </div>
         <div
           class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
           <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-500 mb-1">Selling Price</p>
-          <div class="text-2xl font-black text-emerald-700 dark:text-emerald-300">${{ sellingPrice.toFixed(2) }}</div>
+          <div class="text-2xl font-black text-emerald-700 dark:text-emerald-300">{{ currency() }}{{ sellingPrice.toFixed(2) }}</div>
         </div>
         <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
           <p class="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-1">Gross Profit (GP%)</p>

@@ -1,28 +1,40 @@
 <template>
   <AdminLayout :title="pageTitle">
     <div class="space-y-6">
-      <!-- Filters -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <form @submit.prevent="applyFilter" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-          <div class="space-y-1">
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Account</label>
-            <select v-model="form.account_id" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
-              <option value="">Choose an account...</option>
-              <option v-for="acc in accounts" :key="acc.id" :value="acc.id">[{{ acc.code }}] {{ acc.name }}</option>
-            </select>
+      <!-- Page Header -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
+          <div class="flex justify-between items-center">
+            <div>
+              <h1 class="text-xl font-bold text-gray-800">General Ledger</h1>
+              <p class="text-gray-600 text-sm mt-1">Detailed transaction history for individual accounts</p>
+            </div>
           </div>
-          <div class="space-y-1">
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">From Date</label>
-            <input v-model="form.from_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <div class="space-y-1">
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">To Date</label>
-            <input v-model="form.to_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
-          </div>
-          <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 transition shadow-sm">
-            Generate Report
-          </button>
-        </form>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-6">
+          <form @submit.prevent="applyFilter" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <div class="space-y-1">
+              <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Account</label>
+              <select v-model="form.account_id" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="">Choose an account...</option>
+                <option v-for="acc in accounts" :key="acc.id" :value="acc.id">[{{ acc.code }}] {{ acc.name }}</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">From Date</label>
+              <input v-model="form.from_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">To Date</label>
+              <input v-model="form.to_date" type="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 transition shadow-sm">
+              Generate Report
+            </button>
+          </form>
+        </div>
       </div>
 
       <!-- Ledger Table -->
@@ -33,9 +45,9 @@
               <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date / Type</th>
               <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Voucher # / Reference</th>
               <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Narration</th>
-              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Debit ($)</th>
-              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Credit ($)</th>
-              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Balance ($)</th>
+              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Debit ({{ currency() }})</th>
+              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Credit ({{ currency() }})</th>
+              <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Balance ({{ currency() }})</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
@@ -45,7 +57,7 @@
               <td></td>
               <td></td>
               <td class="px-6 py-3 text-right text-sm font-black text-indigo-700">
-                ${{ openingBalance.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                {{ currency() }}{{ openingBalance.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
               </td>
             </tr>
             <!-- Transactions -->
@@ -70,16 +82,16 @@
                 {{ row.credit > 0 ? parseFloat(row.credit).toLocaleString(undefined, {minimumFractionDigits: 2}) : '-' }}
               </td>
               <td class="px-6 py-4 text-sm font-black text-gray-900 text-right">
-                ${{ row.runningBalance.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                {{ currency() }}{{ row.runningBalance.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
               </td>
             </tr>
           </tbody>
           <tfoot v-if="processedLedger.length > 0" class="bg-gray-50 font-black">
             <tr>
               <td colspan="3" class="px-6 py-4 text-xs uppercase tracking-widest text-gray-400">Period Totals / Closing Balance</td>
-              <td class="px-6 py-4 text-right text-sm">${{ periodTotalDebit.toLocaleString() }}</td>
-              <td class="px-6 py-4 text-right text-sm">${{ periodTotalCredit.toLocaleString() }}</td>
-              <td class="px-6 py-4 text-right text-sm text-indigo-600">${{ closingBalance.toLocaleString() }}</td>
+              <td class="px-6 py-4 text-right text-sm">{{ currency() }}{{ periodTotalDebit.toLocaleString() }}</td>
+              <td class="px-6 py-4 text-right text-sm">{{ currency() }}{{ periodTotalCredit.toLocaleString() }}</td>
+              <td class="px-6 py-4 text-right text-sm text-indigo-600">{{ currency() }}{{ closingBalance.toLocaleString() }}</td>
             </tr>
           </tfoot>
         </table>

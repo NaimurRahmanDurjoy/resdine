@@ -61,6 +61,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            'business' => [
+                'currency_symbol' => \App\Models\BusinessConfig::get('currency', '$'),
+            ],
             'notifications' => $notifications,
             'menus' => $menus,
             'flash' => [

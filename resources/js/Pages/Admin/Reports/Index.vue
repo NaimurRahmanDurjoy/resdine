@@ -17,7 +17,7 @@
         <div class="flex flex-col bg-white dark:bg-slate-800 shadow-sm rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <div class="text-slate-500 text-sm font-semibold mb-2">Sales Today</div>
           <div class="flex items-center">
-            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">${{ stats.salesToday.toFixed(2) }}</div>
+            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">{{ currency() }}{{ stats.salesToday.toFixed(2) }}</div>
             <div class="text-sm font-medium text-emerald-500 bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full">+12%</div>
           </div>
         </div>
@@ -26,7 +26,7 @@
         <div class="flex flex-col bg-white dark:bg-slate-800 shadow-sm rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <div class="text-slate-500 text-sm font-semibold mb-2">Monthly Revenue</div>
           <div class="flex items-center">
-            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">${{ stats.salesMonth.toFixed(2) }}</div>
+            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">{{ currency() }}{{ stats.salesMonth.toFixed(2) }}</div>
           </div>
         </div>
 
@@ -60,7 +60,7 @@
               
               <!-- Tooltip on hover -->
               <div class="opacity-0 group-hover:opacity-100 absolute -top-10 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded font-semibold whitespace-nowrap z-10 pointer-events-none shadow-lg">
-                ${{ day.total.toFixed(2) }}
+                {{ currency() }}{{ day.total.toFixed(2) }}
               </div>
               
               <!-- Bar -->
@@ -91,7 +91,7 @@
                   <div class="text-xs text-slate-500">{{ item.total_qty }} sold</div>
                 </div>
                 <div class="text-sm font-bold text-emerald-500">
-                  ${{ Number(item.revenue).toFixed(2) }}
+                  {{ currency() }}{{ Number(item.revenue).toFixed(2) }}
                 </div>
               </div>
 
@@ -128,7 +128,7 @@
                     <div class="font-medium text-slate-800 dark:text-slate-100">{{ order.customer ? order.customer.name : 'Walk-in / Guest' }}</div>
                   </td>
                   <td class="p-2 whitespace-nowrap">
-                    <div class="text-left font-medium text-emerald-500">${{ Number(order.total_amount).toFixed(2) }}</div>
+                    <div class="text-left font-medium text-emerald-500">{{ currency() }}{{ Number(order.total_amount).toFixed(2) }}</div>
                   </td>
                   <td class="p-2 whitespace-nowrap">
                     <div class="text-center">

@@ -12,17 +12,17 @@
       <div class="grid grid-cols-2 gap-4 mb-8">
         <div class="p-4 bg-gray-800/50 rounded-2xl border border-white/5">
           <div class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Opening Cash</div>
-          <div class="text-xl font-black text-white">${{ register.opening_cash }}</div>
+          <div class="text-xl font-black text-white">{{ currency() }}{{ register.opening_cash }}</div>
         </div>
         <div class="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/10">
           <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Expected Cash</div>
-          <div class="text-xl font-black text-white">${{ register.expected_cash }}</div>
+          <div class="text-xl font-black text-white">{{ currency() }}{{ register.expected_cash }}</div>
         </div>
       </div>
 
       <form @submit.prevent="submit" class="space-y-6">
         <div>
-          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Actual Counted Cash ($)</label>
+          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Actual Counted Cash ({{ currency() }})</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500 material-symbols-outlined">calculate</span>
             <input v-model="form.closing_cash" type="number" step="0.01" required
@@ -36,7 +36,7 @@
           <span class="material-symbols-outlined">{{ difference > 0 ? 'add_circle' : 'remove_circle' }}</span>
           <div>
             <div class="text-[10px] font-black uppercase tracking-widest">Discrepancy Detected</div>
-            <div class="text-lg font-black">${{ Math.abs(difference).toFixed(2) }} {{ difference > 0 ? 'Over' : 'Short' }}</div>
+            <div class="text-lg font-black">{{ currency() }}{{ Math.abs(difference).toFixed(2) }} {{ difference > 0 ? 'Over' : 'Short' }}</div>
           </div>
         </div>
 

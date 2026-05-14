@@ -22,7 +22,7 @@
                             <div class="mt-4 space-y-4">
                                 <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
                                     <span class="text-sm font-medium text-gray-500">Remaining Due:</span>
-                                    <span class="text-xl font-bold text-red-600">${{ remainingDue.toFixed(2) }}</span>
+                                    <span class="text-xl font-bold text-red-600">{{ currency() }}{{ remainingDue.toFixed(2) }}</span>
                                 </div>
 
                                 <div>
@@ -30,7 +30,7 @@
                                     <div class="mt-1 relative rounded-md shadow-sm">
                                         <div
                                             class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                            <span class="text-gray-500 sm:text-sm">{{ currency() }}</span>
                                         </div>
                                         <input v-model.number="form.amount" type="number" step="0.01"
                                             class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"

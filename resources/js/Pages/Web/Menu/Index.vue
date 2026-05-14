@@ -74,7 +74,7 @@
             <!-- Price floating badge -->
             <div
               class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-lg font-black text-slate-900">
-              ${{ item.price }}
+              {{ currency() }}{{ item.price }}
             </div>
           </div>
 
@@ -155,7 +155,7 @@
                           item.variant_name
                         }}</span>
                     </h4>
-                    <div class="text-amber-600 font-black">${{ (item.price * item.quantity).toFixed(2) }}</div>
+                    <div class="text-amber-600 font-black">{{ currency() }}{{ (item.price * item.quantity).toFixed(2) }}</div>
                   </div>
 
                   <div
@@ -230,7 +230,7 @@
             <div class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)]">
               <div class="flex justify-between items-center mb-6">
                 <span class="text-slate-500 font-medium">Subtotal</span>
-                <span class="text-2xl font-black text-slate-900">${{ cartTotal.toFixed(2) }}</span>
+                <span class="text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
               </div>
               <button @click="submitOrder" :disabled="cart.length === 0 || isSubmitting"
                 class="w-full bg-slate-900 text-white font-bold text-lg py-4 rounded-full shadow-xl shadow-slate-900/20 hover:bg-slate-800 hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">

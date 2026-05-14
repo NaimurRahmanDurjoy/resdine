@@ -153,7 +153,7 @@ const getTransactionType = (type) => {
                         }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {{ parseFloat(entry.unit_cost || 0) > 0 ? '$' + parseFloat(entry.unit_cost).toFixed(2) :
+                        {{ parseFloat(entry.unit_cost || 0) > 0 ? currency() + parseFloat(entry.unit_cost).toFixed(2) :
                             '-' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">

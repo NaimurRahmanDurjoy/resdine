@@ -36,7 +36,7 @@
               {{ voucher.reference_no || 'N/A' }}
             </td>
             <td class="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
-              ${{ parseFloat(voucher.total_debit).toLocaleString() }}
+              {{ currency() }}{{ parseFloat(voucher.total_debit).toLocaleString() }}
             </td>
             <td class="px-6 py-2 whitespace-nowrap text-center">
               <span v-if="voucher.status === 1" class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[10px] font-bold rounded-full border border-yellow-100">Draft</span>

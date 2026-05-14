@@ -15,8 +15,12 @@
                             <label class="block text-sm font-medium text-gray-700 capitalize">
                                 {{ config.key.replace(/_/g, ' ') }}
                             </label>
-                            <input v-model="formConfigs[config.key]" type="text"
+                            <input v-if="config.key !== 'currency'" v-model="formConfigs[config.key]" type="text"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <select v-else v-model="formConfigs[config.key]"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option v-for="c in currencies" :key="c.id" :value="c.symbol">{{ c.name }} ({{ c.symbol }})</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -27,8 +31,10 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Currency Symbol</label>
-                            <input v-model="formConfigs.currency" type="text" placeholder="$"
+                            <select v-model="formConfigs.currency"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option v-for="c in currencies" :key="c.id" :value="c.symbol">{{ c.name }} ({{ c.symbol }})</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">VAT (%)</label>
@@ -57,6 +63,7 @@ defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     configs: Object,
+    currencies: Array,
     pageTitle: String
 })
 

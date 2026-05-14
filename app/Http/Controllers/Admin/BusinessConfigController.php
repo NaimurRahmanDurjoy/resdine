@@ -13,6 +13,7 @@ class BusinessConfigController extends Controller
     {
         return Inertia::render('Admin/Settings/BusinessConfig/Index', [
             'configs' => BusinessConfig::all()->groupBy('group'),
+            'currencies' => \App\Models\Currency::all(),
             'pageTitle' => 'System configuration'
         ]);
     }
