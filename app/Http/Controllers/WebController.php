@@ -100,19 +100,47 @@ class WebController extends Controller
                     'notes' => $notes,
                 ]);
 
-                // 2. Handle Instant Payment for Takeaway/Delivery
+                // 2. Handle Instant/Online Payment
+                $redirectUrl = null;
                 if ($validated['payment_method']) {
-                    $this->paymentService->processPayment($order, [
-                        'amount' => $validated['total_amount'],
-                        'payment_method' => $validated['payment_method'],
-                        'transaction_reference' => 'WEB-' . strtoupper(uniqid())
-                    ]);
+                    $methodInt = (int) $validated['payment_method'];
+                    
+                    // Gateway integer mapping: 2 = Stripe, 3 = bKash
+                    $gatewayMapping = [
+                        2 => 'stripe',
+                        3 => 'bkash',
+                    ];
+                    
+                    if (isset($gatewayMapping[$methodInt])) {
+                        $gatewayName = $gatewayMapping[$methodInt];
+                        try {
+                            $manager = app(\App\Services\Payments\PaymentManager::class);
+                            $gateway = $manager->driver($gatewayName);
+                            $callbackUrl = route('payment.callback', ['gateway' => $gatewayName]);
+                            
+                            $paymentResult = $gateway->initiatePayment($order, (float) $validated['total_amount'], $callbackUrl);
+                            
+                            if ($paymentResult['success'] && isset($paymentResult['redirect_url'])) {
+                                $redirectUrl = $paymentResult['redirect_url'];
+                            }
+                        } catch (\Exception $ex) {
+                            \Log::error('Gateway initiation error during checkout: ' . $ex->getMessage());
+                        }
+                    } else {
+                        // Standard Cash/Manual Payment
+                        $this->paymentService->processPayment($order, [
+                            'amount' => $validated['total_amount'],
+                            'payment_method' => $methodInt,
+                            'transaction_reference' => 'WEB-' . strtoupper(uniqid())
+                        ]);
+                    }
                 }
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Your order has been placed successfully!',
                     'order_number' => $order->order_number,
+                    'redirect_url' => $redirectUrl,
                 ]);
             });
         } catch (\Exception $e) {

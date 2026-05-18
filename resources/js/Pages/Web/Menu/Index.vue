@@ -193,16 +193,21 @@
 
                     <div v-if="form.order_type === 2">
                       <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method (Instant Pay)</label>
-                      <div class="grid grid-cols-2 gap-2">
+                      <div class="grid grid-cols-3 gap-2">
                         <button @click="form.payment_method = 1" type="button"
                           :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-2 py-3 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
                           <span class="material-symbols-outlined text-sm">payments</span> Cash
                         </button>
                         <button @click="form.payment_method = 3" type="button"
                           :class="form.payment_method === 3 ? 'bg-pink-600 text-white border-pink-600' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-2 py-3 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
                           <span class="material-symbols-outlined text-sm">smartphone</span> bKash
+                        </button>
+                        <button @click="form.payment_method = 2" type="button"
+                          :class="form.payment_method === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
+                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
+                          <span class="material-symbols-outlined text-sm">credit_card</span> Stripe
                         </button>
                       </div>
                     </div>
@@ -263,7 +268,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import WebLayout from '@/Layouts/WebLayout.vue'
 import axios from 'axios'
@@ -424,6 +429,13 @@ const submitOrder = async () => {
     const res = await axios.post(route('web.order.submit'), payload)
     if (res.data.success) {
       isCartOpen.value = false
+
+      if (res.data.redirect_url) {
+        cart.value = []
+        window.location.href = res.data.redirect_url
+        return
+      }
+
       Swal.fire({
         title: 'Order Confirmed!',
         text: `Your order #${res.data.order_number} has been sent to the kitchen.`,
@@ -444,6 +456,24 @@ const submitOrder = async () => {
     isSubmitting.value = false
   }
 }
+onMounted(() => {
+  const flash = page.props.flash || {}
+  if (flash.success) {
+    Swal.fire({
+      title: 'Success!',
+      text: flash.success,
+      icon: 'success',
+      confirmButtonColor: '#f59e0b',
+    })
+  } else if (flash.error) {
+    Swal.fire({
+      title: 'Error!',
+      text: flash.error,
+      icon: 'error',
+      confirmButtonColor: '#ef4444',
+    })
+  }
+})
 </script>
 
 <style scoped>
