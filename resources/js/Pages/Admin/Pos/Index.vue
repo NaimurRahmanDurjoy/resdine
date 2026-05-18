@@ -176,6 +176,16 @@
               <span>Discount</span>
               <span class="font-semibold text-green-600">-{{ currency() }}{{ cartDiscount.toFixed(2) }}</span>
             </div>
+            <!-- Dynamic VAT row -->
+            <div v-if="cartVatAmount > 0" class="flex justify-between text-gray-600">
+              <span>VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.' }})</span>
+              <span class="font-semibold">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
+            </div>
+            <!-- Dynamic Service Charge row -->
+            <div v-if="cartServiceChargeAmount > 0" class="flex justify-between text-gray-600">
+              <span>Service Charge ({{ branchSetting.service_charge_percentage }}%)</span>
+              <span class="font-semibold">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2) }}</span>
+            </div>
             <div class="flex justify-between items-end mt-2 pt-2 border-t border-gray-200 border-dashed">
               <span class="text-lg font-bold text-gray-800">Total</span>
               <span class="text-2xl font-black text-indigo-700">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
@@ -240,7 +250,8 @@ const props = defineProps({
   categories: Array,
   items: Array,
   customers: Array,
-  tables: Array
+  tables: Array,
+  branchSetting: Object
 })
 
 // UI State
@@ -292,8 +303,29 @@ const cartDiscount = computed(() => {
   return 0 // Future promotion logic here
 })
 
+const cartVatAmount = computed(() => {
+  const vatPercent = parseFloat(props.branchSetting?.vat_percentage || 0)
+  if (vatPercent <= 0) return 0
+  
+  if (props.branchSetting?.is_vat_inclusive) {
+    return cartSubtotal.value - (cartSubtotal.value / (1 + vatPercent / 100))
+  } else {
+    return cartSubtotal.value * (vatPercent / 100)
+  }
+})
+
+const cartServiceChargeAmount = computed(() => {
+  const serviceChargePercent = parseFloat(props.branchSetting?.service_charge_percentage || 0)
+  if (serviceChargePercent <= 0) return 0
+  return cartSubtotal.value * (serviceChargePercent / 100)
+})
+
 const cartTotal = computed(() => {
-  return cartSubtotal.value - cartDiscount.value
+  if (props.branchSetting?.is_vat_inclusive) {
+    return cartSubtotal.value + cartServiceChargeAmount.value - cartDiscount.value
+  } else {
+    return cartSubtotal.value + cartVatAmount.value + cartServiceChargeAmount.value - cartDiscount.value
+  }
 })
 
 const activeCustomerPoints = computed(() => {
@@ -378,6 +410,8 @@ const submitOrder = async (isPaid, paymentMethodId = 1) => {
     order_type: orderType.value,
     subtotal: cartSubtotal.value,
     discount: cartDiscount.value,
+    vat_amount: cartVatAmount.value,
+    service_charge_amount: cartServiceChargeAmount.value,
     total_amount: cartTotal.value,
     payment_method: isPaid ? paymentMethodId : null,
     items: cart.value.map(c => ({

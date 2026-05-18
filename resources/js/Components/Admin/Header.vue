@@ -21,6 +21,20 @@
 
     <!-- Right Section -->
     <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+      
+      <!-- Branch Switcher for Admin -->
+      <div v-if="$page.props.business?.can_select_branch && $page.props.business?.branches?.length > 0" class="relative">
+        <select 
+          :value="$page.props.business.active_branch_id" 
+          @change="switchBranch" 
+          class="block w-40 md:w-48 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-850 text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1.5 pl-3 pr-8 transition-all"
+        >
+          <option v-for="branch in $page.props.business.branches" :key="branch.id" :value="branch.id">
+            {{ branch.name }}
+          </option>
+        </select>
+      </div>
+
       <!-- Notifications Dropdown -->
       <div class="relative notif-dropdown">
         <button class="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none"
@@ -148,5 +162,17 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 // Logout function
 function logout() {
   router.post('/admin/logout')
+}
+
+// Switch Branch function for Administrator
+function switchBranch(event) {
+  router.post(route('admin.settings.switch-branch'), {
+    branch_id: event.target.value
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      window.location.reload()
+    }
+  })
 }
 </script>

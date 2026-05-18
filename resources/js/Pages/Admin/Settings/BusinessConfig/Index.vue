@@ -1,8 +1,21 @@
 <template>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mx-auto mb-10">
-        <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
-            <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>
-            <p class="text-sm text-gray-500">Manage critical settings, tax rules, and branding for this branch.</p>
+        <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>
+                <p class="text-sm text-gray-500">Manage critical settings, tax rules, and branding for this branch.</p>
+            </div>
+
+            <!-- Branch Selector for Admin -->
+            <div v-if="$page.props.business.can_select_branch && $page.props.business.branches.length > 0" class="w-full sm:w-64">
+                <label class="block text-xs font-bold text-indigo-700 uppercase tracking-wider mb-1">Select Branch to Configure</label>
+                <select v-model="selectedBranch" @change="changeBranch"
+                    class="block w-full rounded border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white font-medium text-gray-700">
+                    <option v-for="branch in $page.props.business.branches" :key="branch.id" :value="branch.id">
+                        {{ branch.name }}
+                    </option>
+                </select>
+            </div>
         </div>
 
         <form @submit.prevent="submit" class="p-6">
@@ -158,18 +171,35 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+import { useForm, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     settings: Object,
+    selectedBranchId: Number,
     timezones: Array,
     currencies: Array,
     pageTitle: String
 })
 
+const selectedBranch = ref(props.selectedBranchId)
+
+// Update internal selectedBranch state when prop changes (e.g. on navigation)
+watch(() => props.selectedBranchId, (newVal) => {
+    selectedBranch.value = newVal
+})
+
+const changeBranch = () => {
+    router.visit(route('admin.settings.business-config.index', { branch_id: selectedBranch.value }), {
+        preserveState: false,
+        preserveScroll: true
+    })
+}
+
 const form = useForm({
+    branch_id: props.selectedBranchId,
     currency_id: props.settings?.currency_id || null,
     vat_registration_no: props.settings?.vat_registration_no || '',
     vat_percentage: props.settings?.vat_percentage || 0,
@@ -184,6 +214,24 @@ const form = useForm({
     show_logo_on_receipt: props.settings?.show_logo_on_receipt ?? true,
     invoice_prefix: props.settings?.invoice_prefix || 'INV',
 })
+
+// When properties update, reload the form state
+watch(() => props.settings, (newSettings) => {
+    form.branch_id = props.selectedBranchId
+    form.currency_id = newSettings?.currency_id || null
+    form.vat_registration_no = newSettings?.vat_registration_no || ''
+    form.vat_percentage = newSettings?.vat_percentage || 0
+    form.service_charge_percentage = newSettings?.service_charge_percentage || 0
+    form.is_vat_inclusive = newSettings?.is_vat_inclusive || false
+    form.timezone = newSettings?.timezone || 'Asia/Dhaka'
+    form.language_code = newSettings?.language_code || 'en'
+    form.opening_time = newSettings?.opening_time || ''
+    form.closing_time = newSettings?.closing_time || ''
+    form.receipt_header_title = newSettings?.receipt_header_title || ''
+    form.receipt_footer_text = newSettings?.receipt_footer_text || ''
+    form.show_logo_on_receipt = newSettings?.show_logo_on_receipt ?? true
+    form.invoice_prefix = newSettings?.invoice_prefix || 'INV'
+}, { deep: true })
 
 const submit = () => {
     form.post(route('admin.settings.business-config.update'), {

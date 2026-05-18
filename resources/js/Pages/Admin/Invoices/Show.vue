@@ -4,7 +4,9 @@
             <!-- Header -->
             <div class="bg-indigo-900 p-8 text-white flex justify-between items-start">
                 <div>
-                    <h1 class="text-3xl font-black italic tracking-tighter">RESDINE</h1>
+                    <h1 class="text-3xl font-black italic tracking-tighter">
+                        {{ invoice.order?.branch?.setting?.receipt_header_title || 'RESDINE' }}
+                    </h1>
                     <p class="text-xs opacity-70 mt-1 uppercase tracking-widest">Gourmet Dining Experience</p>
                 </div>
                 <div class="text-right">
@@ -18,9 +20,11 @@
             <div class="p-8 grid grid-cols-2 gap-8 text-sm border-b border-gray-100">
                 <div>
                     <h3 class="text-gray-400 font-bold uppercase text-xs mb-2">Billed From:</h3>
-                    <p class="font-bold text-gray-800">ResDine Main Branch</p>
-                    <p class="text-gray-600">Road 12, Banani, Dhaka</p>
-                    <p class="text-gray-600">Tel: +880 1234 567 890</p>
+                    <p class="font-bold text-gray-800">{{ invoice.order?.branch?.name || 'ResDine Main Branch' }}</p>
+                    <p class="text-gray-600">{{ invoice.order?.branch?.location || 'Road 12, Banani, Dhaka' }}</p>
+                    <p v-if="invoice.order?.branch?.setting?.vat_registration_no" class="text-gray-600">
+                        VAT No: {{ invoice.order.branch.setting.vat_registration_no }}
+                    </p>
                 </div>
                 <div class="text-right">
                     <h3 class="text-gray-400 font-bold uppercase text-xs mb-2">Billed To:</h3>
@@ -67,6 +71,16 @@
                             <span>Discount</span>
                             <span class="font-bold">-{{ currency() }}{{ invoice.discount }}</span>
                         </div>
+                        <!-- VAT Row -->
+                        <div v-if="invoice.vat_amount > 0" class="flex justify-between text-sm text-gray-600">
+                            <span>VAT ({{ invoice.order?.branch?.setting?.vat_percentage || 0 }}%{{ invoice.order?.branch?.setting?.is_vat_inclusive ? ' Incl.' : '' }})</span>
+                            <span class="font-bold text-gray-800">{{ currency() }}{{ invoice.vat_amount }}</span>
+                        </div>
+                        <!-- Service Charge Row -->
+                        <div v-if="invoice.service_charge_amount > 0" class="flex justify-between text-sm text-gray-600">
+                            <span>Service Charge ({{ invoice.order?.branch?.setting?.service_charge_percentage || 0 }}%)</span>
+                            <span class="font-bold text-gray-800">{{ currency() }}{{ invoice.service_charge_amount }}</span>
+                        </div>
                         <div class="flex justify-between text-xl font-black pt-3 border-t border-gray-200">
                             <span class="text-indigo-900">Total</span>
                             <span class="text-indigo-900">{{ currency() }}{{ invoice.grand_total }}</span>
@@ -83,7 +97,9 @@
                 </div>
 
                 <div class="mt-12 pt-8 border-t border-gray-200 text-center">
-                    <p class="text-sm font-bold text-gray-800 uppercase tracking-widest">Thank you for dining with us!</p>
+                    <p class="text-sm font-bold text-gray-800 uppercase tracking-widest">
+                        {{ invoice.order?.branch?.setting?.receipt_footer_text || 'Thank you for dining with us!' }}
+                    </p>
                     <p class="text-xs text-gray-400 mt-1 italic">Please keep this receipt for your records.</p>
                 </div>
             </div>
@@ -104,6 +120,10 @@ const props = defineProps({
     invoice: Object,
     pageTitle: String
 });
+
+const currency = () => {
+    return props.invoice?.order?.branch?.setting?.currency?.symbol || '$';
+};
 
 const formatDate = (date) => {
     if (!date) return '-';

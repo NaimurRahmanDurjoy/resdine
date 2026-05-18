@@ -10,7 +10,7 @@ class InvoiceController extends Controller
 {
     public function show($id)
     {
-        $invoice = SalesInvoice::with(['order.items.product', 'order.table', 'customer'])
+        $invoice = SalesInvoice::with(['order.items.product', 'order.table', 'order.branch.setting.currency', 'customer'])
             ->where('id', $id)
             ->orWhere('order_id', $id)
             ->firstOrFail();

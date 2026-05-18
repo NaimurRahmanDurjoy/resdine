@@ -45,11 +45,19 @@ class PosController extends Controller
         $customers = Customer::with('loyaltyPoints')->where('status', 1)->get();
         $tables = RestaurantTable::where('status', 1)->get(); 
 
+        $activeBranchId = auth()->user()->getActiveBranchId();
+        $settings = \App\Models\BranchSetting::where('branch_id', $activeBranchId)->first();
+
         return Inertia::render('Admin/Pos/Index', [
             'categories' => $categories,
             'items' => $items,
             'customers' => $customers,
             'tables' => $tables,
+            'branchSetting' => [
+                'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
+                'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
+                'is_vat_inclusive' => $settings ? (bool) $settings->is_vat_inclusive : false,
+            ],
             'pageTitle' => 'Point of Sale'
         ]);
     }

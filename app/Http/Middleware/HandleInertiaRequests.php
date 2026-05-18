@@ -57,12 +57,49 @@ class HandleInertiaRequests extends Middleware
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
         }
 
+        $activeBranchId = null;
+        $canSelectBranch = false;
+        $branches = [];
+        $branchSetting = null;
+
+        if ($user) {
+            $activeBranchId = method_exists($user, 'getActiveBranchId') ? $user->getActiveBranchId() : null;
+            $canSelectBranch = $user->role && strtolower($user->role->name ?? '') === 'admin';
+            if ($canSelectBranch) {
+                $branches = \App\Models\Branch::where('status', 1)->get(['id', 'name']);
+            }
+        }
+
+        if (!$activeBranchId) {
+            $activeBranchId = \App\Models\Branch::first()?->id;
+        }
+
+        if ($activeBranchId) {
+            $branchSetting = \App\Models\BranchSetting::with('currency')->where('branch_id', $activeBranchId)->first();
+        }
+
+        if (!$branchSetting) {
+            $branchSetting = new \App\Models\BranchSetting([
+                'currency_id' => null,
+                'vat_registration_no' => null,
+                'vat_percentage' => 0.00,
+                'service_charge_percentage' => 0.00,
+                'is_vat_inclusive' => false,
+                'timezone' => 'UTC',
+                'language_code' => 'en',
+                'invoice_prefix' => 'INV',
+            ]);
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
             ],
             'business' => [
-                'currency_symbol' => \App\Models\BranchSetting::with('currency')->first()?->currency?->symbol ?? '$',
+                'currency_symbol' => $branchSetting->currency?->symbol ?? '$',
+                'active_branch_id' => $activeBranchId,
+                'can_select_branch' => $canSelectBranch,
+                'branches' => $branches,
             ],
             'notifications' => $notifications,
             'menus' => $menus,

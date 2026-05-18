@@ -30,7 +30,22 @@ class OrderService
             });
 
             $discount = $data['discount'] ?? 0;
-            $totalAmount = $subtotal - $discount;
+
+            // Fetch Branch settings for tax calculations
+            $branchSetting = \App\Models\BranchSetting::where('branch_id', $data['branch_id'])->first();
+            $vatPercent = $branchSetting ? (float)$branchSetting->vat_percentage : 0;
+            $serviceChargePercent = $branchSetting ? (float)$branchSetting->service_charge_percentage : 0;
+            $isVatInclusive = $branchSetting ? (bool)$branchSetting->is_vat_inclusive : false;
+
+            if ($isVatInclusive) {
+                $vatAmount = $subtotal - ($subtotal / (1 + $vatPercent / 100));
+                $serviceChargeAmount = $subtotal * ($serviceChargePercent / 100);
+                $totalAmount = $subtotal + $serviceChargeAmount - $discount;
+            } else {
+                $vatAmount = $subtotal * ($vatPercent / 100);
+                $serviceChargeAmount = $subtotal * ($serviceChargePercent / 100);
+                $totalAmount = $subtotal + $vatAmount + $serviceChargeAmount - $discount;
+            }
 
             // 1. Strict Stock Validation
             $allErrors = [];
@@ -62,6 +77,7 @@ class OrderService
                 'order_status' => $data['order_status'] ?? 0, // 0 = Pending
                 'subtotal' => $subtotal,
                 'discount' => $discount,
+                'service_charge_amount' => $serviceChargeAmount,
                 'total_amount' => $totalAmount,
                 'due_amount' => $totalAmount,
                 'collect_amount' => $data['collect_amount'] ?? 0,
@@ -98,6 +114,9 @@ class OrderService
                 'customer_id' => $data['customer_id'] ?? null,
                 'sub_total' => $subtotal,
                 'discount' => $discount,
+                'vat_amount' => $vatAmount,
+                'tax_amount' => 0.00,
+                'service_charge_amount' => $serviceChargeAmount,
                 'due_amount' => $order->due_amount,
                 'grand_total' => $totalAmount,
                 'status' => 1, // Pending
@@ -178,7 +197,25 @@ class OrderService
             $refundAmount = $item->unit_price * $quantityToRefund;
             
             $order->subtotal -= $refundAmount;
-            $order->total_amount -= $refundAmount;
+
+            // Fetch Branch settings for tax calculations
+            $branchSetting = \App\Models\BranchSetting::where('branch_id', $order->branch_id)->first();
+            $vatPercent = $branchSetting ? (float)$branchSetting->vat_percentage : 0;
+            $serviceChargePercent = $branchSetting ? (float)$branchSetting->service_charge_percentage : 0;
+            $isVatInclusive = $branchSetting ? (bool)$branchSetting->is_vat_inclusive : false;
+
+            if ($isVatInclusive) {
+                $vatAmount = $order->subtotal - ($order->subtotal / (1 + $vatPercent / 100));
+                $serviceChargeAmount = $order->subtotal * ($serviceChargePercent / 100);
+                $totalAmount = $order->subtotal + $serviceChargeAmount - $order->discount;
+            } else {
+                $vatAmount = $order->subtotal * ($vatPercent / 100);
+                $serviceChargeAmount = $order->subtotal * ($serviceChargePercent / 100);
+                $totalAmount = $order->subtotal + $vatAmount + $serviceChargeAmount - $order->discount;
+            }
+
+            $order->total_amount = $totalAmount;
+            $order->service_charge_amount = $serviceChargeAmount;
             
             // Adjust due_amount but don't go below 0 (excess would be a credit/cash refund)
             $order->due_amount = max(0, $order->due_amount - $refundAmount);
@@ -198,6 +235,9 @@ class OrderService
             $invoice = SalesInvoice::where('order_id', $order->id)->first();
             if ($invoice) {
                 $invoice->sub_total = $order->subtotal;
+                $invoice->vat_amount = $vatAmount;
+                $invoice->tax_amount = 0.00;
+                $invoice->service_charge_amount = $serviceChargeAmount;
                 $invoice->grand_total = $order->total_amount;
                 $invoice->due_amount = $order->due_amount;
                 $invoice->save();

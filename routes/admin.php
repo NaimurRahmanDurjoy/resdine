@@ -177,6 +177,7 @@ Route::middleware('web')->name('admin.')->group(function () {
             // Business Config
             Route::get('business-config', [BusinessConfigController::class, 'index'])->name('business-config.index');
             Route::post('business-config', [BusinessConfigController::class, 'update'])->name('business-config.update');
+            Route::post('switch-branch', [BusinessConfigController::class, 'switchBranch'])->name('settings.switch-branch');
         });
     });
 });

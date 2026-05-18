@@ -32,9 +32,17 @@ class WebController extends Controller
             ->where('status', 1)
             ->get();
 
+        $defaultBranchId = \App\Models\Branch::first()?->id ?: 1;
+        $settings = \App\Models\BranchSetting::where('branch_id', $defaultBranchId)->first();
+
         return Inertia::render('Web/Menu/Index', [
             'categories' => $categories,
             'items' => $items,
+            'branchSetting' => [
+                'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
+                'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
+                'is_vat_inclusive' => $settings ? (bool) $settings->is_vat_inclusive : false,
+            ]
         ]);
     }
 
@@ -94,12 +102,11 @@ class WebController extends Controller
 
                 // 2. Handle Instant Payment for Takeaway/Delivery
                 if ($validated['payment_method']) {
-                    $this->paymentService->processPayment(
-                        $order->id,
-                        $validated['total_amount'],
-                        $validated['payment_method'],
-                        'WEB-' . strtoupper(uniqid())
-                    );
+                    $this->paymentService->processPayment($order, [
+                        'amount' => $validated['total_amount'],
+                        'payment_method' => $validated['payment_method'],
+                        'transaction_reference' => 'WEB-' . strtoupper(uniqid())
+                    ]);
                 }
 
                 return response()->json([

@@ -37,6 +37,17 @@ class User extends Authenticatable
         return $this->belongsTo(Branch::class);
     }
 
+    // Resolve active branch ID based on role and session
+    public function getActiveBranchId()
+    {
+        $roleName = strtolower($this->role->name ?? '');
+        if ($roleName === 'admin') {
+            return session('active_branch_id') ?: ($this->branch_id ?: \App\Models\Branch::first()?->id);
+        }
+        
+        return $this->branch_id ?: \App\Models\Branch::first()?->id;
+    }
+
     // Redirect user based on role
     public function redirectToDashboard(): string
     {

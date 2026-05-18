@@ -17,6 +17,7 @@ class OrderMaster extends BaseModel
         'order_status',
         'subtotal',
         'discount',
+        'service_charge_amount',
         'collect_amount',
         'due_amount',
         'total_amount',
@@ -29,6 +30,7 @@ class OrderMaster extends BaseModel
     protected $casts = [
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
+        'service_charge_amount' => 'decimal:2',
         'collect_amount' => 'decimal:2',
         'due_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',

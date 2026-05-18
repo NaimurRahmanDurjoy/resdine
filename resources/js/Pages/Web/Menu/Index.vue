@@ -227,9 +227,21 @@
             </div>
 
             <!-- Cart Footer Summary -->
-            <div class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)]">
-              <div class="flex justify-between items-center mb-6">
+            <div class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] space-y-3">
+              <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Subtotal</span>
+                <span class="font-bold text-slate-800">{{ currency() }}{{ cartSubtotal.toFixed(2) }}</span>
+              </div>
+              <div v-if="cartVatAmount > 0" class="flex justify-between items-center text-sm">
+                <span class="text-slate-500 font-medium">VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.' }})</span>
+                <span class="font-bold text-slate-800">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
+              </div>
+              <div v-if="cartServiceChargeAmount > 0" class="flex justify-between items-center text-sm">
+                <span class="text-slate-500 font-medium">Service Charge ({{ branchSetting.service_charge_percentage }}%)</span>
+                <span class="font-bold text-slate-800">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2) }}</span>
+              </div>
+              <div class="flex justify-between items-center pt-3 border-t border-slate-100 mb-2">
+                <span class="text-slate-900 font-black text-lg">Total Amount</span>
                 <span class="text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
               </div>
               <button @click="submitOrder" :disabled="cart.length === 0 || isSubmitting"
@@ -252,14 +264,18 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 import WebLayout from '@/Layouts/WebLayout.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import VariantSelectionModal from '@/Components/VariantSelectionModal.vue'
 
+const page = usePage()
+
 const props = defineProps({
   categories: Array,
-  items: Array
+  items: Array,
+  branchSetting: Object
 })
 
 // State
@@ -286,7 +302,32 @@ const filteredItems = computed(() => {
 })
 
 const cartTotalItems = computed(() => cart.value.reduce((acc, curr) => acc + curr.quantity, 0))
-const cartTotal = computed(() => cart.value.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0))
+const cartSubtotal = computed(() => cart.value.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0))
+
+const cartVatAmount = computed(() => {
+  const vatPercent = parseFloat(props.branchSetting?.vat_percentage || 0)
+  if (vatPercent <= 0) return 0
+  
+  if (props.branchSetting?.is_vat_inclusive) {
+    return cartSubtotal.value - (cartSubtotal.value / (1 + vatPercent / 100))
+  } else {
+    return cartSubtotal.value * (vatPercent / 100)
+  }
+})
+
+const cartServiceChargeAmount = computed(() => {
+  const serviceChargePercent = parseFloat(props.branchSetting?.service_charge_percentage || 0)
+  if (serviceChargePercent <= 0) return 0
+  return cartSubtotal.value * (serviceChargePercent / 100)
+})
+
+const cartTotal = computed(() => {
+  if (props.branchSetting?.is_vat_inclusive) {
+    return cartSubtotal.value + cartServiceChargeAmount.value
+  } else {
+    return cartSubtotal.value + cartVatAmount.value + cartServiceChargeAmount.value
+  }
+})
 
 // Methods
 const addToCart = (product) => {
@@ -366,7 +407,9 @@ const submitOrder = async () => {
 
   const payload = {
     ...form,
-    subtotal: cartTotal.value,
+    subtotal: cartSubtotal.value,
+    vat_amount: cartVatAmount.value,
+    service_charge_amount: cartServiceChargeAmount.value,
     total_amount: cartTotal.value,
     items: cart.value.map(i => ({
       item_id: i.item_id,

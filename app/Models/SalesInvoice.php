@@ -12,6 +12,7 @@ class SalesInvoice extends BaseModel
         'collect_amount' => 'decimal:2',
         'vat_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
+        'service_charge_amount' => 'decimal:2',
         'due_amount' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'issued_at' => 'datetime',
