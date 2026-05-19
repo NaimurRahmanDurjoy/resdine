@@ -92,7 +92,9 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::post('orders/{order}/payments', [PaymentController::class, 'store'])->name('orders.payments.store');
         Route::get('orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
         Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
+        Route::post('orders/{order}/assign-driver', [OrderController::class, 'assignDriver'])->name('orders.assign-driver');
         Route::post('orders/item/{orderDetailId}/refund', [OrderController::class, 'refundItem'])->name('orders.item.refund');
+
 
         // Customers
         Route::resource('customers', CustomerController::class);

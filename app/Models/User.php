@@ -55,6 +55,7 @@ class User extends Authenticatable
 
         return match ($roleName) {
             'admin' => route('admin.dashboard'),
+            'driver' => route('driver.dashboard'),
             'cashier' => route('cashier.dashboard'),
             'staff'   => route('admin.pos.index'),
             'customer' => route('home'),

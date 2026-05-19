@@ -71,13 +71,42 @@ class OrderController extends Controller {
 
     public function show($id)
     {
-        $order = OrderMaster::with(['items.product', 'customer', 'table', 'payments', 'invoice'])
+        $order = OrderMaster::with(['items.product', 'customer', 'table', 'payments', 'invoice', 'delivery.driver'])
             ->findOrFail($id);
+
+        $drivers = \App\Models\User::whereHas('role', function ($query) {
+            $query->where('name', 'driver')->orWhere('name', 'Delivery Driver');
+        })->get();
 
         return Inertia::render('Admin/Orders/Show', [
             'order' => $order,
+            'drivers' => $drivers,
             'pageTitle' => 'Order Details'
         ]);
+    }
+
+    public function assignDriver(Request $request, $id)
+    {
+        $request->validate([
+            'driver_id' => 'required|exists:users,id',
+        ]);
+
+        $order = OrderMaster::findOrFail($id);
+
+        if ($order->order_type != 3) {
+            return back()->withErrors(['error' => 'This is not a delivery order.']);
+        }
+
+        $delivery = $order->delivery;
+        if (!$delivery) {
+            $delivery = new \App\Models\OrderDelivery();
+            $delivery->order_id = $order->id;
+        }
+
+        $delivery->driver_id = $request->driver_id;
+        $delivery->save();
+
+        return back()->with('success', 'Driver assigned successfully.');
     }
 
     public function updateStatus(Request $request, $id)

@@ -80,4 +80,10 @@ class OrderMaster extends BaseModel
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+
+    public function delivery()
+    {
+        return $this->hasOne(OrderDelivery::class, 'order_id');
+    }
 }
+

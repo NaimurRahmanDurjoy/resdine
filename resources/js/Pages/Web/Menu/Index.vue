@@ -176,12 +176,15 @@
                   <div class="space-y-4">
 
                     <div class="flex p-1 bg-slate-200/50 rounded-xl">
-                      <button @click="form.order_type = 1"
+                      <button @click="form.order_type = 1; form.payment_method = null; form.table_number = ''"
                         :class="form.order_type === 1 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
                         class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Dine In</button>
                       <button @click="form.order_type = 2"
                         :class="form.order_type === 2 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
                         class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Takeaway</button>
+                      <button @click="form.order_type = 3"
+                        :class="form.order_type === 3 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
+                        class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Delivery</button>
                     </div>
 
                     <div v-if="form.order_type === 1">
@@ -191,7 +194,20 @@
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                     </div>
 
-                    <div v-if="form.order_type === 2">
+                    <div v-if="form.order_type === 3" class="space-y-3">
+                      <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery Address</label>
+                        <textarea v-model="form.delivery_address" placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
+                          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm resize-none"></textarea>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery Instructions (Optional)</label>
+                        <input v-model="form.delivery_instructions" type="text" placeholder="e.g. Leave at door, call before arriving"
+                          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                      </div>
+                    </div>
+
+                    <div v-if="form.order_type === 2 || form.order_type === 3">
                       <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method (Instant Pay)</label>
                       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <button @click="form.payment_method = 1" type="button"
@@ -300,8 +316,11 @@ const form = reactive({
   customer_phone: '',
   order_type: 1,
   table_number: '',
-  payment_method: null
+  payment_method: null,
+  delivery_address: '',
+  delivery_instructions: ''
 })
+
 
 // Computed
 const filteredItems = computed(() => {
@@ -410,8 +429,13 @@ const submitOrder = async () => {
     return
   }
 
-  if (form.order_type === 2 && !form.payment_method) {
-    Swal.fire('Required Fields', 'Please select a payment method for Takeaway.', 'error')
+  if ((form.order_type === 2 || form.order_type === 3) && !form.payment_method) {
+    Swal.fire('Required Fields', `Please select a payment method for ${form.order_type === 2 ? 'Takeaway' : 'Delivery'}.`, 'error')
+    return
+  }
+
+  if (form.order_type === 3 && !form.delivery_address) {
+    Swal.fire('Required Fields', 'Please enter a delivery address.', 'error')
     return
   }
 
@@ -443,16 +467,22 @@ const submitOrder = async () => {
 
       Swal.fire({
         title: 'Order Confirmed!',
-        text: `Your order #${res.data.order_number} has been sent to the kitchen.`,
+        text: `Your order #${res.data.order_number} has been placed successfully.`,
         icon: 'success',
         confirmButtonColor: '#f59e0b',
-        confirmButtonText: 'Awesome!'
+        confirmButtonText: 'Track Order'
       }).then(() => {
+        const orderNum = res.data.order_number;
         // Reset state
         cart.value = []
         form.customer_name = ''
         form.customer_phone = ''
         form.table_number = ''
+        form.delivery_address = ''
+        form.delivery_instructions = ''
+        
+        // Redirect to track page
+        window.location.href = route('web.order.track', { orderNumber: orderNum })
       })
     }
   } catch (error) {

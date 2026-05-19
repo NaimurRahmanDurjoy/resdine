@@ -54,8 +54,10 @@ class WebController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
-            'order_type' => 'required|in:1,2', // 1=dine-in, 2=takeaway
+            'order_type' => 'required|in:1,2,3', // 1=dine-in, 2=takeaway, 3=delivery
             'table_number' => 'nullable|string', 
+            'delivery_address' => 'required_if:order_type,3|string|nullable|max:1000',
+            'delivery_instructions' => 'nullable|string|max:1000',
             'subtotal' => 'required|numeric',
             'total_amount' => 'required|numeric',
             'payment_method' => 'nullable|integer',
@@ -83,8 +85,10 @@ class WebController extends Controller
                 }
 
                 $notes = "Guest: " . $validated['customer_name'] . " (" . $validated['customer_phone'] . ")";
-                if ($validated['table_number']) {
+                if ($validated['order_type'] == 1 && $validated['table_number']) {
                     $notes .= " - Table: " . $validated['table_number'];
+                } elseif ($validated['order_type'] == 3) {
+                    $notes .= " - [Delivery Order]";
                 }
 
                 // 1. Create Order
@@ -99,6 +103,16 @@ class WebController extends Controller
                     'collect_amount' => 0, 
                     'notes' => $notes,
                 ]);
+
+                // If delivery, create delivery record
+                if ($validated['order_type'] == 3) {
+                    \App\Models\OrderDelivery::create([
+                        'order_id' => $order->id,
+                        'delivery_address' => $validated['delivery_address'],
+                        'contact_number' => $validated['customer_phone'],
+                        'special_instructions' => $validated['delivery_instructions'] ?? null,
+                    ]);
+                }
 
                 // 2. Handle Instant/Online Payment
                 $redirectUrl = null;
@@ -150,5 +164,38 @@ class WebController extends Controller
                 'message' => 'Error placing order: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Show tracking page for a specific order.
+     */
+    public function trackOrder(Request $request, $orderNumber)
+    {
+        $order = OrderMaster::with(['delivery.driver', 'items.product'])
+            ->where('order_number', $orderNumber)
+            ->firstOrFail();
+
+        $data = [
+            'order' => [
+                'order_number' => $order->order_number,
+                'order_status' => (int) $order->order_status,
+                'order_type' => (int) $order->order_type,
+                'total_amount' => $order->total_amount,
+                'created_at' => $order->created_at->toIso8601String(),
+                'delivery' => $order->delivery ? [
+                    'delivery_address' => $order->delivery->delivery_address,
+                    'contact_number' => $order->delivery->contact_number,
+                    'special_instructions' => $order->delivery->special_instructions,
+                    'driver_name' => $order->delivery->driver ? $order->delivery->driver->name : null,
+                    'driver_phone' => $order->delivery->driver ? $order->delivery->driver->phone : null,
+                ] : null,
+            ]
+        ];
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($data);
+        }
+
+        return Inertia::render('Web/Order/Tracking', $data);
     }
 }

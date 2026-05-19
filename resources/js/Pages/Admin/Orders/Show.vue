@@ -247,6 +247,49 @@
                     </div>
                 </div>
 
+                <!-- Delivery & Rider Card -->
+                <div v-if="order.order_type === 3"
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 relative overflow-hidden">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">delivery_dining</span>
+                        Delivery Logistics
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Address -->
+                        <div>
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Destination Address</span>
+                            <p class="text-sm font-bold text-gray-700 dark:text-gray-300 leading-relaxed">
+                                {{ order.delivery ? order.delivery.delivery_address : 'No address provided' }}
+                            </p>
+                            <p v-if="order.delivery && order.delivery.special_instructions" class="text-xs italic text-gray-500 mt-2 bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl">
+                                "{{ order.delivery.special_instructions }}"
+                            </p>
+                        </div>
+
+                        <!-- Courier Assignment -->
+                        <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Delivery Partner</span>
+                            
+                            <form @submit.prevent="assignDriver" class="space-y-3">
+                                <select v-model="driverForm.driver_id" 
+                                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm text-gray-800 dark:text-gray-200 font-bold">
+                                    <option value="">-- Choose Delivery Rider --</option>
+                                    <option v-for="driver in drivers" :key="driver.id" :value="driver.id">
+                                        {{ driver.name }} ({{ driver.phone || 'No phone' }})
+                                    </option>
+                                </select>
+                                
+                                <button type="submit" :disabled="driverForm.processing"
+                                    class="w-full bg-indigo-600 hover:bg-indigo-505 text-white py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
+                                    <span class="material-symbols-outlined text-sm">assignment_ind</span>
+                                    {{ order.delivery && order.delivery.driver_id ? 'Reassign Courier' : 'Assign Courier' }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Financial Pulse Card -->
                 <div
                     class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl shadow-xl shadow-indigo-500/20 p-8 text-white relative overflow-hidden">
@@ -336,8 +379,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import PaymentModal from '@/Components/Admin/Orders/PaymentModal.vue';
 import Swal from 'sweetalert2';
@@ -346,10 +389,29 @@ defineOptions({ layout: AdminLayout });
 
 const props = defineProps({
     order: Object,
+    drivers: Array,
     pageTitle: String
 });
 
 const showPaymentModal = ref(false);
+
+const driverForm = useForm({
+    driver_id: props.order.delivery ? (props.order.delivery.driver_id || '') : ''
+});
+
+const assignDriver = () => {
+    driverForm.post(route('admin.orders.assign-driver', props.order.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            Swal.fire({
+                title: 'Driver Assigned!',
+                text: 'The delivery courier has been successfully updated.',
+                icon: 'success',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+    });
+};
 
 const refundItem = (item) => {
     Swal.fire({
@@ -386,19 +448,31 @@ const refundItem = (item) => {
     });
 };
 
-const statuses = {
-    0: 'Pending',
-    1: 'Preparing',
-    2: 'Served',
-    4: 'Completed',
-    5: 'Cancelled'
-};
+const statuses = computed(() => {
+    const list = {
+        0: 'Pending',
+        1: 'Preparing',
+    };
+    
+    if (props.order.order_type === 3) {
+        list[2] = 'Ready';
+        list[3] = 'Out for Delivery';
+    } else {
+        list[2] = 'Served';
+    }
+    
+    list[4] = 'Completed';
+    list[5] = 'Cancelled';
+    
+    return list;
+});
 
 const statusIcon = (status) => {
     const icons = {
         0: 'schedule',
         1: 'skillet',
         2: 'person_check',
+        3: 'delivery_dining',
         4: 'task_alt',
         5: 'cancel'
     };

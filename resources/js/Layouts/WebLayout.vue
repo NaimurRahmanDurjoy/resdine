@@ -14,6 +14,7 @@
           <!-- Desktop menu -->
           <div class="hidden md:flex space-x-8 items-center">
              <Link :href="route('web.menu')" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">Menu</Link>
+             <button @click="promptTrackOrder" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase focus:outline-none">Track Order</button>
              <a href="#about" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">About</a>
              <a href="#contact" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">Contact</a>
              
@@ -41,9 +42,30 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
-
-// Standard import for Google Font
 import { onMounted } from 'vue'
+import Swal from 'sweetalert2'
+
+const promptTrackOrder = () => {
+  Swal.fire({
+    title: 'Track Your Order',
+    text: 'Please enter your unique Order Number:',
+    input: 'text',
+    inputPlaceholder: 'e.g. ORD-2026-00027',
+    showCancelButton: true,
+    confirmButtonColor: '#f59e0b',
+    cancelButtonColor: '#475569',
+    confirmButtonText: 'Track Now',
+    background: '#ffffff',
+    customClass: {
+      confirmButton: 'px-5 py-3 rounded-xl font-bold uppercase tracking-wider text-sm',
+      cancelButton: 'px-5 py-3 rounded-xl font-bold uppercase tracking-wider text-sm'
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value && result.value.trim()) {
+      window.location.href = `/track-order/${result.value.trim()}`;
+    }
+  });
+};
 
 onMounted(() => {
   // Inject Google Font if not present
