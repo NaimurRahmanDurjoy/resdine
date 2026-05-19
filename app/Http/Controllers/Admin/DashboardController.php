@@ -14,20 +14,72 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Total Sales Today
-        $data['totalSales'] = OrderMaster::whereDate('created_at', today())
-                            ->where('order_status', 'completed')
-                            ->sum('total_amount');
+        $today = today();
+        $yesterday = today()->subDay();
 
-        // Top-selling Menu Item (today)
+        // 1. Total Sales Today & Trend
+        $todaySales = OrderMaster::whereDate('created_at', $today)
+            ->where('order_status', 4) // Completed
+            ->sum('total_amount');
+            
+        $yesterdaySales = OrderMaster::whereDate('created_at', $yesterday)
+            ->where('order_status', 4)
+            ->sum('total_amount');
+
+        $salesDiff = $todaySales - $yesterdaySales;
+        $salesTrendVal = $yesterdaySales > 0 ? round(($salesDiff / $yesterdaySales) * 100, 1) : 0;
+        $salesTrendUp = $salesDiff >= 0;
+
+        $data['totalSales'] = (float)$todaySales;
+        $data['salesTrend'] = [
+            'up' => $salesTrendUp,
+            'value' => abs($salesTrendVal)
+        ];
+
+        // 2. Orders Today & Trend
+        $todayOrders = OrderMaster::whereDate('created_at', $today)->count();
+        $yesterdayOrders = OrderMaster::whereDate('created_at', $yesterday)->count();
+
+        $ordersDiff = $todayOrders - $yesterdayOrders;
+        $ordersTrendVal = $yesterdayOrders > 0 ? round(($ordersDiff / $yesterdayOrders) * 100, 1) : 0;
+        $ordersTrendUp = $ordersDiff >= 0;
+
+        $data['ordersToday'] = $todayOrders;
+        $data['ordersTrend'] = [
+            'up' => $ordersTrendUp,
+            'value' => abs($ordersTrendVal)
+        ];
+
+        // 3. Avg Order Value & Trend
+        $todayAov = $todayOrders > 0 ? ($todaySales / $todayOrders) : 0;
+        $yesterdayAov = $yesterdayOrders > 0 ? ($yesterdaySales / $yesterdayOrders) : 0;
+
+        $aovDiff = $todayAov - $yesterdayAov;
+        $aovTrendVal = $yesterdayAov > 0 ? round(($aovDiff / $yesterdayAov) * 100, 1) : 0;
+        $aovTrendUp = $aovDiff >= 0;
+
+        $data['avgOrderValue'] = round($todayAov, 2);
+        $data['aovTrend'] = [
+            'up' => $aovTrendUp,
+            'value' => abs($aovTrendVal)
+        ];
+
+        // 4. Top-selling Menu Item (today)
         $topItem = DB::table('order_details')
-                     ->select('item_id', DB::raw('SUM(quantity) as total_qty'))
-                     ->whereDate('created_at', today())
-                     ->groupBy('item_id')
-                     ->orderByDesc('total_qty')
-                     ->first();
+            ->select('item_id', DB::raw('SUM(quantity) as total_qty'))
+            ->whereDate('created_at', $today)
+            ->groupBy('item_id')
+            ->orderByDesc('total_qty')
+            ->first();
 
-        $data['topItemName'] = $topItem ? ProductItem::find($topItem->item_id)->name : 'N/A';
+        if ($topItem) {
+            $product = ProductItem::find($topItem->item_id);
+            $data['topItemName'] = $product ? $product->name : 'N/A';
+            $data['topItemSold'] = (int)$topItem->total_qty;
+        } else {
+            $data['topItemName'] = 'No sales today';
+            $data['topItemSold'] = 0;
+        }
         
         // Accurate Low Stock Alerts (based on ingredient.min_stock)
         $data['lowStock'] = StockSummary::with('inventoryItem')
@@ -61,7 +113,7 @@ class DashboardController extends Controller
                             DB::raw('SUM(total_amount) as total')
                         )
                         ->where('created_at', '>=', now()->subDays(6))
-                        ->where('order_status', 'completed')
+                        ->where('order_status', 4) // Completed
                         ->groupBy('date')
                         ->orderBy('date')
                         ->get();

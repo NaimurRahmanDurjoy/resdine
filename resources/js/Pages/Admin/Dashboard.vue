@@ -5,26 +5,26 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <Card
         title="Total Sales Today"
-        :value="totalSales"
+        :value="currency() + parseFloat(totalSales).toFixed(2)"
         icon="payments"
         color="indigo"
-        :trend="{ up: true, value: 12 }"
+        :trend="salesTrend"
       />
 
       <Card
         title="Orders Today"
-        value="42"
+        :value="String(ordersToday)"
         icon="receipt"
         color="green"
-        :trend="{ up: true, value: 5 }"
+        :trend="ordersTrend"
       />
 
       <Card
         title="Avg. Order Value"
-        :value="24.50"
+        :value="currency() + parseFloat(avgOrderValue).toFixed(2)"
         icon="attach_money"
         color="blue"
-        :trend="{ up: false, value: 3 }"
+        :trend="aovTrend"
       />
 
       <Card
@@ -150,16 +150,19 @@ import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
   totalSales: [Number, String],
+  salesTrend: Object,
+  ordersToday: Number,
+  ordersTrend: Object,
+  avgOrderValue: [Number, String],
+  aovTrend: Object,
   topItemName: String,
+  topItemSold: Number,
   lowStock: Array,
   expiringItems: Array,
   labels: Array,
   salesData: Array,
   recentOrders: Array
 });
-
-// Assuming no specific property 'topItemSold' returned, leaving out or you could add to controller if needed.
-const topItemSold = 0; // Or passed from backend
 
 const chartDatasets = computed(() => [
   {
