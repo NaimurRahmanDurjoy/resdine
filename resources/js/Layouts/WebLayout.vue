@@ -15,8 +15,8 @@
           <div class="hidden md:flex space-x-8 items-center">
              <Link :href="route('web.menu')" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">Menu</Link>
              <button @click="promptTrackOrder" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase focus:outline-none">Track Order</button>
-             <a href="#about" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">About</a>
-             <a href="#contact" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase">Contact</a>
+             <button @click="showAboutModal = true" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase focus:outline-none">About</button>
+             <button @click="showContactModal = true" class="text-sm font-bold text-slate-600 hover:text-amber-600 transition tracking-wide uppercase focus:outline-none">Contact</button>
              
              <!-- Slot for cart button usually -->
              <slot name="nav-actions"></slot>
@@ -37,13 +37,93 @@
         <p class="text-xs mt-2 opacity-50">Built with modern tech for an exceptional experience.</p>
       </div>
     </footer>
+
+    <!-- About Us Modal -->
+    <div v-if="showAboutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="showAboutModal = false"></div>
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-105 dark:border-slate-800 max-w-lg w-full overflow-hidden relative z-10 transform scale-100 transition-all duration-300">
+        <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white relative">
+          <button @click="showAboutModal = false" class="absolute top-4 right-4 text-white/80 hover:text-white font-bold bg-white/10 hover:bg-white/20 p-2 rounded-full transition flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+          <span class="text-xs uppercase tracking-wider font-bold opacity-75">Our Story</span>
+          <h3 class="text-2xl font-black mt-1">About ResDine</h3>
+        </div>
+        <div class="p-6 space-y-4">
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed font-medium">
+            Welcome to ResDine, where culinary passion meets exceptional service. Our chefs craft every dish with precision and creativity, sourcing only the finest fresh ingredients to tell a unique culinary story.
+          </p>
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
+            <div class="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-800">
+              <span class="material-symbols-outlined text-amber-500 mb-1 block">schedule</span>
+              <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Opening Hours</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Daily: 11:00 AM - 10:00 PM</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-800">
+              <span class="material-symbols-outlined text-amber-500 mb-1 block">restaurant</span>
+              <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Ambiance</h4>
+              <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Gourmet Fine Dining & Delivery</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <div v-if="showContactModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" @click="showContactModal = false"></div>
+      <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-105 dark:border-slate-800 max-w-lg w-full overflow-hidden relative z-10 transform scale-100 transition-all duration-300">
+        <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white relative">
+          <button @click="showContactModal = false" class="absolute top-4 right-4 text-white/80 hover:text-white font-bold bg-white/10 hover:bg-white/20 p-2 rounded-full transition flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+          <span class="text-xs uppercase tracking-wider font-bold opacity-75">Get In Touch</span>
+          <h3 class="text-2xl font-black mt-1">Contact Us</h3>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/50 dark:border-slate-800">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">call</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs uppercase text-slate-400 tracking-wider">Hotline</h4>
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-300">+880 1234 5678</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/50 dark:border-slate-800">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">mail</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs uppercase text-slate-400 tracking-wider">Email</h4>
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-300">support@resdine.com</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/55 dark:border-slate-800">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-lg">pin_drop</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs uppercase text-slate-400 tracking-wider">Address</h4>
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">123 Gourmet Boulevard, Food District, Dhaka.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
+
+const showAboutModal = ref(false)
+const showContactModal = ref(false)
 
 const promptTrackOrder = () => {
   Swal.fire({
