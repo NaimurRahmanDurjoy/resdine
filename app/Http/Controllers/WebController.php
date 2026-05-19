@@ -84,6 +84,16 @@ class WebController extends Controller
                     }
                 }
 
+                // Resolve or associate customer profile in CRM
+                $customerId = null;
+                if (!empty($validated['customer_phone'])) {
+                    $customer = \App\Models\Customer::firstOrCreate(
+                        ['phone' => $validated['customer_phone']],
+                        ['name' => $validated['customer_name'], 'status' => 1]
+                    );
+                    $customerId = $customer->id;
+                }
+
                 $notes = "Guest: " . $validated['customer_name'] . " (" . $validated['customer_phone'] . ")";
                 if ($validated['order_type'] == 1 && $validated['table_number']) {
                     $notes .= " - Table: " . $validated['table_number'];
@@ -95,6 +105,7 @@ class WebController extends Controller
                 $order = $this->orderService->createOrder([
                     'user_id' => $systemUserId,
                     'branch_id' => $branchId,
+                    'customer_id' => $customerId, // Links order to CRM Customer profile
                     'table_id' => $tableId,
                     'order_type' => $validated['order_type'],
                     'items' => $validated['items'],
