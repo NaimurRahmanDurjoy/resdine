@@ -146,6 +146,81 @@
         </form>
       </div>
 
+      <!-- 3. SSLCommerz Simulation Form -->
+      <div v-else-if="gateway === 'sslcommerz'" class="space-y-4">
+        <!-- SSLCommerz Header branding -->
+        <div class="bg-blue-600 rounded-2xl p-4 flex items-center justify-between text-white shadow-lg">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+            <div class="text-left">
+              <div class="text-xs font-bold uppercase tracking-wider opacity-90">EasyCheckout Aggregator</div>
+              <div class="text-sm font-black">SSLCommerz Hosted Gateway</div>
+            </div>
+          </div>
+          <span class="text-xs font-black bg-white/20 px-2.5 py-1 rounded">Sandbox</span>
+        </div>
+
+        <!-- Tab selection -->
+        <div class="flex border-b border-slate-800 text-xs font-bold text-slate-400">
+          <button type="button" @click="sslTab = 'cards'" :class="sslTab === 'cards' ? 'border-b-2 border-blue-500 text-white' : ''" class="flex-1 py-2.5 transition">Cards</button>
+          <button type="button" @click="sslTab = 'mobile'" :class="sslTab === 'mobile' ? 'border-b-2 border-blue-500 text-white' : ''" class="flex-1 py-2.5 transition">Mobile Financials</button>
+        </div>
+
+        <form @submit.prevent="submitPayment" class="space-y-4 text-left">
+          <!-- Cards Tab -->
+          <div v-if="sslTab === 'cards'" class="space-y-3 pt-2">
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-slate-950 border border-slate-850 hover:border-blue-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-xl text-blue-500">credit_card</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">VISA</span>
+              </div>
+              <div class="bg-slate-950 border border-slate-850 hover:border-blue-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-xl text-orange-500">credit_card</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">MASTERCARD</span>
+              </div>
+              <div class="bg-slate-950 border border-slate-850 hover:border-blue-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-xl text-emerald-500">credit_card</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">DBBL NEXUS</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dummy card number</label>
+              <input v-model="sslCardNumber" type="text" placeholder="e.g. 4242 4242 4242 4242"
+                class="w-full bg-slate-950 border border-slate-850 focus:border-blue-500 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono" required>
+            </div>
+          </div>
+
+          <!-- Mobile Tab -->
+          <div v-else class="space-y-3 pt-2">
+            <div class="grid grid-cols-3 gap-2">
+              <div type="button" @click="sslMobileCarrier = 'bkash'" :class="sslMobileCarrier === 'bkash' ? 'border-pink-500 bg-pink-500/5' : 'border-slate-850 bg-slate-950'" class="border hover:border-pink-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-lg text-pink-500">smartphone</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">bKash</span>
+              </div>
+              <div type="button" @click="sslMobileCarrier = 'nagad'" :class="sslMobileCarrier === 'nagad' ? 'border-orange-500 bg-orange-500/5' : 'border-slate-850 bg-slate-950'" class="border hover:border-orange-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-lg text-orange-500">smartphone</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">Nagad</span>
+              </div>
+              <div type="button" @click="sslMobileCarrier = 'rocket'" :class="sslMobileCarrier === 'rocket' ? 'border-purple-500 bg-purple-500/5' : 'border-slate-850 bg-slate-950'" class="border hover:border-purple-500/50 rounded-xl p-2.5 flex flex-col items-center justify-center cursor-pointer transition">
+                <span class="material-symbols-outlined text-lg text-purple-500">smartphone</span>
+                <span class="text-[9px] font-black text-slate-400 mt-1">Rocket</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dummy Mobile Number</label>
+              <input v-model="sslMobileNumber" type="text" placeholder="e.g. 01XXXXXXXXX"
+                class="w-full bg-slate-950 border border-slate-850 focus:border-blue-500 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono" required>
+            </div>
+          </div>
+
+          <button type="submit" :disabled="isPaying"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm py-4 rounded-xl shadow-lg hover:shadow-blue-600/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-4">
+            <span v-if="isPaying" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            {{ isPaying ? 'Verifying payment aggregator...' : `Pay secure ${currency}${amount}` }}
+          </button>
+        </form>
+      </div>
+
       <!-- Cancel transaction link -->
       <a href="/menu?payment_cancelled=true" class="block text-center text-xs text-slate-500 hover:text-slate-400 font-bold transition-all mt-6">
         Cancel transaction and return to store
@@ -181,6 +256,12 @@ const cardNumber = ref('')
 const cardExpiry = ref('')
 const cardCvc = ref('')
 
+// SSLCommerz input fields
+const sslTab = ref('cards')
+const sslCardNumber = ref('')
+const sslMobileCarrier = ref('bkash')
+const sslMobileNumber = ref('')
+
 const submitPayment = () => {
   isPaying.value = true
   
@@ -193,6 +274,8 @@ const submitPayment = () => {
       redirectDestination += `?status=success&paymentID=mock_bkash_${Math.random().toString(36).substring(7)}&order_id=${props.orderId}&amount=${props.amount}`
     } else if (props.gateway === 'stripe') {
       redirectDestination += `?session_id=mock_session_${Math.random().toString(36).substring(7)}&order_id=${props.orderId}&amount=${props.amount}`
+    } else if (props.gateway === 'sslcommerz') {
+      redirectDestination += `?status=success&val_id=mock_val_${Math.random().toString(36).substring(7)}&order_id=${props.orderId}&amount=${props.amount}`
     }
     
     // Perform redirection

@@ -35,4 +35,14 @@ class PaymentManager extends Manager
     {
         return new BkashGateway();
     }
+
+    /**
+     * Resolve the SSLCommerz driver instance.
+     *
+     * @return SslCommerzGateway
+     */
+    public function createSslcommerzDriver()
+    {
+        return new SslCommerzGateway();
+    }
 }

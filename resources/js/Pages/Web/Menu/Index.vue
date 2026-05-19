@@ -193,7 +193,7 @@
 
                     <div v-if="form.order_type === 2">
                       <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method (Instant Pay)</label>
-                      <div class="grid grid-cols-3 gap-2">
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <button @click="form.payment_method = 1" type="button"
                           :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
                           class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
@@ -208,6 +208,11 @@
                           :class="form.payment_method === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
                           class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
                           <span class="material-symbols-outlined text-sm">credit_card</span> Stripe
+                        </button>
+                        <button @click="form.payment_method = 4" type="button"
+                          :class="form.payment_method === 4 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'"
+                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
+                          <span class="material-symbols-outlined text-sm">account_balance_wallet</span> SSLCommerz
                         </button>
                       </div>
                     </div>

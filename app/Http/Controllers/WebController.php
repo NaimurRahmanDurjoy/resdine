@@ -105,10 +105,11 @@ class WebController extends Controller
                 if ($validated['payment_method']) {
                     $methodInt = (int) $validated['payment_method'];
                     
-                    // Gateway integer mapping: 2 = Stripe, 3 = bKash
+                    // Gateway integer mapping: 2 = Stripe, 3 = bKash, 4 = SSLCommerz
                     $gatewayMapping = [
                         2 => 'stripe',
                         3 => 'bkash',
+                        4 => 'sslcommerz',
                     ];
                     
                     if (isset($gatewayMapping[$methodInt])) {
