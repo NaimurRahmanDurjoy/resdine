@@ -162,6 +162,8 @@ class WebController extends Controller
                     }
                 }
 
+                \App\Events\OrderCreated::dispatch($order);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Your order has been placed successfully!',

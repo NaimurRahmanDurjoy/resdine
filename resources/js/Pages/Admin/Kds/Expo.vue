@@ -108,17 +108,26 @@ const markAsServed = (item) => {
   });
 };
 
-let pollInterval;
-
 onMounted(() => {
   updateTime();
   setInterval(updateTime, 1000);
   fetchReadyItems();
-  pollInterval = setInterval(fetchReadyItems, 5000); // Poll every 5 seconds
+  
+  if (window.Echo) {
+      window.Echo.channel('kds.orders')
+        .listen('.order.status.updated', (e) => {
+            if (e.item_status === 'ready' || e.item_status === 'served') {
+                // Fetch the updated ready items from server or refresh the list
+                fetchReadyItems();
+            }
+        });
+  }
 });
 
 onUnmounted(() => {
-  clearInterval(pollInterval);
+  if (window.Echo) {
+      window.Echo.leaveChannel('kds.orders');
+  }
 });
 </script>
 

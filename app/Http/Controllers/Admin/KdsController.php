@@ -88,6 +88,8 @@ class KdsController extends Controller
             $order->save();
         }
 
+        \App\Events\OrderStatusUpdated::dispatch($order, $item->id, $item->preparation_status);
+
         return back()->with('success', 'Item status updated.');
     }
 
@@ -103,6 +105,8 @@ class KdsController extends Controller
             // Mark all items as ready if not already
             $order->items()->update(['preparation_status' => 'ready']);
         });
+
+        \App\Events\OrderStatusUpdated::dispatch($order, null, 'ready');
 
         return back()->with('success', 'Order marked as ready.');
     }
