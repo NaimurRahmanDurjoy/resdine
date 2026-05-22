@@ -53,7 +53,10 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
             });
         });
 
-        Route::get('clear-cache', [SystemController::class, 'clearCache'])->name('cache.clear');
+        Route::get('queue-monitor', [SystemController::class, 'queueMonitor'])->name('queue.monitor');
+        Route::get('cache-management', [SystemController::class, 'cacheManagement'])->name('cache.management');
+        Route::get('activity-logs', [SystemController::class, 'activityLogs'])->name('activity.logs');
+        Route::post('clear-cache', [SystemController::class, 'clearCache'])->name('cache.clear');
         Route::get('logs', [SystemController::class, 'viewLogs'])->name('logs.view');
         Route::get('database', [SystemController::class, 'databaseInfo'])->name('database.info');
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');

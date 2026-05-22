@@ -109,7 +109,7 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                     <h3 class="font-bold text-gray-900 dark:text-white mb-6">Operations Hub</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <Link :href="route('devAdmin.cache.clear')"
+                        <Link :href="route('devAdmin.cache.management')"
                             class="group flex flex-col p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 rounded-2xl hover:bg-cyan-50 dark:hover:bg-cyan-900/10 hover:border-cyan-200 dark:hover:border-cyan-800 transition-all">
                             <span class="material-symbols-outlined text-cyan-600 mb-3 font-icon">bolt</span>
                             <span class="text-sm font-bold text-gray-900 dark:text-white">Clear Cache</span>

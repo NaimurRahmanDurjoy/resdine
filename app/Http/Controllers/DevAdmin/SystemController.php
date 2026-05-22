@@ -7,17 +7,73 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
+use App\Models\ActivityLog;
 
 class SystemController extends Controller
 {
-    /**
-     * Clear all application caches.
-     */
-    public function clearCache()
+    public function activityLogs()
     {
-        Artisan::call('optimize:clear');
+        $logs = ActivityLog::with('user')->orderBy('id', 'desc')->paginate(50);
 
-        return back()->with('success', 'Application cache cleared successfully!');
+        return Inertia::render('DevAdmin/Systems/ActivityLogs', [
+            'logs' => $logs
+        ]);
+    }
+
+    public function queueMonitor()
+    {
+        $pendingJobs = DB::table('jobs')->count();
+        $failedJobsCount = DB::table('failed_jobs')->count();
+        $failedJobs = DB::table('failed_jobs')->orderBy('id', 'desc')->take(20)->get();
+        $recentJobs = DB::table('jobs')->orderBy('id', 'desc')->take(20)->get();
+
+        return Inertia::render('DevAdmin/Systems/QueueMonitor', [
+            'pendingJobs' => $pendingJobs,
+            'failedJobsCount' => $failedJobsCount,
+            'failedJobs' => $failedJobs,
+            'recentJobs' => $recentJobs,
+        ]);
+    }
+
+    public function cacheManagement()
+    {
+        return Inertia::render('DevAdmin/Systems/CacheManagement');
+    }
+
+    /**
+     * Clear application caches.
+     */
+    public function clearCache(\Illuminate\Http\Request $request)
+    {
+        $type = $request->input('type', 'all');
+
+        try {
+            switch ($type) {
+                case 'config':
+                    Artisan::call('config:clear');
+                    $message = 'Configuration cache cleared successfully!';
+                    break;
+                case 'route':
+                    Artisan::call('route:clear');
+                    $message = 'Route cache cleared successfully!';
+                    break;
+                case 'view':
+                    Artisan::call('view:clear');
+                    $message = 'View cache cleared successfully!';
+                    break;
+                case 'application':
+                    Artisan::call('cache:clear');
+                    $message = 'Application cache cleared successfully!';
+                    break;
+                default:
+                    Artisan::call('optimize:clear');
+                    $message = 'All caches cleared successfully!';
+                    break;
+            }
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to clear cache: ' . $e->getMessage());
+        }
     }
 
     /**
