@@ -40,9 +40,9 @@
         <button class="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors focus:outline-none"
           @click="toggleNotifDropdown">
           <span class="material-symbols-outlined">notifications</span>
-          <span v-if="notifications?.total"
+          <span v-if="localNotifications?.total"
             class="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center font-bold">
-            {{ notifications.total > 9 ? '9+' : notifications.total }}
+            {{ localNotifications.total > 9 ? '9+' : localNotifications.total }}
           </span>
         </button>
 
@@ -54,19 +54,19 @@
             <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/80 flex justify-between items-center">
               <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 Notifications 
-                <span v-if="notifications?.total" class="bg-indigo-100 text-indigo-800 text-xs font-black px-2 py-0.5 rounded-full dark:bg-indigo-900 dark:text-indigo-300">{{ notifications.total }}</span>
+                <span v-if="localNotifications?.total" class="bg-indigo-100 text-indigo-800 text-xs font-black px-2 py-0.5 rounded-full dark:bg-indigo-900 dark:text-indigo-300">{{ localNotifications.total }}</span>
               </h3>
             </div>
 
             <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
-               <div v-if="!notifications?.items || notifications.items.length === 0" class="p-8 text-center text-gray-400 dark:text-gray-500">
+               <div v-if="!localNotifications?.items || localNotifications.items.length === 0" class="p-8 text-center text-gray-400 dark:text-gray-500">
                  <span class="material-symbols-outlined text-5xl mb-3 opacity-30 block">notifications_paused</span>
                  <p class="text-sm font-medium">All caught up!</p>
                </div>
                
                <template v-else>
                   <Link 
-                    v-for="item in notifications.items" 
+                    v-for="item in localNotifications.items" 
                     :key="item.id" 
                     :href="item.url"
                     class="flex items-start p-4 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 border-b border-gray-50 dark:border-gray-700/50 transition-all last:border-0 group"
@@ -123,7 +123,7 @@
 <script setup>
 import { Link, router} from '@inertiajs/vue3'
 import Logo from './Logo.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const open = ref(false)
 const notifOpen = ref(false)
@@ -133,6 +133,12 @@ const props = defineProps({
   user: { type: Object, required: true },
   notifications: { type: Object, default: () => ({ total: 0, groups: {}, items: [] }) }
 })
+
+const localNotifications = ref(JSON.parse(JSON.stringify(props.notifications)))
+
+watch(() => props.notifications, (newVal) => {
+  localNotifications.value = JSON.parse(JSON.stringify(newVal))
+}, { deep: true })
 
 // Toggle dropdowns
 function toggleDropdown() {
@@ -156,7 +162,26 @@ function handleClickOutside(event) {
 }
 
 // Add event listener for clicks outside the dropdown
-onMounted(() => document.addEventListener('click', handleClickOutside))
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  
+  if (window.Echo) {
+    window.Echo.private(`App.Models.User.${props.user.id}`)
+      .notification((notification) => {
+        const newNotif = {
+            id: notification.id,
+            type: notification.type || 'info',
+            message: notification.message,
+            url: notification.url || '#'
+        };
+        
+        if (!localNotifications.value.items) localNotifications.value.items = [];
+        localNotifications.value.items.unshift(newNotif);
+        localNotifications.value.total++;
+      });
+  }
+})
+
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
 // Logout function

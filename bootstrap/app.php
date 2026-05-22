@@ -32,6 +32,30 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function ($exceptions) {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            // Filter out common HTTP exceptions, Validation exceptions, and Auth exceptions
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface || 
+                $e instanceof \Illuminate\Validation\ValidationException ||
+                $e instanceof \Illuminate\Auth\AuthenticationException) {
+                return;
+            }
+
+            try {
+                $devAdmins = \App\Models\Admin::all();
+                
+                if ($devAdmins->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send(
+                        $devAdmins, 
+                        new \App\Notifications\AdminAlert(
+                            'system_error', 
+                            'System Error: ' . substr($e->getMessage(), 0, 150), 
+                            '#' // Link to logs page if one exists
+                        )
+                    );
+                }
+            } catch (\Throwable $err) {
+                // Failsafe: if the database is dead, don't crash the error handler
+            }
+        });
     })
     ->create();

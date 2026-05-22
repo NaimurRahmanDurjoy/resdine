@@ -14,7 +14,6 @@ window.Echo = new Echo({
     wsHost: import.meta.env.VITE_REVERB_HOST === 'localhost' ? '127.0.0.1' : import.meta.env.VITE_REVERB_HOST,
     wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-    forceTLS: false,
-    encrypted: false,
-    enabledTransports: ['ws'],
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
 });

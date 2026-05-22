@@ -50,11 +50,46 @@ class HandleInertiaRequests extends Middleware
             $user = Auth::guard('web')->user();
             $menuService = app(MenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
-            $notifications = (new \App\Services\NotificationService())->getAlerts();
+            
+            // Format native Laravel notifications to match the frontend expectations
+            $unread = $user->unreadNotifications;
+            
+            $items = $unread->map(function ($notif) {
+                return [
+                    'id' => $notif->id,
+                    'type' => $notif->data['type'] ?? 'info',
+                    'message' => $notif->data['message'] ?? '',
+                    'url' => $notif->data['url'] ?? '#',
+                ];
+            })->toArray();
+
+            $notifications = [
+                'total' => $unread->count(),
+                'groups' => [], // We can simplify or keep empty if frontend relies on items
+                'items' => $items,
+            ];
+
         } elseif ($isDevAdminRoute && Auth::guard('admin')->check()) { // Assuming 'admin' guard for devAdmin based on your setup
             $user = Auth::guard('admin')->user();
             $menuService = app(DevAdminMenuService::class);
             $menus = $menuService->prepareForView($menuService->getMenusFor($user), $user);
+
+            // Format native Laravel notifications for DevAdmin
+            $unread = $user->unreadNotifications;
+            $items = $unread->map(function ($notif) {
+                return [
+                    'id' => $notif->id,
+                    'type' => $notif->data['type'] ?? 'info',
+                    'message' => $notif->data['message'] ?? '',
+                    'url' => $notif->data['url'] ?? '#',
+                ];
+            })->toArray();
+
+            $notifications = [
+                'total' => $unread->count(),
+                'groups' => [],
+                'items' => $items,
+            ];
         }
 
         $activeBranchId = null;
