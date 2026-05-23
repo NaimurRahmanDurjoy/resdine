@@ -11,4 +11,9 @@ class Supplier extends BaseModel
         'address',
         'company_name'
     ];
+
+    public function ledgers()
+    {
+        return $this->hasMany(SupplierLedger::class);
+    }
 }

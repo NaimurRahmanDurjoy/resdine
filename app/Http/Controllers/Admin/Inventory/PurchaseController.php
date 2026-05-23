@@ -11,6 +11,7 @@ use App\Models\Ingredient;
 use App\Models\ProductItem;
 use App\Models\StockSummary;
 use App\Models\StockLedger;
+use App\Models\SupplierLedger;
 use App\Models\Unit;
 use App\Services\RecipeService;
 use Illuminate\Http\Request;
@@ -203,6 +204,23 @@ class PurchaseController extends Controller
                         'transaction_date' => now()
                     ]);
                 }
+
+                // Auto-credit Supplier Ledger
+                $lastLedger = SupplierLedger::where('supplier_id', $validated['supplier_id'])
+                    ->orderBy('id', 'desc')
+                    ->first();
+                $previousBalance = $lastLedger ? $lastLedger->balance : 0;
+
+                SupplierLedger::create([
+                    'supplier_id' => $validated['supplier_id'],
+                    'reference_type' => 'purchase',
+                    'reference_id' => $purchaseMaster->id,
+                    'dr_amount' => 0,
+                    'cr_amount' => $totalAmount,
+                    'balance' => $previousBalance + $totalAmount,
+                    'transaction_date' => $validated['purchase_date'],
+                    'notes' => 'Purchase: ' . ($validated['invoice_number'] ?? $purchaseMaster->invoice_number)
+                ]);
             });
 
             return redirect()->route('admin.purchase.index')->with('success', 'Purchase order created and stock updated successfully.');

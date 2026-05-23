@@ -166,10 +166,18 @@ Route::middleware('web')->name('admin.')->group(function () {
                 Route::get('trial-balance', [AccountReportController::class, 'trialBalance'])->name('trial-balance');
                 Route::get('profit-loss', [AccountReportController::class, 'profitAndLoss'])->name('profit-loss');
             });
+
+            // Supplier Ledger
+            Route::get('supplier-ledger', [\App\Http\Controllers\Admin\Account\SupplierLedgerController::class, 'index'])->name('supplier-ledger.index');
+            Route::get('supplier-ledger/{supplier}', [\App\Http\Controllers\Admin\Account\SupplierLedgerController::class, 'show'])->name('supplier-ledger.show');
+            Route::post('supplier-ledger/{supplier}/payment', [\App\Http\Controllers\Admin\Account\SupplierLedgerController::class, 'storePayment'])->name('supplier-ledger.payment');
         });
 
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/abc-analysis', [ReportController::class, 'abcAnalysis'])->name('reports.abc-analysis');
+        Route::get('reports/heatmap', [ReportController::class, 'hourlyHeatmap'])->name('reports.heatmap');
+        Route::get('reports/staff-performance', [ReportController::class, 'staffPerformance'])->name('reports.staff-performance');
 
         // HR Module
         Route::prefix('hr')->name('hr.')->group(function () {
