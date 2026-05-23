@@ -79,6 +79,18 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::resource('purchase', PurchaseController::class);
         Route::resource('production', ProductionController::class);
 
+        Route::prefix('inventory')->name('inventory.')->group(function () {
+            Route::resource('waste', \App\Http\Controllers\Admin\Inventory\WasteManagementController::class)->only(['index', 'create', 'store']);
+            
+            Route::prefix('transfers')->name('transfers.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'index'])->name('index');
+                Route::get('create', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'store'])->name('store');
+                Route::post('{transfer}/dispatch', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'dispatchAction'])->name('dispatch');
+                Route::post('{transfer}/receive', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'receiveAction'])->name('receive');
+            });
+        });
+
         Route::get('stock/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
         Route::post('stock/adjust', [StockController::class, 'processAdjustment'])->name('stock.adjust.process');
         Route::get('stock/{type}/{id}', [StockController::class, 'show'])->name('stock.show');
