@@ -159,6 +159,17 @@ Route::middleware('web')->name('admin.')->group(function () {
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
+        // HR Module
+        Route::prefix('hr')->name('hr.')->group(function () {
+            Route::resource('employees', \App\Http\Controllers\Admin\HR\EmployeeController::class);
+            Route::get('attendance', [\App\Http\Controllers\Admin\HR\AttendanceController::class, 'index'])->name('attendance.index');
+            Route::post('attendance', [\App\Http\Controllers\Admin\HR\AttendanceController::class, 'mark'])->name('attendance.mark');
+            Route::get('leaves', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'index'])->name('leaves.index');
+            Route::post('leaves/{leave}/status', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'updateStatus'])->name('leaves.status');
+            Route::get('payroll', [\App\Http\Controllers\Admin\HR\PayrollController::class, 'index'])->name('payroll.index');
+            Route::post('payroll', [\App\Http\Controllers\Admin\HR\PayrollController::class, 'store'])->name('payroll.store');
+        });
+
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SettingsController::class, 'index'])->name('index');
