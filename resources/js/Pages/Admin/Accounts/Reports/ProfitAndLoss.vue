@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -120,12 +119,12 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   revenueAccounts: Array,

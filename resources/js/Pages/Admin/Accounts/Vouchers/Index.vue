@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <!-- Page Header -->
       <div class="bg-white dark:bg-gray-800">
@@ -65,7 +64,6 @@
         </template>
       </ListTable>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
@@ -73,6 +71,7 @@ import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import ListTable from '@/Components/ListTable.vue'
+defineOptions({ layout: AdminLayout })
 
 defineProps({
   vouchers: Object,

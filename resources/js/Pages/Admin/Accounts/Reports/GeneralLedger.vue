@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -102,13 +101,13 @@
         <h3 class="text-gray-400 font-bold">Select an account to view the General Ledger</h3>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useForm, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   accounts: Array,

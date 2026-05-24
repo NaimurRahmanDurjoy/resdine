@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <!-- Page Header -->
       <div class="bg-white dark:bg-gray-800">
@@ -80,7 +79,6 @@
       <AccountForm :account="editingAccount" :account-types="accountTypes" :parent-accounts="parentAccounts"
         @close="showModal = false" @success="onSuccess" />
     </Modal>
-  </AdminLayout>
 </template>
 
 <script setup>
@@ -91,6 +89,7 @@ import ListTable from '@/Components/ListTable.vue'
 import Modal from '@/Components/Modal.vue'
 import AccountForm from './AccountForm.vue'
 import Swal from 'sweetalert2'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   accounts: Array,

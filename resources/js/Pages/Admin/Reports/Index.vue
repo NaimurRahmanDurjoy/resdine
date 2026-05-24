@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto space-y-8">
       
       <!-- Page header -->
@@ -157,12 +156,13 @@
       </div>
 
     </div>
-  </AdminLayout>
+
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   stats: Object,

@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ pageTitle }}</h1>
       <div class="bg-white rounded-lg shadow overflow-x-auto">
@@ -30,11 +29,12 @@
         </table>
       </div>
     </div>
-  </AdminLayout>
+
 </template>
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+defineOptions({ layout: AdminLayout })
 
 defineProps({
     leaves: Object,

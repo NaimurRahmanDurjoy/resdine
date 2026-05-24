@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ pageTitle }} - {{ date }}</h1>
       <div class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto">
@@ -28,11 +27,11 @@
         </table>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+defineOptions({ layout: AdminLayout })
 
 defineProps({
     attendances: Array,

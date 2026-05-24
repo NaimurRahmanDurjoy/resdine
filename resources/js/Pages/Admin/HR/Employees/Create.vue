@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ pageTitle }}</h1>
 
@@ -50,12 +49,12 @@
         </form>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+defineOptions({ layout: AdminLayout })
 
 defineProps({
     departments: Array,

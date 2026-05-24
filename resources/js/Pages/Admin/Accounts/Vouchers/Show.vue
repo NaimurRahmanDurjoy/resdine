@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- Header / Actions -->
       <div class="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -120,13 +119,13 @@
          </div>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Swal from 'sweetalert2'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   voucher: Object,

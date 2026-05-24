@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout :title="pageTitle">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto">
       <!-- Page Header -->
       <div class="bg-white dark:bg-gray-800">
@@ -100,7 +99,6 @@
         </div>
       </form>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup>
@@ -108,6 +106,7 @@ import { computed } from 'vue'
 import { useForm, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Swal from 'sweetalert2'
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
   voucherTypes: Array,
