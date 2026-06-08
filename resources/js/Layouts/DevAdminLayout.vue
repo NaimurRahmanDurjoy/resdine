@@ -7,7 +7,7 @@
             class="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden transition-opacity duration-300"></div>
 
         <!-- Sidebar -->
-        <SideBar :menus="menus"
+        <Sidebar :menus="menus"
             class="fixed inset-y-0 left-0 z-30 w-64 transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
             :class="{ '-translate-x-full': !sidebarOpen }" />
 
@@ -28,7 +28,7 @@
 import { ref, computed } from 'vue'
 import { usePage, Head } from '@inertiajs/vue3'
 import Header from '@/Components/DevAdmin/Header.vue'
-import SideBar from '@/Components/DevAdmin/SideBar.vue'
+import Sidebar from '@/Components/DevAdmin/Sidebar.vue'
 
 const props = defineProps({
     notifications: { type: Array, default: () => [] },
