@@ -15,7 +15,8 @@ createInertiaApp({
     },
     setup({ el, App, props, plugin }) {
         const app = createApp({ render: () => h(App, props) })
-        app.use(plugin)
+        app.use(plugin) 
+        
         app.component('Link', Link)
         app.component('Head', Head)
 
