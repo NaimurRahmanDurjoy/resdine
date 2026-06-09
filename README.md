@@ -69,6 +69,57 @@ flowchart TD
     PayMngr --> Gateways
 ```
 
+### 🧠 Architecture Decisions (ADR)
+
+*   **Inertia.js Bridge:** Instead of building decoupled REST or GraphQL APIs, ResDine uses Inertia.js. This allows us to build a single, unified codebase in Laravel while utilizing Vue 3's modern reactive frontend components. Data is hydrated directly from controllers without manual state management.
+*   **Service-Oriented Design:** To maintain a clean, maintainable codebase, all core business logics are isolated into specialized Service classes (e.g., `OrderService`, `RecipeService`, `AccountingService`). Controllers only validate inputs and delegate execution.
+*   **Real-time Event-Driven KDS/POS:** By using Laravel Reverb (native WebSocket server) combined with Laravel Echo, the application achieves sub-second synchronization between POS checkouts, Kitchen Display screens, and Customer order tracking.
+*   **Transactional Stock-Recipe Deductions:** Recipes are tied dynamically to raw ingredient stocks. On POS checkout, the system opens a database transaction, validates the recipe ingredients' stock, deducts them, and logs movements. If any ingredient is insufficient, it rolls back to ensure zero inventory discrepancies.
+*   **Autoposted Double-Entry Ledger:** Every transaction that involves money (e.g. POS sales, supplier invoice payments) automatically emits vouchers that hit the Chart of Accounts (COA) to guarantee a real-time Trial Balance and Profit & Loss sheet.
+
+---
+
+### 🔄 End-to-End Order Lifecycle Flow Chart
+
+Here is the flow of an order through the entire ResDine application:
+
+```mermaid
+flowchart TD
+    Start([Order Initialized]) --> Source{Order Source?}
+    
+    Source -->|Online Menu| CustOrder[Customer Checkout]
+    Source -->|POS Terminal| POSOrder[Cashier Checkout]
+    
+    CustOrder & POSOrder --> StockCheck{Verify Stock via RecipeService}
+    
+    StockCheck -->|Insufficient Ingredients| Fail[Reject Order & Alert User]
+    StockCheck -->|Ingredients Available| Success[Deduct Ingredient Inventory]
+    
+    Success --> CreateRecords[Create OrderMaster, OrderItems, & SalesInvoice]
+    CreateRecords --> DBWrite[(Save to Database)]
+    
+    DBWrite --> Broadcast[Broadcast 'Order Created' Event via WebSockets]
+    
+    Broadcast --> KDSReceipt["KDS Display Screen (Queue Ticket)"]
+    Broadcast --> TrackPage[Customer Order Live Tracking Page]
+    
+    KDSReceipt --> ChefAction{Chef Action}
+    ChefAction -->|Start Prep| Prep[Status: In Progress]
+    ChefAction -->|Food Ready| Ready[Status: Ready to Serve/Deliver]
+    
+    Ready --> OrderType{Order Type?}
+    
+    OrderType -->|Dine-In / Takeaway| CloseOrder[Complete & Close Order]
+    OrderType -->|Delivery| Dispatch[Assign Driver & Status: Dispatched]
+    
+    Dispatch --> DriverDel[Driver Marks: Delivered]
+    DriverDel --> CloseOrder
+    
+    CloseOrder --> Accounting[Auto-Post Receipt Voucher to Accounting Service]
+    Accounting --> Ledger[(Update Chart of Accounts Ledger)]
+    Ledger --> End([Flow Completed])
+```
+
 ---
 
 ## 🛠️ Tech Stack
