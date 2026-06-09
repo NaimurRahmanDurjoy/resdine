@@ -120,18 +120,17 @@ ResDine uses a modern, high-performance stack:
 *   **POS Autoposting:** Cash receipts and food revenue are automatically journaled in real-time when POS transactions execute.
 *   **Financial Reporting:** Automated Trial Balance, General Ledger, and Profit & Loss reports.
 
-<!--
+
 ### 6. HR & Payroll
 *   **Employee Directory:** Centralized files for employees, departments, and roles.
 *   **Attendance & Leaves:** Register clock-ins, daily attendances, and request/approve leaves.
 *   **Payroll:** Process monthly/weekly salaries, generate pay slips, and log expenses.
--->
 
-### 6. Branch & User Controls
+
+### 7. Branch & User Controls
 *   **Multi-Branch Setup:** Switch environments, manage isolated inventories, and handle branch-level VAT and service charges.
 *   **Granular Permissions:** Custom role structures (Admin, Manager, Cashier, Kitchen Staff, Driver, etc.) with specific access control lists.
 
----
 
 ## 📂 Project Directory Structure
 
@@ -167,7 +166,7 @@ resdine/
 *   Composer
 *   Node.js & NPM
 *   Database (MySQL or PostgreSQL)
-
+<!--
 ### Installation Steps
 
 1. **Clone the repository:**
@@ -208,10 +207,11 @@ resdine/
    ```bash
    composer dev
    ```
+-->
+## Access the application
 
-8. **Access the application:**
-   *   Customer Menu: `http://localhost:8000/menu`
-   *   Admin Portal: `http://localhost:8000/admin/login`
+*   Customer Menu: `https://resdine.up.railway.app/menu`
+*   Admin Portal: `https://resdine.up.railway.app/admin/login`
 
 ---
 
