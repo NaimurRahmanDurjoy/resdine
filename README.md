@@ -13,63 +13,60 @@ ResDine is built with a **Service-Oriented MVC architecture** tailored for a sea
 ### System Design Diagram
 
 ```mermaid
-graph TD
-    %% Client Tier
-    subgraph "Client Tier (Vue 3 / Tailwind CSS)"
+flowchart TD
+    subgraph "1. Client Tier (Vue 3 / Tailwind CSS)"
+        direction TB
         Customer["Customer Web Menu & Order Tracking"]
         POS["Cashier POS Terminal & Register"]
-        KDS["Kitchen Display System - Expo/Prep"]
+        KDS["Kitchen Display System (KDS)"]
         Driver["Driver Dispatch & Dashboard"]
         AdminPanel["Admin Dashboard & ERP Panel"]
     end
 
-    %% Routing & Real-Time Tier
-    subgraph "Communication Tier"
+    subgraph "2. Communication Tier"
+        direction TB
         Inertia["Inertia.js Routing / State Hydration"]
         Echo["Laravel Echo / WebSocket Channels"]
     end
 
-    %% Application Tier
-    subgraph "Application Tier (Laravel 12 / PHP 8.2+)"
-        Controllers["HTTP Controllers / Middlewares"]
+    subgraph "3. Application Tier (Laravel 12 / PHP 8.2+)"
+        direction TB
+        Controllers["HTTP Controllers & Middlewares"]
         Reverb["Laravel Reverb WebSocket Server"]
         
         subgraph "Services Layer"
+            direction TB
             OrderSvc["OrderService"]
             RecipeSvc["RecipeService"]
             AcctSvc["AccountingService"]
             PayMngr["PaymentManager & Gateways"]
-            NotifSvc["NotificationService"]
         end
     end
 
-    %% Storage Tier
-    subgraph "Storage Tier"
+    subgraph "4. Database & External"
+        direction TB
         DB[("MySQL / PostgreSQL")]
-        Cache[("Redis Cache / Queue")]
+        Gateways["Payment Gateways (Stripe/bKash/SSL)"]
     end
 
-    %% External Systems
-    subgraph "External Gateways"
-        Gateways["Stripe / bKash / SSLCommerz"]
-    end
-
-    %% Connections
-    Customer & POS & Driver & AdminPanel --> Inertia
-    KDS & Customer & POS & Driver -.-> Echo
-    Echo <--> Reverb
-    Inertia <--> Controllers
-    Controllers --> ServicesLayer
+    %% Interactions
+    Customer & POS & AdminPanel --> Inertia
+    Inertia --> Controllers
+    Controllers --> OrderSvc
     
-    %% Service connections
+    %% Services
     OrderSvc --> RecipeSvc
     OrderSvc --> AcctSvc
-    OrderSvc --> NotifSvc
     OrderSvc --> PayMngr
     
-    ServicesLayer <--> DB
-    ServicesLayer <--> Cache
-    PayMngr <--> Gateways
+    %% WebSockets
+    OrderSvc -->|Broadcast Status| Reverb
+    Reverb --> Echo
+    Echo -.->|Live updates| KDS & Driver & Customer
+
+    %% Database & Gateways
+    OrderSvc & RecipeSvc & AcctSvc --> DB
+    PayMngr --> Gateways
 ```
 
 ---
