@@ -15,43 +15,43 @@ ResDine is built with a **Service-Oriented MVC architecture** tailored for a sea
 ```mermaid
 graph TD
     %% Client Tier
-    subgraph Client Tier (Vue 3 / Tailwind CSS)
-        Customer[Customer Web Menu & Order Tracking]
-        POS[Cashier POS Terminal & Register]
-        KDS[Kitchen Display System - Expo/Prep]
-        Driver[Driver Dispatch & Dashboard]
-        AdminPanel[Admin Dashboard & ERP Panel]
+    subgraph "Client Tier (Vue 3 / Tailwind CSS)"
+        Customer["Customer Web Menu & Order Tracking"]
+        POS["Cashier POS Terminal & Register"]
+        KDS["Kitchen Display System - Expo/Prep"]
+        Driver["Driver Dispatch & Dashboard"]
+        AdminPanel["Admin Dashboard & ERP Panel"]
     end
 
     %% Routing & Real-Time Tier
-    subgraph Communication Tier
-        Inertia[Inertia.js Routing / State Hydration]
-        Echo[Laravel Echo / WebSocket Channels]
+    subgraph "Communication Tier"
+        Inertia["Inertia.js Routing / State Hydration"]
+        Echo["Laravel Echo / WebSocket Channels"]
     end
 
     %% Application Tier
-    subgraph Application Tier (Laravel 12 / PHP 8.2+)
-        Controllers[HTTP Controllers / Middlewares]
-        Reverb[Laravel Reverb WebSocket Server]
+    subgraph "Application Tier (Laravel 12 / PHP 8.2+)"
+        Controllers["HTTP Controllers / Middlewares"]
+        Reverb["Laravel Reverb WebSocket Server"]
         
-        subgraph Services Layer
-            OrderSvc[OrderService]
-            RecipeSvc[RecipeService]
-            AcctSvc[AccountingService]
-            PayMngr[PaymentManager & Gateways]
-            NotifSvc[NotificationService]
+        subgraph "Services Layer"
+            OrderSvc["OrderService"]
+            RecipeSvc["RecipeService"]
+            AcctSvc["AccountingService"]
+            PayMngr["PaymentManager & Gateways"]
+            NotifSvc["NotificationService"]
         end
     end
 
     %% Storage Tier
-    subgraph Storage Tier
-        DB[(MySQL / PostgreSQL)]
-        Cache[(Redis Cache / Queue)]
+    subgraph "Storage Tier"
+        DB[("MySQL / PostgreSQL")]
+        Cache[("Redis Cache / Queue")]
     end
 
     %% External Systems
-    subgraph External Gateways
-        Gateways[Stripe / bKash / SSLCommerz]
+    subgraph "External Gateways"
+        Gateways["Stripe / bKash / SSLCommerz"]
     end
 
     %% Connections
