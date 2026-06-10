@@ -40,17 +40,34 @@
     <!-- Category Navigation Stacky -->
     <div
       class="sticky top-16 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all py-3">
-      <div class="max-w-7xl mx-auto px-4 overflow-x-auto no-scrollbar">
-        <div class="flex space-x-2 w-max">
-          <button @click="activeCategory = null"
-            :class="[activeCategory === null ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
-            class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
-            All Items
+      <div class="max-w-7xl mx-auto px-4 relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-1">
+          <button type="button" @click="scrollCategory(-280)"
+            class="p-2 rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 hover:shadow-md transition focus:outline-none">
+            <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <button v-for="cat in categories" :key="cat.id" @click="activeCategory = cat.id"
-            :class="[activeCategory === cat.id ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
-            class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
-            {{ cat.name }}
+        </div>
+
+        <div ref="categoryNav" class="overflow-x-auto no-scrollbar scroll-smooth px-6" @wheel.prevent="onCategoryWheel"
+          tabindex="0" role="group" aria-label="Category navigation">
+          <div class="flex space-x-2 w-max py-1">
+            <button @click="activeCategory = null"
+              :class="[activeCategory === null ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
+              class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
+              All Items
+            </button>
+            <button v-for="cat in categories" :key="cat.id" @click="activeCategory = cat.id"
+              :class="[activeCategory === cat.id ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
+              class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
+              {{ cat.name }}
+            </button>
+          </div>
+        </div>
+
+        <div class="absolute inset-y-0 right-0 flex items-center pr-1">
+          <button type="button" @click="scrollCategory(280)"
+            class="p-2 rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 hover:shadow-md transition focus:outline-none">
+            <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
       </div>
@@ -155,7 +172,8 @@
                           item.variant_name
                         }}</span>
                     </h4>
-                    <div class="text-amber-600 font-black">{{ currency() }}{{ (item.price * item.quantity).toFixed(2) }}</div>
+                    <div class="text-amber-600 font-black">{{ currency() }}{{ (item.price * item.quantity).toFixed(2) }}
+                    </div>
                   </div>
 
                   <div
@@ -196,19 +214,24 @@
 
                     <div v-if="form.order_type === 3" class="space-y-3">
                       <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery Address</label>
-                        <textarea v-model="form.delivery_address" placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
+                          Address</label>
+                        <textarea v-model="form.delivery_address"
+                          placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
                           class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm resize-none"></textarea>
                       </div>
                       <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery Instructions (Optional)</label>
-                        <input v-model="form.delivery_instructions" type="text" placeholder="e.g. Leave at door, call before arriving"
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
+                          Instructions (Optional)</label>
+                        <input v-model="form.delivery_instructions" type="text"
+                          placeholder="e.g. Leave at door, call before arriving"
                           class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                       </div>
                     </div>
 
                     <div v-if="form.order_type === 2 || form.order_type === 3">
-                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method (Instant Pay)</label>
+                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method
+                        (Instant Pay)</label>
                       <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <button @click="form.payment_method = 1" type="button"
                           :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
@@ -253,17 +276,20 @@
             </div>
 
             <!-- Cart Footer Summary -->
-            <div class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] space-y-3">
+            <div
+              class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] space-y-3">
               <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Subtotal</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartSubtotal.toFixed(2) }}</span>
               </div>
               <div v-if="cartVatAmount > 0" class="flex justify-between items-center text-sm">
-                <span class="text-slate-500 font-medium">VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.' }})</span>
+                <span class="text-slate-500 font-medium">VAT ({{ branchSetting.vat_percentage }}%{{
+                  branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.' }})</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
               </div>
               <div v-if="cartServiceChargeAmount > 0" class="flex justify-between items-center text-sm">
-                <span class="text-slate-500 font-medium">Service Charge ({{ branchSetting.service_charge_percentage }}%)</span>
+                <span class="text-slate-500 font-medium">Service Charge ({{ branchSetting.service_charge_percentage
+                }}%)</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between items-center pt-3 border-t border-slate-100 mb-2">
@@ -310,6 +336,7 @@ const isCartOpen = ref(false)
 const cart = ref([])
 const isSubmitting = ref(false)
 const selectedProductForVariant = ref(null)
+const categoryNav = ref(null)
 
 const form = reactive({
   customer_name: '',
@@ -336,7 +363,7 @@ const cartSubtotal = computed(() => cart.value.reduce((acc, curr) => acc + (curr
 const cartVatAmount = computed(() => {
   const vatPercent = parseFloat(props.branchSetting?.vat_percentage || 0)
   if (vatPercent <= 0) return 0
-  
+
   if (props.branchSetting?.is_vat_inclusive) {
     return cartSubtotal.value - (cartSubtotal.value / (1 + vatPercent / 100))
   } else {
@@ -415,6 +442,18 @@ const updateQuantity = (index, delta) => {
   }
 }
 
+const scrollCategory = (distance) => {
+  const nav = categoryNav.value
+  if (!nav) return
+  nav.scrollBy({ left: distance, behavior: 'smooth' })
+}
+
+const onCategoryWheel = (event) => {
+  const nav = categoryNav.value
+  if (!nav) return
+  nav.scrollBy({ left: event.deltaY, behavior: 'smooth' })
+}
+
 const submitOrder = async () => {
   if (cart.value.length === 0) return
 
@@ -480,7 +519,7 @@ const submitOrder = async () => {
         form.table_number = ''
         form.delivery_address = ''
         form.delivery_instructions = ''
-        
+
         // Redirect to track page
         window.location.href = route('web.order.track', { orderNumber: orderNum })
       })

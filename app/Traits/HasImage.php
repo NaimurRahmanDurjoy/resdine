@@ -12,7 +12,21 @@ trait HasImage
     public function getImageUrlAttribute(): ?string
     {
         $field = $this->getImageField();
-        return $this->$field ? asset('storage/' . $this->$field) : null;
+        if (!$this->$field) {
+            return null;
+        }
+
+        // If the path stored in the database is already a full URL (e.g. Cloudinary)
+        if (filter_var($this->$field, FILTER_VALIDATE_URL)) {
+            return $this->$field;
+        }
+
+        // Try the configured disk; fall back to local storage for legacy images
+        try {
+            return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->$field);
+        } catch (\Exception $e) {
+            return asset('storage/' . $this->$field);
+        }
     }
 
     /**
