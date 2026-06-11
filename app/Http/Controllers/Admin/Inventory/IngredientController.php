@@ -23,7 +23,7 @@ class IngredientController extends Controller
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
-            
+
         return Inertia::render('Admin/Inventory/Ingredient/Index', [
             'ingredients' => $ingredients,
             'filters' => [
@@ -63,7 +63,6 @@ class IngredientController extends Controller
             'unit_id' => $validated['unit_id'],
             'current_stock' => 0,
             'min_stock' => $validated['min_stock'],
-            'has_expiry' => $validated['has_expiry'],
             'status' => $validated['status'],
             'reference_id' => $ingredient->id,
             'item_type' => 1
@@ -99,7 +98,6 @@ class IngredientController extends Controller
             'sku' => 'ING-' . str_pad($ingredient->id, 6, '0', STR_PAD_LEFT),
             'unit_id' => $validated['unit_id'],
             'min_stock' => $validated['min_stock'],
-            'has_expiry' => $validated['has_expiry'],
             'status' => $validated['status']
         ]);
 
