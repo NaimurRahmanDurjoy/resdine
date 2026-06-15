@@ -35,7 +35,7 @@ class ProductController extends Controller
         $perPage = min($request->input('perPage', 10), 100);
 
         $items = ProductItem::select('id', 'name', 'type', 'price', 'status', 'menu_img', 'category_id', 'department_id', 'is_prep_item')
-            ->with(['category:id,name', 'unit:id,name', 'department:id,name'])
+            ->with(['category:id,name', 'unit:id,name', 'department:id,name', 'recipe:id,menu_item_id'])
             ->withCount('recipes')
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
