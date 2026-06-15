@@ -16,7 +16,7 @@ class AttendanceController extends Controller
         $date = $request->input('date', Carbon::today()->toDateString());
         $attendances = Attendance::with('employee.user')
             ->whereDate('date', $date)
-            ->get();
+            ->paginate(20)->withQueryString();
 
         return Inertia::render('Admin/HR/Attendance/Index', [
             'attendances' => $attendances,
