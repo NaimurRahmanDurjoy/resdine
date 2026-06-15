@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductCategoryController;
-use App\Http\Controllers\Admin\productVariantsController;
+use App\Http\Controllers\Admin\ProductVariantsController;
 use App\Http\Controllers\Admin\ComboItemController;
 use App\Http\Controllers\Admin\ComplementaryItemController;
 use App\Http\Controllers\Admin\OrderController;
