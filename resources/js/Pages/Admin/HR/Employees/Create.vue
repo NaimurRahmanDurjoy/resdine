@@ -55,6 +55,19 @@
             required>
         </div>
         <div class="space-y-2">
+  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+    Role
+  </label>
+
+          <select v-model="form.role_id"
+            class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" required>
+            <option value="">Select Role</option>
+            <option v-for="role in roles" :key="role.id" :value="role.id">
+              {{ role.name }}
+            </option>
+          </select>
+        </div>
+        <div class="space-y-2">
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Basic Salary</label>
           <input v-model="form.basic_salary" type="number" step="0.01"
             class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
@@ -90,6 +103,7 @@ defineOptions({ layout: AdminLayout })
 
 defineProps({
   departments: Array,
+  roles: Array,
   pageTitle: String
 });
 
@@ -99,6 +113,7 @@ const form = useForm({
   phone: '',
   employee_code: '',
   staff_department_id: '',
+  role_id: '',
   designation: '',
   basic_salary: 0,
   joining_date: ''

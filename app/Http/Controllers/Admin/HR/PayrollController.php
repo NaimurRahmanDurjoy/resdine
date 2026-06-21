@@ -13,8 +13,11 @@ class PayrollController extends Controller
     public function index()
     {
         $payrolls = Payroll::with('employee.user')->orderBy('created_at', 'desc')->paginate(10);
+        $employees = Employee::with('user')->orderBy('employee_code')->get();
+
         return Inertia::render('Admin/HR/Payroll/Index', [
             'payrolls' => $payrolls,
+            'employees' => $employees,
             'pageTitle' => 'Payroll Processing'
         ]);
     }

@@ -18,8 +18,11 @@ class AttendanceController extends Controller
             ->whereDate('date', $date)
             ->paginate(20)->withQueryString();
 
+        $employees = Employee::with('user')->orderBy('employee_code')->get();
+
         return Inertia::render('Admin/HR/Attendance/Index', [
             'attendances' => $attendances,
+            'employees' => $employees,
             'date' => $date,
             'pageTitle' => 'Daily Attendance'
         ]);

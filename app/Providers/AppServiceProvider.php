@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Authenticate::redirectUsing(function ($request) {
+            if ($request->is('devAdmin') || $request->is('devAdmin/*')) {
+                return route('devAdmin.login');
+            }
+
+            return route('admin.login');
+        });
+
         Paginator::useTailwind();
         if (env('APP_ENV') === 'production') {
             URL::forceScheme('https');

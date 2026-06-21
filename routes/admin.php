@@ -81,7 +81,7 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         Route::prefix('inventory')->name('inventory.')->group(function () {
             Route::resource('waste', \App\Http\Controllers\Admin\Inventory\WasteManagementController::class)->only(['index', 'create', 'store']);
-            
+
             Route::prefix('transfers')->name('transfers.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'index'])->name('index');
                 Route::get('create', [\App\Http\Controllers\Admin\Inventory\StockTransferController::class, 'create'])->name('create');
@@ -133,7 +133,7 @@ Route::middleware('web')->name('admin.')->group(function () {
         Route::prefix('pos')->name('pos.')->group(function () {
             Route::get('/', [PosController::class, 'index'])->name('index');
             Route::post('submit', [PosController::class, 'submitOrder'])->name('submit');
-            
+
             // Register Shifts
             Route::get('register/open', [PosRegisterController::class, 'showOpen'])->name('register.open');
             Route::post('register/open', [PosRegisterController::class, 'open'])->name('register.open.submit');
@@ -155,7 +155,7 @@ Route::middleware('web')->name('admin.')->group(function () {
             // Chart of Accounts
             Route::post('coa/post-opening', [ChartOfAccountController::class, 'postOpeningBalances'])->name('coa.post-opening');
             Route::resource('coa', ChartOfAccountController::class);
-            
+
             // Vouchers
             Route::resource('vouchers', VoucherController::class);
             Route::post('vouchers/{voucher}/approve', [VoucherController::class, 'approve'])->name('vouchers.approve');
@@ -185,6 +185,8 @@ Route::middleware('web')->name('admin.')->group(function () {
             Route::get('attendance', [\App\Http\Controllers\Admin\HR\AttendanceController::class, 'index'])->name('attendance.index');
             Route::post('attendance', [\App\Http\Controllers\Admin\HR\AttendanceController::class, 'mark'])->name('attendance.mark');
             Route::get('leaves', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'index'])->name('leaves.index');
+            Route::get('leaves/create', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'create'])->name('leaves.create');
+            Route::post('leaves', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'store'])->name('leaves.store');
             Route::post('leaves/{leave}/status', [\App\Http\Controllers\Admin\HR\LeaveController::class, 'updateStatus'])->name('leaves.status');
             Route::get('payroll', [\App\Http\Controllers\Admin\HR\PayrollController::class, 'index'])->name('payroll.index');
             Route::post('payroll', [\App\Http\Controllers\Admin\HR\PayrollController::class, 'store'])->name('payroll.store');
