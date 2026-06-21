@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\StaffDepartment;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class EmployeeController extends Controller
     {
         return Inertia::render('Admin/HR/Employees/Create', [
             'departments' => StaffDepartment::all(),
+            'roles' => Role::whereNotIn('name', ['admin', 'customer'])->get(),
             'pageTitle' => 'Add Employee'
         ]);
     }
@@ -39,6 +41,7 @@ class EmployeeController extends Controller
             'staff_department_id' => 'required|exists:staff_departments,id',
             'employee_code' => 'required|string|unique:employees',
             'designation' => 'required|string|max:255',
+            'role_id' => 'required|exists:roles,id',
             'basic_salary' => 'required|numeric|min:0',
             'joining_date' => 'required|date',
         ]);
@@ -46,9 +49,9 @@ class EmployeeController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make(Str::random(10)),
+            'password' => Hash::make(12345678), // Default password, should be changed by the user
             'phone' => $validated['phone'],
-            'role_id' => 4, // Default to staff role
+            'role_id' => $validated['role_id'],
         ]);
 
         Employee::create([

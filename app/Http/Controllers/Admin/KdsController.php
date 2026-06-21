@@ -38,9 +38,24 @@ class KdsController extends Controller
 
         $orders = $query->orderBy('created_at', 'asc')->get();
 
+        // Determine active branch (fall back to first branch)
+        $activeBranchId = null;
+        if (auth()->check()) {
+            $user = auth()->user();
+            $activeBranchId = method_exists($user, 'getActiveBranchId') ? $user->getActiveBranchId() : null;
+        }
+
+        if (!$activeBranchId) {
+            $activeBranchId = \App\Models\Branch::first()?->id;
+        }
+
+        $departments = \App\Models\ResDepartment::when($activeBranchId, function ($q) use ($activeBranchId) {
+            $q->where('branch_id', $activeBranchId);
+        })->get();
+
         return Inertia::render('Admin/Kds/Index', [
             'orders' => $orders,
-            'departments' => \App\Models\ResDepartment::all(),
+            'departments' => $departments,
             'currentDepartment' => $deptId,
             'pageTitle' => 'Kitchen Display System'
         ]);

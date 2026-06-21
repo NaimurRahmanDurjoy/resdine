@@ -12,7 +12,7 @@ use Inertia\Inertia;
 class ProductVariantsController extends Controller
 {
     public function index(Request $request)
-    {
+    { 
         $search = $request->get('search');
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');

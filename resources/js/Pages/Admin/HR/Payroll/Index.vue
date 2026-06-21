@@ -1,42 +1,135 @@
 <template>
-
-    <div class="p-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6">{{ pageTitle }}</h1>
-      <div class="bg-white rounded-lg shadow overflow-x-auto">
-        <table class="w-full whitespace-nowrap">
-          <thead class="bg-gray-50 border-b">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month/Year</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Basic</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Salary</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="payroll in payrolls.data" :key="payroll.id">
-              <td class="px-6 py-4">{{ payroll.employee?.user?.name }}</td>
-              <td class="px-6 py-4">{{ payroll.month }} {{ payroll.year }}</td>
-              <td class="px-6 py-4">{{ payroll.basic_salary }}</td>
-              <td class="px-6 py-4 font-bold">{{ payroll.net_salary }}</td>
-              <td class="px-6 py-4">{{ payroll.payment_status }}</td>
-            </tr>
-            <tr v-if="payrolls.data.length === 0">
-              <td colspan="5" class="px-6 py-4 text-center text-gray-500">No payroll records found.</td>
-            </tr>
-          </tbody>
-        </table>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800">
+      <div
+        class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ pageTitle }}</h1>
       </div>
     </div>
 
+    <div class="p-6 space-y-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Generate Payroll</h2>
+        <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Employee</label>
+            <select v-model="form.employee_id"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              required>
+              <option value="">Select Employee</option>
+              <option v-for="employee in employees" :key="employee.id" :value="employee.id">
+                {{ employee.employee_code }} - {{ employee.user?.name }}
+              </option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Month</label>
+            <select v-model="form.month"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              required>
+              <option value="">Select Month</option>
+              <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Year</label>
+            <input v-model="form.year" type="number" min="2000" max="2100"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              required>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Allowances</label>
+            <input v-model="form.allowances" type="number" step="0.01"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              required>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Deductions</label>
+            <input v-model="form.deductions" type="number" step="0.01"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              required>
+          </div>
+          <div class="flex items-end justify-end">
+            <button type="submit" :disabled="form.processing"
+              class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 transition shadow-md flex items-center justify-center gap-2">
+              <span v-if="form.processing" class="animate-spin material-symbols-outlined text-sm">sync</span>
+              <span>Save Payroll</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <ListTable :headers="headers" :items="payrolls.data" :pagination="payrolls" :loading="false">
+      <template #rows="{ items }">
+        <tr v-for="payroll in items" :key="payroll.id"
+          class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <td class="px-6 py-2 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">{{ payroll.employee?.user?.name }}</div>
+          </td>
+          <td class="px-6 py-2 whitespace-nowrap">
+            <div class="text-sm text-gray-600">{{ payroll.month }} {{ payroll.year }}</div>
+          </td>
+          <td class="px-6 py-2 whitespace-nowrap">
+            <div class="text-sm text-gray-600">{{ payroll.basic_salary }}</div>
+          </td>
+          <td class="px-6 py-2 whitespace-nowrap">
+            <div class="text-sm font-bold text-gray-900">{{ payroll.net_salary }}</div>
+          </td>
+          <td class="px-6 py-2 whitespace-nowrap">
+            <div class="text-sm text-gray-600">{{ payroll.payment_status }}</div>
+          </td>
+        </tr>
+      </template>
+      <template #pagination v-if="payrolls.links">
+        <div class="flex items-center justify-between w-full">
+          <div class="text-sm text-gray-700 dark:text-gray-400">
+            Showing <span class="font-medium">{{ payrolls.from }}</span> to <span class="font-medium">{{ payrolls.to
+            }}</span> of <span class="font-medium">{{ payrolls.total }}</span> entries
+          </div>
+          <div class="flex space-x-1">
+            <Link v-for="(link, k) in payrolls.links" :key="k" :href="link.url || '#'" v-html="link.label"
+              class="relative inline-flex items-center px-3 py-1 border text-xs font-medium transition-colors rounded shadow-sm"
+              :class="[link.active ? 'z-10 bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700', !link.url ? 'cursor-not-allowed opacity-50' : '']" />
+          </div>
+        </div>
+      </template>
+    </ListTable>
+  </div>
 </template>
 
 <script setup>
+import { useForm, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import ListTable from '@/Components/ListTable.vue';
 defineOptions({ layout: AdminLayout })
 
 defineProps({
-    payrolls: Object,
-    pageTitle: String
+  payrolls: Object,
+  employees: Array,
+  pageTitle: String
 });
+
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const form = useForm({
+  employee_id: '',
+  month: '',
+  year: new Date().getFullYear(),
+  allowances: 0,
+  deductions: 0
+});
+
+const submit = () => {
+  form.post(route('admin.hr.payroll.store'), { preserveScroll: true });
+};
+
+const headers = [
+  { label: 'Employee', key: 'employee', sortable: false },
+  { label: 'Month/Year', key: 'month_year', sortable: false },
+  { label: 'Basic', key: 'basic', sortable: false },
+  { label: 'Net Salary', key: 'net_salary', sortable: false },
+  { label: 'Status', key: 'status', sortable: false }
+];
 </script>
