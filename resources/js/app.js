@@ -7,7 +7,7 @@ import { route } from 'ziggy-js' // Ziggy for use route helper in Vue components
 const pages = import.meta.glob('./Pages/**/*.vue');
 
 createInertiaApp({
-    title: (title) => title ? `${title} | Resdine Admin` : 'Resdine Admin',
+    title: (title) => title ? `${title} | Resdine Admin` : 'Resdine',
     resolve: name => {
         const importPage = pages[`./Pages/${name}.vue`];
         if (!importPage) throw new Error(`Page ${name} not found`);
@@ -15,8 +15,8 @@ createInertiaApp({
     },
     setup({ el, App, props, plugin }) {
         const app = createApp({ render: () => h(App, props) })
-        app.use(plugin) 
-        
+        app.use(plugin)
+
         app.component('Link', Link)
         app.component('Head', Head)
 

@@ -6,6 +6,7 @@ use App\Models\ProductCategory;
 use App\Models\ProductItem;
 use App\Models\OrderMaster;
 use App\Models\OrderItem;
+use App\Models\MarketingCampaign;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -35,9 +36,22 @@ class WebController extends Controller
         $defaultBranchId = \App\Models\Branch::first()?->id ?: 1;
         $settings = \App\Models\BranchSetting::where('branch_id', $defaultBranchId)->first();
 
+        // Fetch active campaigns for the web menu
+        $activeCampaigns = MarketingCampaign::where('is_active', true)
+            ->where(function($query) {
+                // If starts_at is in the next 12 hours, show it anyway to handle timezone offsets
+                $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()->addHours(12));
+            })
+            ->where(function($query) {
+                $query->whereNull('ends_at')->orWhere('ends_at', '>=', now()->subHours(12));
+            })
+            ->orderBy('priority', 'desc')
+            ->get();
+
         return Inertia::render('Web/Menu/Index', [
             'categories' => $categories,
             'items' => $items,
+            'activeCampaigns' => $activeCampaigns,
             'branchSetting' => [
                 'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
                 'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,

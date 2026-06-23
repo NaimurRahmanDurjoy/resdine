@@ -311,6 +311,8 @@
     <!-- Variant Modal (Web) Component -->
     <VariantSelectionModal :show="!!selectedProductForVariant" :product="selectedProductForVariant" theme="amber"
       @close="closeVariantModal" @selected="selectVariant" />
+    <!-- Campaign Popup (Daraz Style) -->
+    <CampaignModal :activeCampaigns="activeCampaigns" />
   </WebLayout>
 </template>
 
@@ -321,12 +323,14 @@ import WebLayout from '@/Layouts/WebLayout.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import VariantSelectionModal from '@/Components/VariantSelectionModal.vue'
+import CampaignModal from '@/Components/CampaignModal.vue'
 
 const page = usePage()
 
 const props = defineProps({
   categories: Array,
   items: Array,
+  activeCampaigns: Array,
   branchSetting: Object
 })
 

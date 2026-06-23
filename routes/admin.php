@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\MembershipController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\MarketingCampaignController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\RestaurantSetup\BranchController;
@@ -116,6 +117,9 @@ Route::middleware('web')->name('admin.')->group(function () {
 
         // Promotions
         Route::resource('promotions', PromotionController::class);
+
+        // Marketing Campaigns
+        Route::resource('marketing-campaigns', MarketingCampaignController::class);
 
         // Reservations & Events
         Route::resource('reservations', ReservationController::class);
