@@ -1,65 +1,103 @@
 <template>
-    <!-- Current Menu Row -->
-        <tr :class="[
-            level === 0 ? 'bg-gray-50/50 dark:bg-gray-900/20' : 'bg-gray-50/20 dark:bg-gray-900/10',
-            level > 0 ? 'border-l-4 border-gray-100 dark:border-gray-800' : ''
-        ]" class="group">
-            <td class="py-3 px-2" :style="{ paddingLeft: `${level * 1.5 + 0.5}rem` }">
-                <div class="flex items-center space-x-3">
-                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl font-icon">
-                        {{ menu.icon || (level === 0 ? 'folder' : 'subdirectory_arrow_right') }}
-                    </span>
-                    <span class="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider" :class="{'text-xs font-bold': level > 0}">{{ menu.name }}</span>
-                </div>
-            </td>
-            <td class="py-1 px-4 text-right">
-                <!-- Menu Level Bulk Toggle -->
-                <div class="inline-flex gap-1 items-center bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                    <span class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mr-1 pl-1">Menu Bulk:</span>
-                    <button @click="bulkApply(null)" type="button" title="Inherit Menu" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 material-symbols-outlined text-sm">settings_backup_restore</button>
-                    <button @click="bulkApply(true)" type="button" title="Allow Menu" class="p-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded text-emerald-500 material-symbols-outlined text-sm">check_circle</button>
-                    <button @click="bulkApply(false)" type="button" title="Deny Menu" class="p-1 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded text-rose-500 material-symbols-outlined text-sm">cancel</button>
-                </div>
-            </td>
-        </tr>
+    <div class="permission-node-wrapper" :class="{ 'mt-4': level === 0 }">
+        <!-- Node Row (Module/Menu/Submenu) -->
+        <div 
+            class="group flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border border-transparent shadow-sm"
+            :class="[
+                level === 0 ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-blue-500/5' : 'hover:bg-gray-50/80 dark:hover:bg-gray-900/30',
+                isExpanded ? 'mb-2' : ''
+            ]"
+            @click="toggle"
+        >
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+                <!-- Indent -->
+                <div v-for="i in level" :key="i" class="w-6 h-px bg-gray-200 dark:bg-gray-800 ml-2 first:ml-0"></div>
 
-        <!-- Actions for this Menu -->
-        <template v-for="action in menu.actions" :key="action.id">
-            <PermissionRow :action="action" :form="form" :role-permissions="rolePermissions" :indent="level > 0" />
-        </template>
+                <!-- Icons & Label -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <span 
+                        class="material-symbols-outlined text-gray-400 font-icon transition-transform duration-300"
+                        :class="{ 'rotate-90 text-blue-500': isExpanded }"
+                    >chevron_right</span>
+                    
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div 
+                            class="w-9 h-9 rounded-xl flex items-center justify-center border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 group-hover:scale-110 transition-transform"
+                            :class="level === 0 ? 'bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400' : ''"
+                        >
+                            <span class="material-symbols-outlined text-xl font-icon">{{ menu.icon || (level === 0 ? 'category' : 'folder') }}</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span 
+                                class="text-sm font-black truncate tracking-wider"
+                                :class="level === 0 ? 'text-gray-800 dark:text-gray-100 uppercase' : 'text-gray-600 dark:text-gray-300'"
+                            >
+                                {{ menu.name }}
+                            </span>
+                            <span v-if="level > 0" class="text-[10px] text-gray-400 dark:text-gray-500 font-mono truncate">{{ menu.route }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Recursive Children -->
-        <template v-for="child in menu.children_recursive" :key="child.id">
+            <!-- Action Area -->
+            <div class="flex items-center gap-6" @click.stop>
+                <!-- Grouped Actions -->
+                <ActionGroup 
+                    v-if="menu.grouped_actions && (menu.grouped_actions.view || menu.grouped_actions.create || menu.grouped_actions.edit || menu.grouped_actions.delete || menu.grouped_actions.others.length)"
+                    :actions="menu.grouped_actions"
+                    :overrides="overrides"
+                    :role-permissions="rolePermissions"
+                    @update="$emit('update', $event)"
+                />
+
+                <!-- Bulk Controls -->
+                <div class="flex items-center bg-gray-100/50 dark:bg-gray-900/50 p-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button @click="$emit('bulk-apply', { menu, val: null })" title="Reset All in this branch" class="p-1.5 hover:text-rose-500 material-symbols-outlined text-sm font-icon">restart_alt</button>
+                    <button @click="$emit('bulk-apply', { menu, val: true })" title="Grant All in this branch" class="p-1.5 hover:text-emerald-500 material-symbols-outlined text-sm font-icon">check_circle</button>
+                    <button @click="$emit('bulk-apply', { menu, val: false })" title="Deny All in this branch" class="p-1.5 hover:text-rose-500 material-symbols-outlined text-sm font-icon">cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expansion Area -->
+        <div v-show="isExpanded" class="animate-in slide-in-from-top-2 fade-in duration-300">
             <PermissionTreeNode 
+                v-for="child in menu.children_recursive" 
+                :key="child.id"
                 :menu="child" 
-                :form="form" 
-                :role-permissions="rolePermissions" 
-                :level="level + 1"
-                @bulk-apply="emitBulkApply"
+                :overrides="overrides" 
+                :role-permissions="rolePermissions"
+                :expanded-menus="expandedMenus" 
+                :search-query="searchQuery" 
+                :level="level + 1" 
+                @toggle="$emit('toggle', $event)"
+                @bulk-apply="$emit('bulk-apply', $event)" 
+                @update="$emit('update', $event)" 
             />
-        </template>
+        </div>
+    </div>
 </template>
 
 <script setup>
-import PermissionRow from './PermissionRow.vue'
+import { computed } from 'vue'
+import ActionGroup from './ActionGroup.vue'
 import PermissionTreeNode from './PermissionTreeNode.vue'
 
 const props = defineProps({
     menu: Object,
-    form: Object,
+    overrides: Array,
     rolePermissions: Array,
+    expandedMenus: Object, // Set
+    searchQuery: String,
     level: { type: Number, default: 0 }
 })
 
-const emit = defineEmits(['bulk-apply'])
+const emit = defineEmits(['toggle', 'bulk-apply', 'update'])
 
-const bulkApply = (val) => {
-    emit('bulk-apply', { menu: props.menu, val })
-}
+const isExpanded = computed(() => props.expandedMenus.has(props.menu.id) || !!props.searchQuery)
 
-const emitBulkApply = (payload) => {
-    emit('bulk-apply', payload)
-}
+const toggle = () => emit('toggle', props.menu.id)
 </script>
 
 <style scoped>

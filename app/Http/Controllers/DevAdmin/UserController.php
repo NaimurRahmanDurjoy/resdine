@@ -12,6 +12,7 @@ use App\Models\UserPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -92,62 +93,39 @@ class UserController extends Controller
         return redirect()->route('devAdmin.users.index')->with('success', 'Users updated successfully.');
     }
 
-    public function permissions(User $user)
+    public function permissions(User $user, \App\Services\PermissionService $permissionService)
     {
         $user->load('role');
 
-        // Get all software menus with their actions and recursive children
-        $softwareMenus = SoftwareMenu::whereNull('parent_id')
-            ->with('childrenRecursive')
-            ->orderBy('order')
-            ->get();
-
-        // Get role permissions for this user's role
-        $rolePermissions = RolePermission::where('role_id', $user->role_id)
-            ->where('is_allowed', true)
-            ->pluck('software_menu_action_id')
-            ->toArray();
-
-        // Get user specific overrides (true = explicitly allowed, false = explicitly denied)
-        $userPermissions = UserPermission::where('user_id', $user->id)
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->software_menu_action_id => $item->is_allowed];
-            })
-            ->toArray();
-
         return Inertia::render('DevAdmin/Users/Permissions', [
             'user' => $user,
-            'softwareMenus' => $softwareMenus,
-            'rolePermissions' => $rolePermissions,
-            'userPermissions' => $userPermissions,
+            'softwareMenus' => $permissionService->getPermissionTree(),
+            'rolePermissions' => DB::table('role_permissions')
+                ->where('role_id', $user->role_id)
+                ->where('is_allowed', true)
+                ->pluck('software_menu_action_id')
+                ->toArray(),
+            'overrides' => DB::table('user_permissions')
+                ->where('user_id', $user->id)
+                ->get()
+                ->map(function ($o) {
+                    return [
+                        'action_id' => $o->software_menu_action_id,
+                        'is_allowed' => $o->is_allowed,
+                    ];
+                })->toArray(),
         ]);
     }
 
-    public function updatePermissions(Request $request, User $user)
+    public function updatePermissions(Request $request, User $user, \App\Services\PermissionService $permissionService)
     {
         $request->validate([
             'overrides' => 'present|array',
-            'overrides.*.id' => 'required|exists:software_menu_actions,id',
+            'overrides.*.action_id' => 'required|exists:software_menu_actions,id',
             'overrides.*.is_allowed' => 'nullable|boolean', // null means Inherited (Delete override)
         ]);
 
-        // Remove all current overrides to start fresh
-        UserPermission::where('user_id', $user->id)->delete();
-
-        // Add new overrides where state is not null (not Inherited)
-        foreach ($request->overrides as $perm) {
-            if ($perm['is_allowed'] !== null) {
-                UserPermission::create([
-                    'user_id' => $user->id,
-                    'software_menu_action_id' => $perm['id'],
-                    'is_allowed' => $perm['is_allowed'],
-                ]);
-            }
-        }
-
-        // Clear permission cache to force refresh on next check
-        Cache::forget("perm_{$user->id}");
+        $permissionService->updateUserPermissions($user, $request->overrides);
 
         return redirect()->back()->with('success', 'User permissions updated successfully.');
     }

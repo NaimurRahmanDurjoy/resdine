@@ -1,203 +1,170 @@
 <template>
-    <AdminLayout :pageTitle="pageTitle">
 
-        <Head :title="pageTitle" />
+    <Head :title="pageTitle" />
 
-        <div class="max-w-6xl mx-auto space-y-6">
-            <!-- Header Card -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="max-w-[1600px] mx-auto">
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+
+            <!-- Left Column: Context & Stats -->
+            <div class="w-full lg:w-80 space-y-6 lg:sticky lg:top-6">
+                <!-- Role Card -->
                 <div
-                    class="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <Link :href="route('admin.settings.roles.index')"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                                <span class="material-symbols-outlined font-icon">arrow_back</span>
-                            </Link>
-                            <div>
-                                <h1 class="text-xl font-bold text-gray-800 dark:text-white uppercase tracking-wider">{{
-                                    pageTitle }}</h1>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="text-xs text-gray-600 dark:text-gray-400">Configuring permissions
-                                        for</span>
-                                    <span
-                                        class="text-xs font-bold text-blue-600 dark:text-blue-400 underline decoration-blue-500/30 whitespace-nowrap">{{
-                                        role.name }}</span>
-                                    <span
-                                        class="px-2 py-0.25 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-[9px] font-bold rounded border border-emerald-100 dark:border-emerald-800 uppercase tracking-tighter">
-                                        Role Mapping
-                                    </span>
-                                </div>
-                            </div>
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
+                            <span class="material-symbols-outlined">shield_person</span>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <button @click="resetToDefault" type="button"
-                                class="text-xs font-semibold text-gray-500 hover:text-rose-600 transition-colors uppercase tracking-widest px-3 py-2">
-                                Revoke All
-                            </button>
-                            <button @click="savePermissions" :disabled="form.processing || !form.isDirty"
-                                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                                <span v-if="form.processing"
-                                    class="material-symbols-outlined animate-spin text-sm">sync</span>
-                                <span v-else class="material-symbols-outlined text-sm">save</span>
-                                Save Permissions
-                            </button>
+                        <div class="min-w-0">
+                            <h2
+                                class="text-base font-black text-gray-800 dark:text-white truncate uppercase tracking-wider">
+                                {{ role.name }}</h2>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
+                                Global Security Role</p>
                         </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <Link :href="route('admin.settings.roles.index')"
+                            class="flex items-center justify-center gap-2 w-full py-3 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span>
+                            Back to Roles
+                        </Link>
+
+                        <button @click="savePermissions" :disabled="form.processing || !form.isDirty"
+                            class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/25 hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center gap-2">
+                            <span v-if="form.processing"
+                                class="material-symbols-outlined animate-spin text-sm">sync</span>
+                            <span v-else class="material-symbols-outlined text-sm">security</span>
+                            Update Role Access
+                        </button>
                     </div>
                 </div>
 
-                <!-- Legend, Search & Bulk Actions -->
+                <!-- Search -->
                 <div
-                    class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 space-y-4">
-                    <div class="flex flex-wrap gap-6 justify-between items-center">
-                        <div class="flex items-center gap-8">
-                            <div class="flex items-center gap-2 group cursor-help"
-                                title="Role currently has access to this action">
-                                <div
-                                    class="w-3.5 h-3.5 rounded-md bg-emerald-500 border border-emerald-600 shadow-sm shadow-emerald-500/20">
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Allowed
-                                    Access</span>
-                            </div>
-                            <div class="flex items-center gap-2 group cursor-help"
-                                title="Role currently has NO access to this action">
-                                <div
-                                    class="w-3.5 h-3.5 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">No
-                                    Access</span>
-                            </div>
-                        </div>
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                    <div class="relative">
+                        <input type="text" v-model="searchQuery" placeholder="Find menu or action..."
+                            class="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-white placeholder-gray-400" />
+                        <span
+                            class="material-symbols-outlined absolute left-3.5 top-3.5 text-gray-400 text-xl font-icon">search</span>
+                    </div>
 
-                        <!-- Filter -->
-                        <div class="relative w-full md:w-80">
-                            <input type="text" v-model="searchQuery" placeholder="Filter menus or actions..."
-                                class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white shadow-sm" />
+                    <div class="flex flex-wrap gap-2">
+                        <button @click="expandAll"
+                            class="flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">Expand
+                            All</button>
+                        <button @click="collapseAll"
+                            class="flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Collapse</button>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <RolePermissionSummary :allowed-count="form.allowed_action_ids.length"
+                    :restricted-count="allActionIds.length - form.allowed_action_ids.length" />
+            </div>
+
+            <!-- Right Column: Tree -->
+            <div class="flex-1 min-w-0 space-y-6">
+                <!-- Global Actions -->
+                <div
+                    class="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl p-2 pl-6 rounded-3xl border border-white dark:border-gray-700 shadow-sm sticky top-6 z-10">
+                    <h2 class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">
+                        Permissions Explorer</h2>
+                    <div class="flex items-center gap-2">
+                        <button @click="bulkApply(true)"
+                            class="px-4 py-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all">Grant
+                            All</button>
+                        <button @click="bulkApply(false)"
+                            class="px-4 py-2 bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all">Revoke
+                            All</button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <PermissionTreeNode v-for="menu in filteredMenus" :key="menu.id" :menu="menu"
+                        :allowed-action-ids="form.allowed_action_ids" :expanded-menus="expandedMenus"
+                        :search-query="searchQuery" @toggle="toggleMenu" @bulk-apply="bulkApplyToMenu"
+                        @update="handleUpdate" />
+
+                    <!-- Empty State -->
+                    <div v-if="filteredMenus.length === 0" class="py-20 text-center">
+                        <div
+                            class="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <span
-                                class="material-symbols-outlined absolute left-3 top-2 text-gray-400 text-xl font-icon">search</span>
-                            <span v-if="searchQuery" @click="searchQuery = ''"
-                                class="material-symbols-outlined absolute right-3 top-2 text-gray-400 text-xl font-icon cursor-pointer hover:text-gray-600">close</span>
+                                class="material-symbols-outlined text-gray-300 dark:text-gray-700 text-3xl">filter_list_off</span>
                         </div>
+                        <h3 class="text-gray-400 font-bold uppercase tracking-widest text-xs">No Results</h3>
                     </div>
-
-                    <!-- Global Bulk Actions -->
-                    <div class="flex items-center gap-6 pt-2">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-black uppercase tracking-tighter text-gray-400 whitespace-nowrap">Bulk Permissions:</span>
-                            <div class="flex bg-white dark:bg-gray-800 p-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <button @click="bulkApply(true)" type="button" class="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-md transition-colors">Grant All</button>
-                                <div class="w-px h-3 bg-gray-200 dark:bg-gray-700 my-auto mx-1"></div>
-                                <button @click="bulkApply(false)" type="button" class="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-md transition-colors">Revoke All</button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-3 ml-auto">
-                            <span class="text-[10px] font-black uppercase tracking-tighter text-gray-400 whitespace-nowrap">View Control:</span>
-                            <div class="flex bg-white dark:bg-gray-800 p-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                                <button @click="expandAll" type="button" title="Expand All" class="px-2 py-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-all flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-sm font-icon">unfold_more</span>
-                                    <span class="text-[8px] font-bold uppercase tracking-widest leading-none">Expand All</span>
-                                </button>
-                                <div class="w-px h-3 bg-gray-200 dark:bg-gray-700 my-auto mx-1"></div>
-                                <button @click="collapseAll" type="button" title="Collapse All" class="px-2 py-1 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-all flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-sm font-icon">unfold_less</span>
-                                    <span class="text-[8px] font-bold uppercase tracking-widest leading-none">Collapse All</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tree View -->
-                <div class="p-6 overflow-x-auto">
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr class="text-left border-b border-gray-100 dark:border-gray-700">
-                                <th
-                                    class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                    Menu / Action Hierarchy</th>
-                                <th
-                                    class="pb-3 text-right text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                    Enable / Disable Access</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                            <template v-for="menu in filteredMenus" :key="menu.id">
-                                <PermissionTreeNode 
-                                    :menu="menu" 
-                                    :form="form" 
-                                    :expandedMenus="expandedMenus"
-                                    :searchQuery="searchQuery"
-                                    @toggle="toggleMenu"
-                                    @bulk-apply="bulkApplyToMenu"
-                                />
-                            </template>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
-    </AdminLayout>
+    </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import PermissionRow from './Partials/PermissionRow.vue'
 import PermissionTreeNode from './Partials/PermissionTreeNode.vue'
+import RolePermissionSummary from './Partials/RolePermissionSummary.vue'
+
+defineOptions({ layout: AdminLayout })
 
 const props = defineProps({
     role: Object,
     softwareMenus: Array,
-    rolePermissions: Array, // IDs of currently allowed actionIds
+    rolePermissions: Array,
     pageTitle: String
 })
 
 const searchQuery = ref('')
-const expandedMenus = ref(new Set())
 
-// Collect all software action IDs for batch operations
-const allActionIds = []
 const allMenuIds = []
-const collectActionIds = (menus) => {
+const allActionIds = []
+const collectData = (menus) => {
     menus.forEach(menu => {
         allMenuIds.push(menu.id)
-        menu.actions?.forEach(action => allActionIds.push(action.id))
-        if (menu.children_recursive) collectActionIds(menu.children_recursive)
+        if (menu.grouped_actions) {
+            ['view', 'create', 'edit', 'delete'].forEach(type => {
+                if (menu.grouped_actions[type]) allActionIds.push(menu.grouped_actions[type].id)
+            })
+            menu.grouped_actions.others?.forEach(a => allActionIds.push(a.id))
+        }
+        if (menu.children_recursive) collectData(menu.children_recursive)
     })
 }
-collectActionIds(props.softwareMenus)
+collectData(props.softwareMenus)
 
-onMounted(() => {
-    // Optionally expand some by default or based on state
-    // For now, let's keep them collapsed for a clean look
-})
-
-const isExpanded = (id) => expandedMenus.value.has(id) || !!searchQuery.value
-
-const toggleMenu = (id) => {
-    if (expandedMenus.value.has(id)) {
-        expandedMenus.value.delete(id)
-    } else {
-        expandedMenus.value.add(id)
-    }
-}
-
-const expandAll = () => {
-    allMenuIds.forEach(id => expandedMenus.value.add(id))
-}
-
-const collapseAll = () => {
-    expandedMenus.value.clear()
-}
+// Auto-expand all menus so previously saved permissions are visible on first load
+const expandedMenus = ref(new Set(allMenuIds))
 
 const form = useForm({
-    allowed_action_ids: [...props.rolePermissions]
+    allowed_action_ids: props.rolePermissions.map(id => Number(id))
 })
+
+watch(
+    () => props.rolePermissions,
+    rolePermissions => {
+        form.allowed_action_ids = rolePermissions.map(id => Number(id))
+    },
+    { immediate: true }
+)
+
+const toggleMenu = (id) => expandedMenus.value.has(id) ? expandedMenus.value.delete(id) : expandedMenus.value.add(id)
+const expandAll = () => allMenuIds.forEach(id => expandedMenus.value.add(id))
+const collapseAll = () => expandedMenus.value.clear()
+
+const handleUpdate = (update) => {
+    const actionId = Number(update.action_id)
+    const index = form.allowed_action_ids.indexOf(actionId)
+    if (update.is_allowed) {
+        if (index === -1) form.allowed_action_ids.push(actionId)
+    } else {
+        if (index > -1) form.allowed_action_ids.splice(index, 1)
+    }
+}
 
 const savePermissions = () => {
     form.post(route('admin.settings.roles.permissions.update', props.role.id), {
@@ -205,24 +172,19 @@ const savePermissions = () => {
     })
 }
 
-const resetToDefault = () => {
-    if (confirm('Revoke all permissions for this role? All users with this role will lose access.')) {
-        form.allowed_action_ids = []
-        savePermissions()
-    }
-}
-
 const bulkApply = (shouldAllow) => {
-    if (shouldAllow) {
-        form.allowed_action_ids = [...allActionIds]
-    } else {
-        form.allowed_action_ids = []
-    }
+    form.allowed_action_ids = shouldAllow ? [...allActionIds] : []
 }
 
-const bulkApplyToMenu = (menu, shouldAllow) => {
+const bulkApplyToMenu = ({ menu, val }) => {
     const getMenuActionIds = (node) => {
-        let ids = node.actions?.map(a => a.id) || []
+        let ids = []
+        if (node.grouped_actions) {
+            ['view', 'create', 'edit', 'delete'].forEach(type => {
+                if (node.grouped_actions[type]) ids.push(node.grouped_actions[type].id)
+            })
+            node.grouped_actions.others?.forEach(a => ids.push(a.id))
+        }
         if (node.children_recursive) {
             node.children_recursive.forEach(child => {
                 ids = [...ids, ...getMenuActionIds(child)]
@@ -231,33 +193,25 @@ const bulkApplyToMenu = (menu, shouldAllow) => {
         return ids
     }
 
-    const menuIds = getMenuActionIds(menu)
+    const menuActionIds = getMenuActionIds(menu)
+    form.allowed_action_ids = form.allowed_action_ids.filter(id => !menuActionIds.includes(id))
 
-    if (shouldAllow) {
-        // Add unique menuIds to form
-        const currentIds = new Set(form.allowed_action_ids)
-        menuIds.forEach(id => currentIds.add(id))
-        form.allowed_action_ids = Array.from(currentIds)
-    } else {
-        // Remove menuIds from form
-        form.allowed_action_ids = form.allowed_action_ids.filter(id => !menuIds.includes(id))
+    if (val) {
+        menuActionIds.forEach(id => form.allowed_action_ids.push(id))
     }
 }
 
-// Filtering Logic
 const filteredMenus = computed(() => {
     if (!searchQuery.value) return props.softwareMenus
-    const query = searchQuery.value.toLowerCase()
+    const q = searchQuery.value.toLowerCase()
 
-    return props.softwareMenus.filter(menu => {
-        const menuMatch = menu.name.toLowerCase().includes(query)
-        const actionMatch = menu.actions?.some(a => a.action.toLowerCase().includes(query))
-        const childMatch = menu.children_recursive?.some(c =>
-            c.name.toLowerCase().includes(query) ||
-            c.actions?.some(a => a.action.toLowerCase().includes(query))
-        )
-        return menuMatch || actionMatch || childMatch
-    })
+    const checkNode = (node) => {
+        const matchesName = node.name.toLowerCase().includes(q)
+        const hasMatchingChild = node.children_recursive?.some(child => checkNode(child))
+        return matchesName || hasMatchingChild
+    }
+
+    return props.softwareMenus.filter(m => checkNode(m))
 })
 </script>
 

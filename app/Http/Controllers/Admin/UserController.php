@@ -13,8 +13,10 @@ use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Services\PermissionService;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -168,22 +170,21 @@ class UserController extends Controller
     /**
      * Manage User Specific Permissions (Overrides)
      */
-    public function permissions(User $user)
+    public function permissions(User $user, PermissionService $permissionService)
     {
         $user->load('role');
-        $softwareMenus = SoftwareMenu::where('is_active', true)
-            ->whereNull('parent_id')
-            ->orderBy('order')
-            ->with(['actions', 'childrenRecursive'])
-            ->get();
+        $softwareMenus = $permissionService->getPermissionTree();
 
         // Get role-based permissions
-        $rolePermissions = RolePermission::where('role_id', $user->role_id)
+        $rolePermissions = DB::table('role_permissions')
+            ->where('role_id', $user->role_id)
+            ->where('is_allowed', true)
             ->pluck('software_menu_action_id')
             ->toArray();
 
         // Get user overrides
-        $overrides = UserPermission::where('user_id', $user->id)
+        $overrides = DB::table('user_permissions')
+            ->where('user_id', $user->id)
             ->get()
             ->map(function ($o) {
                 return [
@@ -204,29 +205,11 @@ class UserController extends Controller
     /**
      * Update User Specific Permissions (Overrides)
      */
-    public function updatePermissions(Request $request, User $user)
+    public function updatePermissions(Request $request, User $user, \App\Services\PermissionService $permissionService)
     {
         $overrides = $request->input('overrides', []); // Array of {action_id, is_allowed}
 
-        UserPermission::where('user_id', $user->id)->delete();
-
-        foreach ($overrides as $override) {
-            // If is_allowed is null, it means 'Inherit', so we don't save a record
-            if ($override['is_allowed'] === null) continue;
-
-            UserPermission::create([
-                'user_id' => $user->id,
-                'software_menu_action_id' => $override['action_id'],
-                'is_allowed' => $override['is_allowed'],
-            ]);
-        }
-
-        // Clear user-specific cache
-        $menuService = app(\App\Services\MenuService::class);
-        $menuService->clearCache($user);
-
-        // Also clear any permission-related cache if exists
-        Cache::forget("perm_{$user->id}");
+        $permissionService->updateUserPermissions($user, $overrides);
 
         return redirect()->back()->with('success', 'User specific permissions updated successfully');
     }

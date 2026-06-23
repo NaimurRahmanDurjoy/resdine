@@ -1,243 +1,281 @@
 <template>
-    <DevAdminLayout>
 
-        <Head :title="`Permissions for ${user.name}`" />
+    <Head :title="pageTitle" />
 
-        <div class="max-w-6xl mx-auto space-y-6">
-            <!-- Header Card -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="max-w-[1600px] mx-auto">
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+
+            <!-- Left Column: Summary & Search (Sticky) -->
+            <div class="w-full lg:w-80 space-y-6 lg:sticky lg:top-6">
+                <!-- User Profile Card -->
                 <div
-                    class="bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <Link :href="route('devAdmin.users.index')"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                                <span class="material-symbols-outlined font-icon">arrow_back</span>
-                            </Link>
-                            <div>
-                                <h1 class="text-xl font-bold text-gray-800 dark:text-white">User Permissions</h1>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="text-xs text-gray-600 dark:text-gray-400">Managing access for</span>
-                                    <span
-                                        class="text-xs font-bold text-blue-600 dark:text-blue-400 underline decoration-blue-500/30">{{
-                                        user.name }}</span>
-                                    <span
-                                        class="px-2 py-0.25 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 text-[9px] font-bold rounded border border-indigo-100 dark:border-indigo-800 uppercase tracking-tighter">
-                                        {{ user.role?.name || 'No Role' }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <button @click="resetToDefault" type="button"
-                                class="text-xs font-semibold text-gray-500 hover:text-rose-600 transition-colors uppercase tracking-widest px-3 py-2">
-                                Reset All Overrides
-                            </button>
-                            <button @click="savePermissions" :disabled="form.processing || !form.isDirty"
-                                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                                <span v-if="form.processing"
-                                    class="material-symbols-outlined animate-spin text-sm">sync</span>
-                                <span v-else class="material-symbols-outlined text-sm">save</span>
-                                Save Changes
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Legend, Search & Bulk Actions -->
-                <div
-                    class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 space-y-4">
-                    <div class="flex flex-wrap gap-6 justify-between items-center">
-                        <div class="flex items-center gap-8">
-                            <div class="flex items-center gap-2 group cursor-help"
-                                title="Permission matches that of the user's role">
-                                <div
-                                    class="w-3.5 h-3.5 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Inherited</span>
-                            </div>
-                            <div class="flex items-center gap-2 group cursor-help"
-                                title="Access explicitly granted to this user">
-                                <div
-                                    class="w-3.5 h-3.5 rounded-md bg-emerald-500 border border-emerald-600 shadow-sm shadow-emerald-500/20">
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Explicit
-                                    Allow</span>
-                            </div>
-                            <div class="flex items-center gap-2 group cursor-help"
-                                title="Access explicitly denied to this user">
-                                <div
-                                    class="w-3.5 h-3.5 rounded-md bg-rose-500 border border-rose-600 shadow-sm shadow-rose-500/20">
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Explicit
-                                    Deny</span>
-                            </div>
-                        </div>
-
-                        <!-- Filter Input -->
-                        <div class="relative w-full md:w-80">
-                            <input type="text" v-model="searchQuery" placeholder="Filter menus or actions..."
-                                class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white shadow-sm" />
-                            <span
-                                class="material-symbols-outlined absolute left-3 top-2 text-gray-400 text-xl font-icon">search</span>
-                            <span v-if="searchQuery" @click="searchQuery = ''"
-                                class="material-symbols-outlined absolute right-3 top-2 text-gray-400 text-xl font-icon cursor-pointer hover:text-gray-600">close</span>
-                        </div>
-                    </div>
-
-                    <!-- Global Bulk Actions -->
-                    <div class="flex items-center gap-3 pt-2">
-                        <span class="text-[10px] font-black uppercase tracking-tighter text-gray-400">Global Bulk
-                            Action:</span>
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-4 mb-6">
                         <div
-                            class="flex bg-white dark:bg-gray-800 p-0.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <button @click="bulkApply(null)" type="button"
-                                class="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Inherit
-                                All</button>
-                            <div class="w-px h-3 bg-gray-200 dark:bg-gray-700 my-auto mx-1"></div>
-                            <button @click="bulkApply(true)" type="button"
-                                class="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-md transition-colors">Allow
-                                All</button>
-                            <div class="w-px h-3 bg-gray-200 dark:bg-gray-700 my-auto mx-1"></div>
-                            <button @click="bulkApply(false)" type="button"
-                                class="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-md transition-colors">Deny
-                                All</button>
+                            class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-500/20">
+                            {{ user.name.charAt(0) }}
                         </div>
+                        <div class="min-w-0">
+                            <h2
+                                class="text-base font-black text-gray-800 dark:text-white truncate uppercase tracking-wider">
+                                {{ user.name }}</h2>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{{
+                                user.role.name }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <Link :href="route('devAdmin.users.index')"
+                            class="flex items-center justify-center gap-2 w-full py-3 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span>
+                            Back to Users
+                        </Link>
+
+                        <button @click="savePermissions" :disabled="form.processing || !form.isDirty"
+                            class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/25 hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center gap-2">
+                            <span v-if="form.processing"
+                                class="material-symbols-outlined animate-spin text-sm">sync</span>
+                            <span v-else class="material-symbols-outlined text-sm">enhanced_encryption</span>
+                            Update Core Rights
+                        </button>
                     </div>
                 </div>
 
-                <!-- Tree View -->
-                <div class="p-6 overflow-x-auto">
-                    <table class="w-full border-collapse">
-                        <thead>
-                            <tr class="text-left border-b border-gray-100 dark:border-gray-700">
-                                <th
-                                    class="pb-3 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                    Menu / Action Breakdown</th>
-                                <th
-                                    class="pb-3 text-right text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                    Permission Override Controls</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                            <template v-for="menu in filteredMenus" :key="menu.id">
-                                <PermissionTreeNode :menu="menu" :form="form" :role-permissions="rolePermissions"
-                                    @bulk-apply="handleTreeNodeBulkApply" />
-                            </template>
-                        </tbody>
-                    </table>
+                <!-- Search & Filters -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                    <div class="relative">
+                        <input type="text" v-model="searchQuery" placeholder="Search modules..."
+                            class="w-full pl-10 pr-4 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500/50 transition-all dark:text-white placeholder-gray-400" />
+                        <span
+                            class="material-symbols-outlined absolute left-3.5 top-3.5 text-gray-400 text-xl font-icon">search</span>
+                    </div>
 
-                    <div v-if="filteredMenus.length === 0"
-                        class="py-32 flex flex-col items-center justify-center text-center">
-                        <div class="p-6 bg-gray-50 dark:bg-gray-900 rounded-full mb-4">
-                            <span
-                                class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600">search_off</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button @click="expandAll"
+                            class="flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">Expand
+                            All</button>
+                        <button @click="collapseAll"
+                            class="flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-gray-50 dark:bg-gray-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Collapse</button>
+                    </div>
+                </div>
+
+                <!-- Summary Panel -->
+                <PermissionSummary :stats="permissionStats" />
+            </div>
+
+            <!-- Right Column: Permission Tree -->
+            <div class="flex-1 min-w-0 space-y-6">
+                <!-- Global Actions Bar -->
+                <div
+                    class="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl p-2 pl-6 rounded-3xl border border-white dark:border-gray-700 shadow-sm sticky top-6 z-10">
+                    <div class="flex items-center gap-6">
+                        <h2 class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">
+                            Software Architecture</h2>
+                        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Global
+                                Batch:</span>
+                            <div class="flex gap-1">
+                                <button @click="bulkApply(null)"
+                                    class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest text-gray-500 hover:bg-white dark:hover:bg-gray-800 transition-all">Inherit</button>
+                                <button @click="bulkApply(true)"
+                                    class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all">Grant
+                                    All</button>
+                                <button @click="bulkApply(false)"
+                                    class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all">Revoke
+                                    All</button>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Boundary not found</h3>
-                        <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-sm">No menus or actions matched your
-                            current search filters.
-                            Try using more general terms.</p>
+                    </div>
+
+                    <button @click="resetToDefault"
+                        class="px-4 py-2 text-rose-500 hover:text-rose-600 text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">restart_alt</span>
+                        Revert All Overrides
+                    </button>
+                </div>
+
+                <!-- Tree Rendering -->
+                <div class="space-y-4">
+                    <PermissionTreeNode v-for="menu in filteredMenus" :key="menu.id" :menu="menu"
+                        :overrides="form.overrides" :role-permissions="rolePermissionIds" :expanded-menus="expandedMenus"
+                        :search-query="searchQuery" @toggle="toggleMenu" @bulk-apply="bulkApplyToMenu"
+                        @update="handleUpdate" />
+
+                    <!-- Empty State -->
+                    <div v-if="filteredMenus.length === 0" class="py-20 text-center">
+                        <div
+                            class="w-20 h-20 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span
+                                class="material-symbols-outlined text-gray-300 dark:text-gray-700 text-4xl">search_off</span>
+                        </div>
+                        <h3 class="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest text-sm">No
+                            Results Match</h3>
+                        <p class="text-xs text-gray-400 mt-1">Try a different search term</p>
                     </div>
                 </div>
             </div>
         </div>
-    </DevAdminLayout>
+    </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Head, Link, useForm, router } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 import DevAdminLayout from '@/Layouts/DevAdminLayout.vue'
-import PermissionRow from './Partials/PermissionRow.vue'
 import PermissionTreeNode from './Partials/PermissionTreeNode.vue'
+import PermissionSummary from './Partials/PermissionSummary.vue'
+
+defineOptions({ layout: DevAdminLayout })
 
 const props = defineProps({
     user: Object,
     softwareMenus: Array,
-    rolePermissions: Array, // IDs of allowed actions
-    userPermissions: Object, // action_id -> is_allowed (true/false)
+    rolePermissions: Array,
+    overrides: Array,
+    pageTitle: { type: String, default: 'DevAdmin: Permissions' }
 })
 
 const searchQuery = ref('')
 
-// Initialize form with current overrides
-const form = useForm({
-    overrides: []
-})
-
-onMounted(() => {
-    // Collect action overrides from props
-    const collectedOverrides = []
-    const collectFromMenus = (menus) => {
-        menus.forEach(menu => {
-            menu.actions?.forEach(action => {
-                const override = props.userPermissions[action.id]
-                collectedOverrides.push({
-                    id: action.id,
-                    is_allowed: override !== undefined ? Boolean(override) : null
-                })
+const allMenuIds = []
+const allActionIds = []
+const collectData = (menus) => {
+    menus.forEach(menu => {
+        allMenuIds.push(menu.id)
+        if (menu.grouped_actions) {
+            ['view', 'create', 'edit', 'delete'].forEach(type => {
+                if (menu.grouped_actions[type]) allActionIds.push(menu.grouped_actions[type].id)
             })
-            if (menu.children_recursive) collectFromMenus(menu.children_recursive)
-        })
-    }
-    collectFromMenus(props.softwareMenus)
-    form.overrides = collectedOverrides
+            menu.grouped_actions.others?.forEach(a => allActionIds.push(a.id))
+        }
+        if (menu.children_recursive) collectData(menu.children_recursive)
+    })
+}
+collectData(props.softwareMenus)
+
+// Auto-expand all menus so saved permissions are visible on first load
+const expandedMenus = ref(new Set(allMenuIds))
+
+const form = useForm({
+    overrides: props.overrides.map(override => ({
+        ...override,
+        action_id: Number(override.action_id)
+    }))
 })
 
-const handleTreeNodeBulkApply = ({ menu, val }) => {
-    bulkApplyToMenu(menu, val)
+const rolePermissionIds = computed(() => props.rolePermissions.map(id => Number(id)))
+
+const toggleMenu = (id) => expandedMenus.value.has(id) ? expandedMenus.value.delete(id) : expandedMenus.value.add(id)
+const expandAll = () => allMenuIds.forEach(id => expandedMenus.value.add(id))
+const collapseAll = () => expandedMenus.value.clear()
+
+const handleUpdate = (update) => {
+    const normalizedUpdate = {
+        ...update,
+        action_id: Number(update.action_id)
+    }
+    const index = form.overrides.findIndex(o => o.action_id === normalizedUpdate.action_id)
+    if (update.is_allowed === null) {
+        if (index > -1) form.overrides.splice(index, 1)
+    } else {
+        if (index > -1) {
+            form.overrides[index].is_allowed = normalizedUpdate.is_allowed
+        } else {
+            form.overrides.push(normalizedUpdate)
+        }
+    }
 }
 
 const savePermissions = () => {
     form.post(route('devAdmin.users.permissions.update', props.user.id), {
-        onSuccess: () => {
-            // Optional success logic
-        }
+        preserveScroll: true
     })
 }
 
 const resetToDefault = () => {
-    if (confirm('Are you sure you want to revert all overrides? This user will revert to standard Role-based permissions.')) {
-        form.overrides.forEach(o => o.is_allowed = null)
+    if (confirm('Revert all custom overrides for this user?')) {
+        form.overrides = []
         savePermissions()
     }
 }
 
-const bulkApply = (val) => {
-    form.overrides.forEach(o => o.is_allowed = val)
+const bulkApply = (shouldAllow) => {
+    form.overrides = []
+    if (shouldAllow !== null) {
+        allActionIds.forEach(id => {
+            form.overrides.push({ action_id: id, is_allowed: shouldAllow })
+        })
+    }
 }
 
-const bulkApplyToMenu = (menu, val) => {
-    // Apply to direct actions of the menu
-    menu.actions?.forEach(action => {
-        const override = form.overrides.find(o => o.id === action.id)
-        if (override) override.is_allowed = val
-    })
+const bulkApplyToMenu = ({ menu, val }) => {
+    const getMenuActionIds = (node) => {
+        let ids = []
+        if (node.grouped_actions) {
+            ['view', 'create', 'edit', 'delete'].forEach(type => {
+                if (node.grouped_actions[type]) ids.push(node.grouped_actions[type].id)
+            })
+            node.grouped_actions.others?.forEach(a => ids.push(a.id))
+        }
+        if (node.children_recursive) {
+            node.children_recursive.forEach(child => {
+                ids = [...ids, ...getMenuActionIds(child)]
+            })
+        }
+        return ids
+    }
 
-    // Recursively apply to children menus
-    menu.children_recursive?.forEach(child => {
-        bulkApplyToMenu(child, val)
-    })
+    const menuActionIds = getMenuActionIds(menu)
+    form.overrides = form.overrides.filter(o => !menuActionIds.includes(o.action_id))
+
+    if (val !== null) {
+        menuActionIds.forEach(id => {
+            form.overrides.push({ action_id: id, is_allowed: val })
+        })
+    }
 }
 
-// Filtering
+const permissionStats = computed(() => {
+    let explicitAllow = 0
+    let explicitDeny = 0
+
+    form.overrides.forEach(o => {
+        if (o.is_allowed === true) explicitAllow++
+        else if (o.is_allowed === false) explicitDeny++
+    })
+
+    const allowedSet = new Set(rolePermissionIds.value)
+    form.overrides.forEach(o => {
+        if (o.is_allowed === true) allowedSet.add(o.action_id)
+        else if (o.is_allowed === false) allowedSet.delete(o.action_id)
+    })
+
+    return {
+        allowed: allowedSet.size,
+        restricted: allActionIds.length - allowedSet.size,
+        overrides: form.overrides.length,
+        explicitAllow,
+        explicitDeny
+    }
+})
+
 const filteredMenus = computed(() => {
     if (!searchQuery.value) return props.softwareMenus
-    const query = searchQuery.value.toLowerCase()
+    const q = searchQuery.value.toLowerCase()
 
-    return props.softwareMenus.filter(menu => {
-        const menuMatch = menu.name.toLowerCase().includes(query)
-        const actionMatch = menu.actions?.some(a => a.action.toLowerCase().includes(query))
-        const childMatch = menu.children_recursive?.some(c =>
-            c.name.toLowerCase().includes(query) ||
-            c.actions?.some(a => a.action.toLowerCase().includes(query))
+    const checkNode = (node) => {
+        const matchesName = node.name.toLowerCase().includes(q)
+        const matchesAction = node.grouped_actions && (
+            ['view', 'create', 'edit', 'delete'].some(type => node.grouped_actions[type]?.action.toLowerCase().includes(q)) ||
+            node.grouped_actions.others?.some(a => a.action.toLowerCase().includes(q))
         )
-        return menuMatch || actionMatch || childMatch
-    })
+        const hasMatchingChild = node.children_recursive?.some(child => checkNode(child))
+        return matchesName || matchesAction || hasMatchingChild
+    }
+
+    return props.softwareMenus.filter(m => checkNode(m))
 })
 </script>
 

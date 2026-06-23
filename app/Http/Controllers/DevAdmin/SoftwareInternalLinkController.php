@@ -9,6 +9,7 @@ use App\Models\SoftwareMenuAction;
 use App\Services\DevAdminMenuService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SoftwareInternalLinkController extends Controller
@@ -140,7 +141,8 @@ class SoftwareInternalLinkController extends Controller
 
         // All roles and their permission status for this action
         $roles = \App\Models\Role::all()->map(function ($role) use ($internalLink) {
-            $role->is_allowed = \App\Models\RolePermission::where('role_id', $role->id)
+            $role->is_allowed = DB::table('role_permissions')
+                ->where('role_id', $role->id)
                 ->where('software_menu_action_id', $internalLink->id)
                 ->where('is_allowed', true)
                 ->exists();
@@ -167,7 +169,7 @@ class SoftwareInternalLinkController extends Controller
         ]);
     }
 
-    public function updatePermissions(Request $request, SoftwareMenuAction $internalLink)
+    public function updatePermissions(Request $request, SoftwareMenuAction $internalLink, \App\Services\PermissionService $permissionService)
     {
         $request->validate([
             'roles' => 'array', // [role_id => is_allowed]
@@ -177,10 +179,13 @@ class SoftwareInternalLinkController extends Controller
         // 1. Update Role Permissions
         if ($request->has('roles')) {
             foreach ($request->roles as $roleId => $isAllowed) {
-                \App\Models\RolePermission::updateOrCreate(
+                $permission = \App\Models\RolePermission::withTrashed()->updateOrCreate(
                     ['role_id' => $roleId, 'software_menu_action_id' => $internalLink->id],
                     ['is_allowed' => $isAllowed]
                 );
+                if ($permission->trashed()) {
+                    $permission->restore();
+                }
 
                 // Clear cache for all users of this role
                 \App\Models\User::where('role_id', $roleId)->chunk(100, function ($users) {
@@ -193,22 +198,15 @@ class SoftwareInternalLinkController extends Controller
 
         // 2. Update User Overrides
         if ($request->has('users')) {
-            // Remove existing overrides for these users for this action
-            $userIds = collect($request->users)->pluck('user_id')->toArray();
-            \App\Models\UserPermission::where('software_menu_action_id', $internalLink->id)
-                ->whereIn('user_id', $userIds)
-                ->delete();
-
-            // Add new ones
             foreach ($request->users as $userOverride) {
-                if ($userOverride['is_allowed'] !== null) {
-                    \App\Models\UserPermission::create([
-                        'user_id' => $userOverride['user_id'],
-                        'software_menu_action_id' => $internalLink->id,
-                        'is_allowed' => $userOverride['is_allowed'],
+                $user = \App\Models\User::find($userOverride['user_id']);
+                if ($user) {
+                    $permissionService->updateUserPermissions($user, [
+                        [
+                            'action_id' => $internalLink->id,
+                            'is_allowed' => $userOverride['is_allowed']
+                        ]
                     ]);
-
-                    \Illuminate\Support\Facades\Cache::forget("perm_{$userOverride['user_id']}");
                 }
             }
         }

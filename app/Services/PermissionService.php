@@ -76,4 +76,135 @@ class PermissionService
 
         return in_array($action->id, $allowedIds);
     }
+
+    /**
+     * Update user specific permissions (overrides)
+     */
+    public function updateUserPermissions($user, array $overrides): void
+    {
+        DB::transaction(function () use ($user, $overrides) {
+            // Deduplicate overrides by action_id to prevent integrity violations
+            $deduplicated = [];
+            foreach ($overrides as $override) {
+                $actionId = $override['action_id'] ?? $override['id'] ?? null;
+                if ($actionId) {
+                    $deduplicated[$actionId] = $override['is_allowed'];
+                }
+            }
+
+            // Remove all existing overrides
+            DB::table('user_permissions')->where('user_id', $user->id)->delete();
+
+            // Insert new ones
+            foreach ($deduplicated as $actionId => $isAllowed) {
+                // null means Inherit (handled by role), so we don't save a record
+                if ($isAllowed === null) continue;
+
+                DB::table('user_permissions')->insert([
+                    'user_id' => $user->id,
+                    'software_menu_action_id' => $actionId,
+                    'is_allowed' => $isAllowed,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        // Invalidate cache
+        Cache::forget("perm_{$user->id}");
+        if (class_exists(\App\Services\MenuService::class)) {
+            app(\App\Services\MenuService::class)->clearCache($user);
+        }
+    }
+
+    /**
+    * Get structured permission tree with grouped actions
+    */
+    public function getPermissionTree()
+    {
+        return \App\Models\SoftwareMenu::where('is_active', true)
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->with(['actions', 'childrenRecursive'])
+            ->get()
+            ->map(function ($menu) {
+                return $this->processMenuNode($menu);
+            });
+    }
+
+    /**
+     * Recursively process menu nodes to group actions
+     */
+    protected function processMenuNode($menu)
+    {
+        // Recursively process children first
+        if ($menu->childrenRecursive) {
+            $menu->childrenRecursive->each(function ($child) {
+                $this->processMenuNode($child);
+            });
+        }
+
+        // Group regular actions
+        $standardActions = \App\Models\SoftwareMenuAction::ACTIONS;
+        $grouped = [
+            'view'   => null,
+            'create' => null,
+            'edit'   => null,
+            'delete' => null,
+            'others' => []
+        ];
+
+        foreach ($menu->actions as $action) {
+            $actionLabel = strtolower($action->action);
+            if (in_array($actionLabel, $standardActions)) {
+                $grouped[$actionLabel] = $action;
+            } else {
+                $grouped['others'][] = $action;
+            }
+        }
+
+        $menu->grouped_actions = $grouped;
+        
+        return $menu;
+    }
+
+    /**
+     * Update role permissions
+     */
+    public function updateRolePermissions($role, array $actionIds): void
+    {
+        DB::transaction(function () use ($role, $actionIds) {
+            // Deduplicate
+            $actionIds = array_unique(array_map('intval', $actionIds));
+
+            // Force-delete all (including soft-deleted) records for this role
+            // This ensures we start clean, respecting the softDeletes() on the model
+            \App\Models\RolePermission::withTrashed()
+                ->where('role_id', $role->id)
+                ->forceDelete();
+
+            // Re-insert the allowed actions
+            $now = now();
+            $rows = [];
+            foreach ($actionIds as $actionId) {
+                $rows[] = [
+                    'role_id' => $role->id,
+                    'software_menu_action_id' => $actionId,
+                    'is_allowed' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+            if (!empty($rows)) {
+                DB::table('role_permissions')->insert($rows);
+            }
+        });
+
+        // Invalidate cache for all users of this role
+        \App\Models\User::where('role_id', $role->id)->chunk(100, function ($users) {
+            foreach ($users as $user) {
+                Cache::forget("perm_{$user->id}");
+            }
+        });
+    }
 }

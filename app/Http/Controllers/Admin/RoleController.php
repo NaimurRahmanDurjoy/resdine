@@ -9,6 +9,7 @@ use App\Models\SoftwareMenu;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class RoleController extends Controller
@@ -91,16 +92,14 @@ class RoleController extends Controller
         return redirect()->route('admin.settings.roles.index')->with('success', 'Role deleted successfully.');
     }
 
-    public function permissions(Role $role)
+    public function permissions(Role $role, \App\Services\PermissionService $permissionService)
     {
-        // Get all software menus with their actions and recursive children
-        $softwareMenus = SoftwareMenu::whereNull('parent_id')
-            ->with(['childrenRecursive.actions', 'actions'])
-            ->orderBy('order')
-            ->get();
+        // Get structured software menus
+        $softwareMenus = $permissionService->getPermissionTree();
 
         // Get currently allowed action IDs for this role
-        $rolePermissions = RolePermission::where('role_id', $role->id)
+        $rolePermissions = DB::table('role_permissions')
+            ->where('role_id', $role->id)
             ->where('is_allowed', true)
             ->pluck('software_menu_action_id')
             ->toArray();
@@ -113,31 +112,14 @@ class RoleController extends Controller
         ]);
     }
 
-    public function updatePermissions(Request $request, Role $role)
+    public function updatePermissions(Request $request, Role $role, \App\Services\PermissionService $permissionService)
     {
         $request->validate([
             'allowed_action_ids' => 'present|array',
             'allowed_action_ids.*' => 'exists:software_menu_actions,id',
         ]);
 
-        // Remove all current permissions for this role
-        RolePermission::where('role_id', $role->id)->delete();
-
-        // Add new permissions
-        foreach ($request->allowed_action_ids as $actionId) {
-            RolePermission::create([
-                'role_id' => $role->id,
-                'software_menu_action_id' => $actionId,
-                'is_allowed' => true,
-            ]);
-        }
-
-        // Clear permission cache for all users of this role
-        User::where('role_id', $role->id)->chunk(100, function ($users) {
-            foreach ($users as $user) {
-                Cache::forget("perm_{$user->id}");
-            }
-        });
+        $permissionService->updateRolePermissions($role, $request->allowed_action_ids);
 
         return redirect()->back()->with('success', 'Role permissions updated successfully.');
     }

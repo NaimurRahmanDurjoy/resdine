@@ -1,67 +1,98 @@
 <template>
-    <!-- Parent Menu Row -->
-    <tr :class="[
-            level === 0 ? 'bg-gray-50/50 dark:bg-gray-900/20' : 'bg-gray-50/20 dark:bg-gray-900/10',
-            level > 0 ? 'border-l-4 border-gray-100 dark:border-gray-800' : ''
-        ]" class="group cursor-pointer" @click="emitToggle(menu.id)">
-        <td class="py-3 px-2" :style="{ paddingLeft: `${level * 1.5 + 0.5}rem` }">
-            <div class="flex items-center space-x-3">
-                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-lg font-icon transition-transform" 
-                    :class="{ 'rotate-90 text-blue-500': isExpanded(menu.id) }">chevron_right</span>
-                <span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-xl font-icon">{{ menu.icon || (level === 0 ? 'folder' : 'subdirectory_arrow_right') }}</span>
-                <span class="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider" :class="{'text-xs font-bold': level > 0}">{{ menu.name }}</span>
-            </div>
-        </td>
-        <td class="py-1 px-4 text-right">
-            <div class="inline-flex gap-1 items-center bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" @click.stop>
-                <span class="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mr-1 pl-1 whitespace-nowrap">Batch Actions:</span>
-                <button @click="emitBulkApply(menu, true)" type="button" title="Grant All under this Menu" class="p-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded text-emerald-500 material-symbols-outlined text-sm">check_circle</button>
-                <button @click="emitBulkApply(menu, false)" type="button" title="Revoke All under this Menu" class="p-1 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded text-rose-500 material-symbols-outlined text-sm">cancel</button>
-            </div>
-        </td>
-    </tr>
+    <div class="role-permission-node-wrapper" :class="{ 'mt-4': level === 0 }">
+        <!-- Node Row -->
+        <div 
+            class="group flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border border-transparent shadow-sm"
+            :class="[
+                level === 0 ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-indigo-500/5' : 'hover:bg-gray-50/80 dark:hover:bg-gray-900/30',
+                isExpanded ? 'mb-2' : ''
+            ]"
+            @click="toggle"
+        >
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+                <!-- Indent -->
+                <div v-for="i in level" :key="i" class="w-6 h-px bg-gray-200 dark:bg-gray-800 ml-2 first:ml-0"></div>
 
-    <!-- Actions & Children -->
-    <template v-if="isExpanded(menu.id)">
-        <template v-for="action in menu.actions" :key="action.id">
-            <PermissionRow 
-                :action="action" 
-                :form="form" 
-                :indent="level > 0"
-            />
-        </template>
-        <template v-for="child in menu.children_recursive" :key="child.id">
+                <!-- Icons & Label -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <span 
+                        class="material-symbols-outlined text-gray-400 font-icon transition-transform duration-300"
+                        :class="{ 'rotate-90 text-indigo-500': isExpanded }"
+                    >chevron_right</span>
+                    
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div 
+                            class="w-9 h-9 rounded-xl flex items-center justify-center border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 group-hover:scale-110 transition-transform"
+                            :class="level === 0 ? 'bg-indigo-50/50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400' : ''"
+                        >
+                            <span class="material-symbols-outlined text-xl font-icon">{{ menu.icon || (level === 0 ? 'shield_person' : 'folder') }}</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span 
+                                class="text-sm font-black truncate tracking-wider"
+                                :class="level === 0 ? 'text-gray-800 dark:text-gray-100 uppercase' : 'text-gray-600 dark:text-gray-300'"
+                            >
+                                {{ menu.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Area -->
+            <div class="flex items-center gap-6" @click.stop>
+                <!-- Grouped Actions -->
+                <RoleActionGroup 
+                    v-if="menu.grouped_actions && (menu.grouped_actions.view || menu.grouped_actions.create || menu.grouped_actions.edit || menu.grouped_actions.delete || menu.grouped_actions.others.length)"
+                    :actions="menu.grouped_actions"
+                    :allowed-action-ids="allowedActionIds"
+                    @update="$emit('update', $event)"
+                />
+
+                <!-- Bulk Controls -->
+                <div class="flex items-center bg-gray-100/50 dark:bg-gray-900/50 p-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button @click="$emit('bulk-apply', { menu, val: true })" title="Allow All in this branch" class="p-1.5 hover:text-emerald-500 material-symbols-outlined text-sm font-icon">check_circle</button>
+                    <button @click="$emit('bulk-apply', { menu, val: false })" title="Deny All in this branch" class="p-1.5 hover:text-rose-500 material-symbols-outlined text-sm font-icon">cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expansion Area -->
+        <div v-show="isExpanded" class="animate-in slide-in-from-top-2 fade-in duration-300">
             <PermissionTreeNode 
+                v-for="child in menu.children_recursive" 
+                :key="child.id"
                 :menu="child" 
-                :form="form" 
-                :expandedMenus="expandedMenus"
-                :searchQuery="searchQuery"
-                :level="level + 1"
-                @toggle="emitToggle"
-                @bulk-apply="emitBulkApply"
+                :allowed-action-ids="allowedActionIds"
+                :expanded-menus="expandedMenus" 
+                :search-query="searchQuery" 
+                :level="level + 1" 
+                @toggle="$emit('toggle', $event)"
+                @bulk-apply="$emit('bulk-apply', $event)" 
+                @update="$emit('update', $event)" 
             />
-        </template>
-    </template>
+        </div>
+    </div>
 </template>
 
 <script setup>
-import PermissionRow from './PermissionRow.vue'
+import { computed } from 'vue'
+import RoleActionGroup from './RoleActionGroup.vue'
 import PermissionTreeNode from './PermissionTreeNode.vue'
 
 const props = defineProps({
     menu: Object,
-    form: Object,
+    allowedActionIds: Array,
     expandedMenus: Object, // Set
     searchQuery: String,
     level: { type: Number, default: 0 }
 })
 
-const emit = defineEmits(['toggle', 'bulk-apply'])
+const emit = defineEmits(['toggle', 'bulk-apply', 'update'])
 
-const isExpanded = (id) => props.expandedMenus.has(id) || !!props.searchQuery
+const isExpanded = computed(() => props.expandedMenus.has(props.menu.id) || !!props.searchQuery)
 
-const emitToggle = (id) => emit('toggle', id)
-const emitBulkApply = (menu, val) => emit('bulk-apply', menu, val)
+const toggle = () => emit('toggle', props.menu.id)
 </script>
 
 <style scoped>
