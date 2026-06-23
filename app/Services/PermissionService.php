@@ -83,31 +83,17 @@ class PermissionService
     public function updateUserPermissions($user, array $overrides): void
     {
         DB::transaction(function () use ($user, $overrides) {
-            // Deduplicate overrides by action_id to prevent integrity violations
-            $deduplicated = [];
+            // Deduplicate overrides by action_id
+            $syncData = [];
             foreach ($overrides as $override) {
                 $actionId = $override['action_id'] ?? $override['id'] ?? null;
-                if ($actionId) {
-                    $deduplicated[$actionId] = $override['is_allowed'];
+                if ($actionId && $override['is_allowed'] !== null) {
+                    $syncData[$actionId] = ['is_allowed' => $override['is_allowed']];
                 }
             }
 
-            // Remove all existing overrides
-            DB::table('user_permissions')->where('user_id', $user->id)->delete();
-
-            // Insert new ones
-            foreach ($deduplicated as $actionId => $isAllowed) {
-                // null means Inherit (handled by role), so we don't save a record
-                if ($isAllowed === null) continue;
-
-                DB::table('user_permissions')->insert([
-                    'user_id' => $user->id,
-                    'software_menu_action_id' => $actionId,
-                    'is_allowed' => $isAllowed,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+            // Delta Sync: Only add/update/delete what's necessary
+            $user->permissions()->sync($syncData);
         });
 
         // Invalidate cache
@@ -174,30 +160,16 @@ class PermissionService
     public function updateRolePermissions($role, array $actionIds): void
     {
         DB::transaction(function () use ($role, $actionIds) {
-            // Deduplicate
+            // Deduplicate and format for sync
             $actionIds = array_unique(array_map('intval', $actionIds));
-
-            // Force-delete all (including soft-deleted) records for this role
-            // This ensures we start clean, respecting the softDeletes() on the model
-            \App\Models\RolePermission::withTrashed()
-                ->where('role_id', $role->id)
-                ->forceDelete();
-
-            // Re-insert the allowed actions
-            $now = now();
-            $rows = [];
-            foreach ($actionIds as $actionId) {
-                $rows[] = [
-                    'role_id' => $role->id,
-                    'software_menu_action_id' => $actionId,
-                    'is_allowed' => true,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
+            
+            $syncData = [];
+            foreach ($actionIds as $id) {
+                $syncData[$id] = ['is_allowed' => true];
             }
-            if (!empty($rows)) {
-                DB::table('role_permissions')->insert($rows);
-            }
+
+            // Delta Sync: Only adds/removes differences
+            $role->permissions()->sync($syncData);
         });
 
         // Invalidate cache for all users of this role

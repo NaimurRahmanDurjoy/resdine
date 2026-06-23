@@ -13,4 +13,14 @@ class Role extends BaseModel
     {
         return $this->hasMany(RolePermission::class);
     }
+
+    /**
+     * Relationship to permissions (actions)
+     */
+    public function permissions()
+    {
+        return $this->belongsToMany(SoftwareMenuAction::class, 'role_permissions', 'role_id', 'software_menu_action_id')
+            ->withPivot('is_allowed')
+            ->withTimestamps();
+    }
 }

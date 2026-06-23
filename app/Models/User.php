@@ -70,6 +70,16 @@ class User extends Authenticatable
         return $this->hasMany(UserPermission::class);
     }
 
+    /**
+     * Relationship to permissions overrides (actions)
+     */
+    public function permissions()
+    {
+        return $this->belongsToMany(SoftwareMenuAction::class, 'user_permissions', 'user_id', 'software_menu_action_id')
+            ->withPivot('is_allowed')
+            ->withTimestamps();
+    }
+
     // Get menus the user has access to
     public function softwareMenus()
     {
