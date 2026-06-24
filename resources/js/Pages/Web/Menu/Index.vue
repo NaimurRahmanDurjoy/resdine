@@ -2,9 +2,9 @@
   <WebLayout>
     <template #nav-actions>
       <button @click="isCartOpen = true"
-        class="relative bg-slate-900 text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 group">
-        <span class="material-symbols-outlined text-[20px] group-hover:animate-bounce">shopping_basket</span>
-        <span class="tracking-wide">Cart</span>
+        class="relative bg-slate-900 text-white px-3 md:px-5 py-2.5 rounded-full font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">shopping_basket</span>
+        <span class="tracking-wide hidden md:inline">Cart</span>
 
         <span v-if="cartTotalItems > 0"
           class="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-black shadow-sm ring-2 ring-white">
@@ -14,8 +14,7 @@
     </template>
 
     <!-- Hero Section -->
-    <div class="relative bg-slate-900 overflow-hidden min-h-[40vh] flex items-center">
-      <!-- Decorative background elements -->
+    <div class="relative bg-slate-900 overflow-hidden min-h-[32vh] md:min-h-[40vh] flex items-center">
       <div class="absolute inset-0 z-0 opacity-20">
         <div
           class="absolute -top-24 -right-24 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob">
@@ -25,46 +24,47 @@
         </div>
       </div>
 
-      <div class="max-w-7xl mx-auto px-4 relative z-10 w-full py-16 text-center">
-        <span class="text-amber-500 font-bold tracking-widest uppercase text-sm mb-4 block">Welcome to ResDine</span>
-        <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-6 tracking-tighter">
+      <div class="max-w-7xl mx-auto px-4 relative z-10 w-full py-10 md:py-16 text-center">
+        <span class="text-amber-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-3 md:mb-4 block">Welcome to ResDine</span>
+        <h1 class="text-3xl sm:text-4xl md:text-7xl font-black text-white leading-tight mb-4 md:mb-6 tracking-tighter">
           Taste the <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Extraordinary</span>
         </h1>
-        <p class="text-slate-300 max-w-2xl mx-auto text-lg md:text-xl font-light mb-8">
-          Order for dine-in or takeaway right from your phone. Freshly prepared, delivered to your table.
+        <p class="text-slate-300 max-w-2xl mx-auto text-sm md:text-xl font-light mb-2">
+          Order for dine-in or takeaway right from your phone.
         </p>
       </div>
     </div>
 
-    <!-- Category Navigation Stacky -->
+    <!-- Category Navigation -->
     <div
-      class="sticky top-16 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all py-3">
-      <div class="max-w-7xl mx-auto px-4 relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-1">
+      class="sticky top-14 md:top-16 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all py-2.5 md:py-3">
+      <div class="max-w-7xl mx-auto px-2 md:px-4 relative">
+        <!-- Arrows: desktop only, mobile relies on natural swipe -->
+        <div class="hidden md:flex absolute inset-y-0 left-0 items-center pl-1">
           <button type="button" @click="scrollCategory(-280)"
             class="p-2 rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 hover:shadow-md transition focus:outline-none">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
         </div>
 
-        <div ref="categoryNav" class="overflow-x-auto no-scrollbar scroll-smooth px-6" @wheel.prevent="onCategoryWheel"
+        <div ref="categoryNav" class="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-6" @wheel.prevent="onCategoryWheel"
           tabindex="0" role="group" aria-label="Category navigation">
           <div class="flex space-x-2 w-max py-1">
             <button @click="activeCategory = null"
-              :class="[activeCategory === null ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
-              class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
+              :class="[activeCategory === null ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 active:bg-slate-200']"
+              class="px-5 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm transition-all focus:outline-none whitespace-nowrap">
               All Items
             </button>
             <button v-for="cat in categories" :key="cat.id" @click="activeCategory = cat.id"
-              :class="[activeCategory === cat.id ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200']"
-              class="px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:outline-none whitespace-nowrap">
+              :class="[activeCategory === cat.id ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 active:bg-slate-200']"
+              class="px-5 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm transition-all focus:outline-none whitespace-nowrap">
               {{ cat.name }}
             </button>
           </div>
         </div>
 
-        <div class="absolute inset-y-0 right-0 flex items-center pr-1">
+        <div class="hidden md:flex absolute inset-y-0 right-0 items-center pr-1">
           <button type="button" @click="scrollCategory(280)"
             class="p-2 rounded-full bg-white shadow-sm text-slate-600 hover:text-slate-900 hover:shadow-md transition focus:outline-none">
             <span class="material-symbols-outlined">chevron_right</span>
@@ -74,210 +74,226 @@
     </div>
 
     <!-- Menu Grid -->
-    <div class="max-w-7xl mx-auto px-4 py-12">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+    <div class="max-w-7xl mx-auto px-3 md:px-4 py-6 md:py-12">
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8">
 
         <div v-for="item in filteredItems" :key="item.id"
-          class="group bg-white rounded-[2rem] shadow-sm hover:shadow-2xl border border-slate-100/50 overflow-hidden transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
-          <!-- Image Container -->
-          <div class="relative h-56 bg-slate-100 overflow-hidden rounded-t-[2rem]">
+          class="group bg-white rounded-2xl md:rounded-[2rem] shadow-sm active:shadow-md md:hover:shadow-2xl border border-slate-100/50 overflow-hidden transition-all duration-300 md:transform md:hover:-translate-y-2 flex flex-col">
+          <!-- Image Container: shorter on mobile to reduce scroll -->
+          <div class="relative h-28 md:h-56 bg-slate-100 overflow-hidden rounded-t-2xl md:rounded-t-[2rem]">
             <img v-if="item.image_url" :src="item.image_url"
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              class="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-110" />
             <div v-else
               class="w-full h-full flex items-center justify-center text-slate-300 bg-gradient-to-br from-slate-100 to-slate-200">
-              <span class="material-symbols-outlined text-7xl opacity-50">fastfood</span>
+              <span class="material-symbols-outlined text-4xl md:text-7xl opacity-50">fastfood</span>
             </div>
 
-            <!-- Price floating badge -->
             <div
-              class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-lg font-black text-slate-900">
+              class="absolute top-2 right-2 md:top-4 md:right-4 bg-white/90 backdrop-blur-md px-2.5 md:px-4 py-1 md:py-1.5 rounded-full shadow-lg font-black text-slate-900 text-xs md:text-base">
               {{ currency() }}{{ item.price }}
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="p-6 flex-1 flex flex-col justify-between">
+          <!-- Content: tighter padding on mobile -->
+          <div class="p-3 md:p-6 flex-1 flex flex-col justify-between">
             <div>
               <h3
-                class="font-black text-xl text-slate-900 mb-2 leading-tight group-hover:text-amber-600 transition-colors">
+                class="font-black text-sm md:text-xl text-slate-900 mb-1 md:mb-2 leading-tight line-clamp-1 md:group-hover:text-amber-600 transition-colors">
                 {{ item.name }}</h3>
-              <p class="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-4">
+              <p class="hidden md:block text-slate-500 text-sm line-clamp-2 leading-relaxed mb-4">
                 {{ item.description || 'Deliciously prepared using the freshest ingredients.' }}</p>
             </div>
 
             <button @click="addToCart(item)"
-              class="w-full bg-slate-50 hover:bg-amber-500 text-slate-900 hover:text-white border border-slate-200 hover:border-amber-500 py-3 rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-2 group/btn">
-              <span
-                class="material-symbols-outlined text-xl transition-transform group-hover/btn:scale-125">add_shopping_cart</span>
-              Add to Order
+              class="w-full bg-slate-50 active:bg-amber-500 md:hover:bg-amber-500 text-slate-900 active:text-white md:hover:text-white border border-slate-200 active:border-amber-500 md:hover:border-amber-500 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-base transition-all duration-300 flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-base md:text-xl">add_shopping_cart</span>
+              <span class="hidden sm:inline">Add to Order</span>
+              <span class="sm:hidden">Add</span>
             </button>
           </div>
         </div>
 
       </div>
 
-      <!-- Empty State -->
-      <div v-if="filteredItems.length === 0" class="py-20 text-center">
-        <span class="material-symbols-outlined text-8xl text-slate-200 mb-4 inline-block">search_off</span>
-        <h2 class="text-2xl font-bold text-slate-700">No items found</h2>
-        <p class="text-slate-500 mt-2">Looks like this category is empty right now.</p>
+      <div v-if="filteredItems.length === 0" class="py-16 md:py-20 text-center">
+        <span class="material-symbols-outlined text-6xl md:text-8xl text-slate-200 mb-4 inline-block">search_off</span>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-700">No items found</h2>
+        <p class="text-slate-500 mt-2 text-sm md:text-base">Looks like this category is empty right now.</p>
       </div>
     </div>
+
+    <!-- Sticky bottom "View Cart" bar — mobile only, hidden once drawer is open -->
+    <Transition name="slide-up">
+      <button v-if="cartTotalItems > 0 && !isCartOpen" @click="isCartOpen = true"
+        class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900 text-white px-4 py-4 flex items-center justify-between shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.3)]"
+        style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+        <span class="flex items-center gap-2 font-bold text-sm">
+          <span class="bg-amber-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black">{{ cartTotalItems }}</span>
+          View Cart
+        </span>
+        <span class="font-black">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
+      </button>
+    </Transition>
 
     <!-- Sliding Cart Overlay -->
     <div v-if="isCartOpen" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog"
       aria-modal="true">
-      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="isCartOpen = false">
-      </div>
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="closeCart"></div>
 
-      <div class="fixed inset-y-0 right-0 max-w-full flex">
-        <div class="w-screen max-w-md transform transition-transform duration-500 ease-in-out shadow-2xl">
-          <div class="h-full flex flex-col bg-white shadow-xl rounded-l-3xl overflow-hidden">
+      <div class="fixed inset-y-0 right-0 w-full md:max-w-md flex">
+        <div class="w-full transform transition-transform duration-500 ease-in-out shadow-2xl">
+          <div class="h-full flex flex-col bg-white shadow-xl md:rounded-l-3xl overflow-hidden">
 
-            <!-- Cart Header -->
+            <!-- Header -->
             <div
-              class="px-6 py-5 bg-white border-b border-slate-100 flex items-center justify-between z-10 sticky top-0">
-              <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2">
-                <span class="material-symbols-outlined text-amber-500">shopping_bag</span>
-                Your Order
-              </h2>
-              <button @click="isCartOpen = false"
+              class="px-4 md:px-6 py-4 md:py-5 bg-white border-b border-slate-100 flex items-center justify-between z-10 sticky top-0">
+              <div class="flex items-center gap-2">
+                <button v-if="checkoutStep === 2" @click="checkoutStep = 1"
+                  class="text-slate-400 hover:text-slate-800 p-1 -ml-1 rounded-full transition">
+                  <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-amber-500">{{ checkoutStep === 1 ? 'shopping_bag' : 'receipt_long' }}</span>
+                  {{ checkoutStep === 1 ? 'Your Order' : 'Checkout' }}
+                </h2>
+              </div>
+              <button @click="closeCart"
                 class="text-slate-400 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-all focus:outline-none">
                 <span class="material-symbols-outlined">close</span>
               </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-50 relative no-scrollbar">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 relative no-scrollbar">
               <div v-if="cart.length === 0"
                 class="h-full flex flex-col items-center justify-center text-center opacity-50 space-y-4">
                 <span class="material-symbols-outlined text-7xl block">lunch_dining</span>
                 <p class="text-lg font-bold">Your cart is empty and hungry.</p>
               </div>
 
-              <div v-else class="space-y-4">
-                <!-- Order items -->
+              <!-- STEP 1: Review items -->
+              <div v-else-if="checkoutStep === 1" class="space-y-3">
                 <div v-for="(item, index) in cart" :key="index"
-                  class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 animate-fade-in-up">
+                  class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 md:gap-4 animate-fade-in-up">
                   <img v-if="item.product.image_url" :src="item.product.image_url"
-                    class="w-16 h-16 rounded-xl object-cover shadow-inner" />
-                  <div v-else class="w-16 h-16 rounded-xl bg-slate-100 flex flex-shrink-0 items-center justify-center">
+                    class="w-14 h-14 md:w-16 md:h-16 rounded-xl object-cover shadow-inner flex-shrink-0" />
+                  <div v-else class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-slate-100 flex flex-shrink-0 items-center justify-center">
                     <span class="material-symbols-outlined text-slate-300">restaurant</span>
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-slate-900 truncate">
+                    <h4 class="font-bold text-sm md:text-base text-slate-900 truncate">
                       {{ item.product.name }}
                       <span v-if="item.variant_name"
                         class="text-xs text-slate-500 font-normal ml-1 border-l pl-1 border-slate-300">{{
                           item.variant_name
                         }}</span>
                     </h4>
-                    <div class="text-amber-600 font-black">{{ currency() }}{{ (item.price * item.quantity).toFixed(2) }}
+                    <div class="text-amber-600 font-black text-sm md:text-base">{{ currency() }}{{ (item.price *
+                      item.quantity).toFixed(2)
+                    }}
                     </div>
                   </div>
 
                   <div
-                    class="flex flex-col items-center bg-slate-50 rounded-xl p-1 border border-slate-100 shadow-inner">
+                    class="flex flex-col items-center bg-slate-50 rounded-xl p-1 border border-slate-100 shadow-inner shrink-0">
                     <button @click="updateQuantity(index, 1)"
-                      class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-900 transition"><span
+                      class="w-7 h-7 md:w-6 md:h-6 flex items-center justify-center text-slate-500 active:text-slate-900 transition"><span
                         class="material-symbols-outlined text-[16px]">add</span></button>
                     <span class="font-bold text-sm my-1">{{ item.quantity }}</span>
                     <button @click="updateQuantity(index, -1)"
-                      class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-900 transition"><span
+                      class="w-7 h-7 md:w-6 md:h-6 flex items-center justify-center text-slate-500 active:text-slate-900 transition"><span
                         class="material-symbols-outlined text-[16px]">remove</span></button>
                   </div>
                 </div>
+              </div>
 
-                <!-- Checkout Form Inline -->
-                <div class="mt-8 pt-6 border-t border-slate-200">
-                  <h3 class="font-black text-lg mb-4 text-slate-800">Checkout Details</h3>
-                  <div class="space-y-4">
+              <!-- STEP 2: Checkout form (separate screen on mobile, less scroll-and-lose-cart-context) -->
+              <div v-else class="space-y-4">
+                <div class="flex p-1 bg-slate-200/50 rounded-xl">
+                  <button @click="form.order_type = 1; form.payment_method = null; form.table_number = ''"
+                    :class="form.order_type === 1 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 active:text-slate-800'"
+                    class="flex-1 py-2.5 text-xs md:text-sm font-bold rounded-lg transition-all">Dine In</button>
+                  <button @click="form.order_type = 2"
+                    :class="form.order_type === 2 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 active:text-slate-800'"
+                    class="flex-1 py-2.5 text-xs md:text-sm font-bold rounded-lg transition-all">Takeaway</button>
+                  <button @click="form.order_type = 3"
+                    :class="form.order_type === 3 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 active:text-slate-800'"
+                    class="flex-1 py-2.5 text-xs md:text-sm font-bold rounded-lg transition-all">Delivery</button>
+                </div>
 
-                    <div class="flex p-1 bg-slate-200/50 rounded-xl">
-                      <button @click="form.order_type = 1; form.payment_method = null; form.table_number = ''"
-                        :class="form.order_type === 1 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
-                        class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Dine In</button>
-                      <button @click="form.order_type = 2"
-                        :class="form.order_type === 2 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
-                        class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Takeaway</button>
-                      <button @click="form.order_type = 3"
-                        :class="form.order_type === 3 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-800'"
-                        class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">Delivery</button>
-                    </div>
+                <div v-if="form.order_type === 1">
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Table
+                    Number</label>
+                  <input v-model="form.table_number" type="text" placeholder="e.g. 12" inputmode="numeric"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                </div>
 
-                    <div v-if="form.order_type === 1">
-                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Table
-                        Number</label>
-                      <input v-model="form.table_number" type="text" placeholder="e.g. 12"
-                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
-                    </div>
-
-                    <div v-if="form.order_type === 3" class="space-y-3">
-                      <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
-                          Address</label>
-                        <textarea v-model="form.delivery_address"
-                          placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
-                          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm resize-none"></textarea>
-                      </div>
-                      <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
-                          Instructions (Optional)</label>
-                        <input v-model="form.delivery_instructions" type="text"
-                          placeholder="e.g. Leave at door, call before arriving"
-                          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
-                      </div>
-                    </div>
-
-                    <div v-if="form.order_type === 2 || form.order_type === 3">
-                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Method
-                        (Instant Pay)</label>
-                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <button @click="form.payment_method = 1" type="button"
-                          :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
-                          <span class="material-symbols-outlined text-sm">payments</span> Cash
-                        </button>
-                        <button @click="form.payment_method = 3" type="button"
-                          :class="form.payment_method === 3 ? 'bg-pink-600 text-white border-pink-600' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
-                          <span class="material-symbols-outlined text-sm">smartphone</span> bKash
-                        </button>
-                        <button @click="form.payment_method = 2" type="button"
-                          :class="form.payment_method === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
-                          <span class="material-symbols-outlined text-sm">credit_card</span> Stripe
-                        </button>
-                        <button @click="form.payment_method = 4" type="button"
-                          :class="form.payment_method === 4 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'"
-                          class="flex items-center justify-center gap-1.5 py-3 rounded-xl border font-bold text-[11px] transition-all shadow-sm">
-                          <span class="material-symbols-outlined text-sm">account_balance_wallet</span> SSLCommerz
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your
-                        Name</label>
-                      <input v-model="form.customer_name" type="text" placeholder="John Doe"
-                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
-                    </div>
-
-                    <div>
-                      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Phone
-                        Number</label>
-                      <input v-model="form.customer_phone" type="text" placeholder="Phone for updates"
-                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
-                    </div>
-
+                <div v-if="form.order_type === 3" class="space-y-3">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
+                      Address</label>
+                    <textarea v-model="form.delivery_address"
+                      placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm resize-none"></textarea>
                   </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
+                      Instructions (Optional)</label>
+                    <input v-model="form.delivery_instructions" type="text"
+                      placeholder="e.g. Leave at door, call before arriving"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                  </div>
+                </div>
+
+                <div v-if="form.order_type === 2 || form.order_type === 3">
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment
+                    Method
+                    (Instant Pay)</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button @click="form.payment_method = 1" type="button"
+                      :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
+                      class="flex items-center justify-center gap-1.5 py-3.5 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                      <span class="material-symbols-outlined text-base">payments</span> Cash
+                    </button>
+                    <button @click="form.payment_method = 3" type="button"
+                      :class="form.payment_method === 3 ? 'bg-pink-600 text-white border-pink-600' : 'bg-white text-slate-600 border-slate-200'"
+                      class="flex items-center justify-center gap-1.5 py-3.5 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                      <span class="material-symbols-outlined text-base">smartphone</span> bKash
+                    </button>
+                    <button @click="form.payment_method = 2" type="button"
+                      :class="form.payment_method === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
+                      class="flex items-center justify-center gap-1.5 py-3.5 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                      <span class="material-symbols-outlined text-base">credit_card</span> Stripe
+                    </button>
+                    <button @click="form.payment_method = 4" type="button"
+                      :class="form.payment_method === 4 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200'"
+                      class="flex items-center justify-center gap-1.5 py-3.5 rounded-xl border font-bold text-xs transition-all shadow-sm">
+                      <span class="material-symbols-outlined text-base">account_balance_wallet</span> SSLCommerz
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your
+                    Name</label>
+                  <input v-model="form.customer_name" type="text" placeholder="John Doe" autocomplete="name"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Phone
+                    Number</label>
+                  <input v-model="form.customer_phone" type="tel" placeholder="Phone for updates" autocomplete="tel"
+                    inputmode="tel"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                 </div>
               </div>
             </div>
 
-            <!-- Cart Footer Summary -->
-            <div
-              class="bg-white p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] space-y-3">
+            <!-- Footer: summary + primary action, changes by step -->
+            <div v-if="cart.length > 0"
+              class="bg-white p-4 md:p-6 border-t border-slate-100 z-10 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] space-y-2.5 md:space-y-3"
+              style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
               <div class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Subtotal</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartSubtotal.toFixed(2) }}</span>
@@ -288,16 +304,25 @@
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
               </div>
               <div v-if="cartServiceChargeAmount > 0" class="flex justify-between items-center text-sm">
-                <span class="text-slate-500 font-medium">Service Charge ({{ branchSetting.service_charge_percentage
+                <span class="text-slate-500 font-medium">Service Charge ({{
+                  branchSetting.service_charge_percentage
                 }}%)</span>
-                <span class="font-bold text-slate-800">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2) }}</span>
+                <span class="font-bold text-slate-800">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2)
+                }}</span>
               </div>
-              <div class="flex justify-between items-center pt-3 border-t border-slate-100 mb-2">
-                <span class="text-slate-900 font-black text-lg">Total Amount</span>
-                <span class="text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
+              <div class="flex justify-between items-center pt-2.5 md:pt-3 border-t border-slate-100 mb-1 md:mb-2">
+                <span class="text-slate-900 font-black text-base md:text-lg">Total Amount</span>
+                <span class="text-xl md:text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
               </div>
-              <button @click="submitOrder" :disabled="cart.length === 0 || isSubmitting"
-                class="w-full bg-slate-900 text-white font-bold text-lg py-4 rounded-full shadow-xl shadow-slate-900/20 hover:bg-slate-800 hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+
+              <button v-if="checkoutStep === 1" @click="checkoutStep = 2"
+                class="w-full bg-slate-900 text-white font-bold text-base md:text-lg py-3.5 md:py-4 rounded-full shadow-xl shadow-slate-900/20 active:bg-slate-800 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <span>Proceed to Checkout</span>
+                <span class="material-symbols-outlined">arrow_right_alt</span>
+              </button>
+
+              <button v-else @click="submitOrder" :disabled="isSubmitting"
+                class="w-full bg-slate-900 text-white font-bold text-base md:text-lg py-3.5 md:py-4 rounded-full shadow-xl shadow-slate-900/20 active:bg-slate-800 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <span class="material-symbols-outlined animate-spin" v-if="isSubmitting">autorenew</span>
                 <span>{{ isSubmitting ? 'Placing Order...' : 'Place Order' }}</span>
                 <span class="material-symbols-outlined" v-if="!isSubmitting">arrow_right_alt</span>
@@ -308,10 +333,9 @@
         </div>
       </div>
     </div>
-    <!-- Variant Modal (Web) Component -->
+
     <VariantSelectionModal :show="!!selectedProductForVariant" :product="selectedProductForVariant" theme="amber"
       @close="closeVariantModal" @selected="selectVariant" />
-    <!-- Campaign Popup (Daraz Style) -->
     <CampaignModal :activeCampaigns="activeCampaigns" />
   </WebLayout>
 </template>
@@ -337,6 +361,7 @@ const props = defineProps({
 // State
 const activeCategory = ref(null)
 const isCartOpen = ref(false)
+const checkoutStep = ref(1) // 1 = review items, 2 = checkout form
 const cart = ref([])
 const isSubmitting = ref(false)
 const selectedProductForVariant = ref(null)
@@ -351,7 +376,6 @@ const form = reactive({
   delivery_address: '',
   delivery_instructions: ''
 })
-
 
 // Computed
 const filteredItems = computed(() => {
@@ -427,10 +451,10 @@ const doAddToCart = (product, variantId, variantName, price) => {
       variant_name: variantName
     })
   }
-
-  // Animation trigger or toast logic could go here
-  // Opening cart for demo
-  isCartOpen.value = true
+  // Note: cart no longer auto-opens on add — keeps the user browsing the menu,
+  // the sticky bottom bar gives them a persistent, low-friction way to check out
+  // when they're ready. Re-enable the line below if you prefer auto-open:
+  // isCartOpen.value = true
 }
 
 const updateQuantity = (index, delta) => {
@@ -441,9 +465,15 @@ const updateQuantity = (index, delta) => {
   } else {
     cart.value.splice(index, 1)
     if (cart.value.length === 0) {
-      isCartOpen.value = false;
+      isCartOpen.value = false
+      checkoutStep.value = 1
     }
   }
+}
+
+const closeCart = () => {
+  isCartOpen.value = false
+  checkoutStep.value = 1
 }
 
 const scrollCategory = (distance) => {
@@ -461,7 +491,6 @@ const onCategoryWheel = (event) => {
 const submitOrder = async () => {
   if (cart.value.length === 0) return
 
-  // Basic Validation
   if (!form.customer_name || !form.customer_phone) {
     Swal.fire('Required Fields', 'Please enter your name and phone number.', 'error')
     return
@@ -515,16 +544,15 @@ const submitOrder = async () => {
         confirmButtonColor: '#f59e0b',
         confirmButtonText: 'Track Order'
       }).then(() => {
-        const orderNum = res.data.order_number;
-        // Reset state
+        const orderNum = res.data.order_number
         cart.value = []
+        checkoutStep.value = 1
         form.customer_name = ''
         form.customer_phone = ''
         form.table_number = ''
         form.delivery_address = ''
         form.delivery_instructions = ''
 
-        // Redirect to track page
         window.location.href = route('web.order.track', { orderNumber: orderNum })
       })
     }
@@ -534,6 +562,7 @@ const submitOrder = async () => {
     isSubmitting.value = false
   }
 }
+
 onMounted(() => {
   const flash = page.props.flash || {}
   if (flash.success) {
@@ -555,34 +584,20 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* High-End Aesthetics Utilities */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .no-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
 @keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
 }
 
 .animate-blob {
@@ -594,18 +609,22 @@ onMounted(() => {
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Sticky bottom cart bar transition */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
 }
 </style>
