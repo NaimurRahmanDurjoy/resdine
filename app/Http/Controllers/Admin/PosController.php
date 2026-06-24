@@ -29,15 +29,15 @@ class PosController extends Controller
 
     public function index()
     {
-        // 0. Check for active register
+        // 0. Inform frontend if there's an active register
         $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
             ->where('branch_id', auth()->user()->branch_id)
             ->where('status', 1)
             ->first();
 
-        if (!$activeRegister) {
-            return redirect()->route('admin.pos.register.open');
-        }
+        // Optional: We only force "Open Register" if the user has specific cashier permissions 
+        // and doesn't have an active register. For Waiters/Managers, we let them through.
+        // For now, let's just pass the register state to the frontend.
 
         $categories = ProductCategory::where('status', 1)->get();
         // Return items with variants to easily calculate pricing on frontend
@@ -53,6 +53,7 @@ class PosController extends Controller
             'items' => $items,
             'customers' => $customers,
             'tables' => $tables,
+            'activeRegister' => $activeRegister,
             'branchSetting' => [
                 'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
                 'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
@@ -83,17 +84,26 @@ class PosController extends Controller
             return DB::transaction(function () use ($validated) {
                 $branchId = auth()->user()->branch_id ?? 1;
 
-                $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
-                    ->where('branch_id', $branchId)
-                    ->where('status', 1)
-                    ->firstOrFail();
+                // 0. Conditionally require a register only if payment is being processed
+                $registerId = null;
+                if (!empty($validated['payment_method'])) {
+                    $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
+                        ->where('branch_id', $branchId)
+                        ->where('status', 1)
+                        ->first();
+
+                    if (!$activeRegister) {
+                        throw new \Exception("A cash register must be open to process payments.");
+                    }
+                    $registerId = $activeRegister->id;
+                }
 
                 // 1. Create Order via Service (Handles Stock Deduction & Invoicing)
                 $order = $this->orderService->createOrder([
                     'customer_id' => $validated['customer_id'] ?? null,
                     'table_id' => $validated['table_id'] ?? null,
                     'branch_id' => $branchId,
-                    'register_id' => $activeRegister->id,
+                    'register_id' => $registerId,
                     'order_type' => $validated['order_type'],
                     'items' => $validated['items'],
                     'discount' => $validated['discount'],

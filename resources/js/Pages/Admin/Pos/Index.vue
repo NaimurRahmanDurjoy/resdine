@@ -25,9 +25,13 @@
 
       <div class="flex items-center space-x-3">
         <span class="text-sm opacity-90 mr-2 hidden lg:block">{{ currentTime }}</span>
-        <Link :href="route('admin.pos.register.close')"
+        <Link v-if="activeRegister" :href="route('admin.pos.register.close')"
           class="bg-red-600/50 hover:bg-red-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all mr-2 flex items-center gap-1 border border-red-500/30">
           <span class="material-symbols-outlined text-xs">logout</span> Close Shift
+        </Link>
+        <Link v-else :href="route('admin.pos.register.open')"
+          class="bg-emerald-600/50 hover:bg-emerald-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all mr-2 flex items-center gap-1 border border-emerald-500/30">
+          <span class="material-symbols-outlined text-xs">login</span> Open Register
         </Link>
         <div
           class="bg-indigo-600 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-inner cursor-pointer hover:bg-indigo-500 transition">
@@ -201,23 +205,26 @@
                 <span v-else class="material-symbols-outlined text-sm">send_to_mobile</span>
                 <span class="text-xs">Send to Kitchen</span>
               </button>
-              <button @click="submitOrder(true)" :disabled="cart.length === 0 || isSubmitting"
+              <button v-if="activeRegister" @click="submitOrder(true)" :disabled="cart.length === 0 || isSubmitting"
                 class="py-3 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                 <span class="material-symbols-outlined text-sm" v-if="isSubmitting">autorenew</span>
                 <span v-else class="material-symbols-outlined text-sm">payments</span>
                 <span class="text-xs">Pay & Complete</span>
               </button>
+              <div v-else class="bg-gray-100 rounded-xl flex flex-col items-center justify-center p-2 border border-gray-200">
+                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tight text-center">Open register to enable payments</span>
+              </div>
             </div>
 
             <!-- Loyalty Point Redemption Button -->
-            <div v-if="selectedCustomerId && activeCustomerPoints >= cartTotal" class="w-full">
+            <div v-if="activeRegister && selectedCustomerId && activeCustomerPoints >= cartTotal" class="w-full">
               <button @click="submitOrder(true, 5)" :disabled="isSubmitting"
                 class="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition active:scale-95 shadow-md flex items-center justify-center space-x-2">
                 <span class="material-symbols-outlined text-sm">redeem</span>
                 <span class="text-xs">Pay with {{ cartTotal.toFixed(0) }} Points (Bal: {{ activeCustomerPoints }})</span>
               </button>
             </div>
-            <div v-else-if="selectedCustomerId" class="text-center">
+            <div v-else-if="activeRegister && selectedCustomerId" class="text-center">
                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Points Balance: {{ activeCustomerPoints }} (Insufficient for this order)</span>
             </div>
             <button @click="cart = []" :disabled="cart.length === 0"
@@ -251,7 +258,8 @@ const props = defineProps({
   items: Array,
   customers: Array,
   tables: Array,
-  branchSetting: Object
+  branchSetting: Object,
+  activeRegister: Object
 })
 
 // UI State
