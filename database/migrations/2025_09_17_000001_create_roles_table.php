@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->unique();
+            $table->unsignedBigInteger('landing_menu_id')->nullable()->comment('software_menus.id for the landing menu');
             $table->string('description')->nullable();
             $table->tinyInteger('status')->default(1)->comment('1=active,0=inactive');
             $table->timestamps();

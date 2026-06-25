@@ -20,7 +20,7 @@ class RoleController extends Controller
         $sort = $request->get('sort', 'created_at');
         $direction = $request->get('direction', 'desc');
 
-        $roles = Role::query()
+        $roles = Role::with('landingMenu')
             ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
             ->orderBy($sort, $direction)
             ->paginate(10)
@@ -41,6 +41,7 @@ class RoleController extends Controller
     {
         return Inertia::render('Admin/Roles/Form', [
             'isEdit' => false,
+            'landingMenus' => SoftwareMenu::whereNotNull('route')->get(),
             'pageTitle' => 'Create Role',
         ]);
     }
@@ -51,6 +52,7 @@ class RoleController extends Controller
             'name' => 'required|string|max:255|unique:roles',
             'description' => 'nullable|string|max:500',
             'status' => 'required|boolean',
+            'landing_menu_id' => 'nullable|exists:software_menus,id',
         ]);
 
         Role::create($data);
@@ -63,6 +65,7 @@ class RoleController extends Controller
         return Inertia::render('Admin/Roles/Form', [
             'role' => $role,
             'isEdit' => true,
+            'landingMenus' => SoftwareMenu::whereNotNull('route')->get(),
             'pageTitle' => 'Edit Role',
         ]);
     }
@@ -73,8 +76,8 @@ class RoleController extends Controller
             'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
             'description' => 'nullable|string|max:500',
             'status' => 'required|boolean',
+            'landing_menu_id' => 'nullable|exists:software_menus,id',
         ]);
-
         $role->update($data);
 
         return redirect()->route('admin.settings.roles.index')->with('success', 'Role updated successfully.');

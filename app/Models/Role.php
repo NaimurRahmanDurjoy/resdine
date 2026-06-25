@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Role extends BaseModel
 {
-    protected $fillable = ['name', 'description', 'status'];
+    protected $fillable = ['name','landing_menu_id', 'description', 'status'];
 
     /**
      * Relationship to permissions
@@ -22,5 +22,10 @@ class Role extends BaseModel
         return $this->belongsToMany(SoftwareMenuAction::class, 'role_permissions', 'role_id', 'software_menu_action_id')
             ->withPivot('is_allowed')
             ->withTimestamps();
+    }
+
+    public function landingMenu()
+    {
+        return $this->belongsTo(SoftwareMenu::class, 'landing_menu_id');
     }
 }

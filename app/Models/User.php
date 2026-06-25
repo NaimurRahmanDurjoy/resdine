@@ -48,20 +48,14 @@ class User extends Authenticatable
         return $this->branch_id ?: \App\Models\Branch::first()?->id;
     }
 
-    // Redirect user based on role
+    /**
+     * Redirect to the user's first RBAC-permitted menu route, or home.
+     */
     public function redirectToDashboard(): string
     {
-        $roleName = strtolower($this->role->name ?? '');
-
-        return match ($roleName) {
-            'admin' => route('admin.dashboard'),
-            'manager' => route('admin.dashboard'),
-            'driver' => route('driver.dashboard'),
-            'cashier' => route('cashier.dashboard'),
-            'staff'   => route('admin.pos.index'),
-            'customer' => route('home'),
-            default => route('home'),
-        };  
+        return route(
+            $this->role?->landingMenu?->route ?? 'home'
+        );
     }
 
     // Relationship to user-specific permissions

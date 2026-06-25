@@ -39,7 +39,7 @@
             </div>
 
             <!-- Table -->
-            <DataTable :headers="['Role Details', 'Description', 'Users', 'Status', 'Actions']" :items="roles.data"
+            <DataTable :headers="['Role Details', 'Landing Menu', 'Description', 'Users', 'Status', 'Actions']" :items="roles.data"
                 :pagination="roles" :sortableHeaders="{ 0: 'name', 4: 'created_at' }" :currentSort="filters.sort"
                 :currentDirection="filters.direction">
                 <template #rows>
@@ -58,9 +58,13 @@
                                         {{ role.name }}</div>
                                     <div
                                         class="text-[9px] text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5">
-                                        ID: #RL_{{ role.id }}</div>
+                                        ID: RL_{{ role.id }}</div>
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate">{{ role.landing_menu?.name
+                                || 'No landing menu assigned' }}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-xs text-gray-600 dark:text-gray-400 max-w-xs truncate">{{ role.description
@@ -84,9 +88,9 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
                                 <Link :href="route('admin.settings.roles.permissions', role.id)"
-                                    class="p-1.5 text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900/20 rounded-md transition-colors tooltip"
+                                    class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-colors tooltip"
                                     title="Manage Permissions">
-                                    <span class="material-symbols-outlined text-xl font-icon">shield</span>
+                                    <span class="material-symbols-outlined text-xl font-icon">security</span>
                                 </Link>
                                 <Link :href="route('admin.settings.roles.edit', role.id)"
                                     class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors tooltip"

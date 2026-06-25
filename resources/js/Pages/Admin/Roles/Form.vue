@@ -20,6 +20,17 @@
                             :class="{ 'border-rose-500 ring-1 ring-rose-500/20': form.errors.name }">
                         <span v-if="form.errors.name" class="text-[10px] text-rose-500 font-bold px-1 uppercase tracking-tighter">{{ form.errors.name }}</span>
                     </div>
+                    <!-- Landing Menu -->
+                    <div class="space-y-1.5">
+                        <label for="landing_menu_id" class="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Landing Menu</label>
+                        <select v-model="form.landing_menu_id" id="landing_menu_id"
+                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                            :class="{ 'border-rose-500 ring-1 ring-rose-500/20': form.errors.landing_menu_id }">
+                            <option value="">Select a landing menu</option>
+                            <option v-for="menu in landingMenus" :key="menu.id" :value="menu.id">{{ menu.name }}</option>
+                        </select>
+                        <span v-if="form.errors.landing_menu_id" class="text-[10px] text-rose-500 font-bold px-1 uppercase tracking-tighter">{{ form.errors.landing_menu_id }}</span>
+                    </div>
 
                     <!-- Description -->
                     <div class="space-y-1.5">
@@ -67,13 +78,15 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 const props = defineProps({
     role: Object,
     isEdit: Boolean,
-    pageTitle: String
+    pageTitle: String,
+    landingMenus: Array
 })
 
 const form = useForm({
     name: props.role?.name ?? '',
     description: props.role?.description ?? '',
-    status: props.role?.status ?? true
+    status: props.role?.status ?? true,
+    landing_menu_id: props.role?.landing_menu_id ?? null
 })
 
 const submit = () => {
