@@ -8,6 +8,7 @@ use App\Models\PurchaseMaster;
 use App\Models\PurchaseDetail;
 use App\Models\Supplier;
 use App\Models\Ingredient;
+use App\Models\InventoryItem;
 use App\Models\ProductItem;
 use App\Models\StockSummary;
 use App\Models\StockLedger;
@@ -75,7 +76,7 @@ class PurchaseController extends Controller
     {
         return Inertia::render('Admin/Inventory/Purchase/Create', [
             'suppliers' => Supplier::all(),
-            'inventoryItems' => \App\Models\InventoryItem::with('unit')
+            'inventoryItems' => InventoryItem::with('unit')
                 ->where('status', 1)
                 ->where('item_type', '!=', 3) // Exclude Prep Items from purchase
                 ->get(),
@@ -90,7 +91,7 @@ class PurchaseController extends Controller
             'supplier_id' => 'required|exists:suppliers,id',
             'purchase_date' => 'required|date',
             'invoice_number' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
+            'notes' => 'required|string',
             'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
             'items.*.unit_id' => 'required|exists:units,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
