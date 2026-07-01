@@ -36,6 +36,8 @@ return new class extends Migration
         Schema::table('stock_summary', function (Blueprint $table) {
             $table->unsignedBigInteger('inventory_item_id')->nullable()->after('id');
             $table->foreign('inventory_item_id')->references('id')->on('inventory_items')->onDelete('cascade');
+            // Unique ensures one row per product+branch+batch
+            $table->unique(['branch_id', 'inventory_item_id', 'batch_no']);
         });
 
         Schema::table('stock_ledger', function (Blueprint $table) {

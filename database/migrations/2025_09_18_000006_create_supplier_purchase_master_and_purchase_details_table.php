@@ -54,7 +54,6 @@ return new class extends Migration
         Schema::create('purchase_details', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('purchase_id');
-            $table->unsignedBigInteger('ingredients_id');
             $table->decimal('unit_price', 10, 2);
             $table->integer('quantity');
             $table->decimal('total_price', 10, 2);

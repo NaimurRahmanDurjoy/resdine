@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('stock_ledger', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('ingredient_id');
             $table->unsignedBigInteger('unit_id');
             $table->unsignedBigInteger('branch_id');
 
@@ -40,7 +39,6 @@ return new class extends Migration
 
 
             // Indexes
-            $table->index('ingredient_id');
             $table->index('branch_id');
             $table->index('transaction_type');
             $table->index('transaction_date');
@@ -51,7 +49,6 @@ return new class extends Migration
 
         Schema::create('stock_summary', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('ingredient_id');
             $table->unsignedBigInteger('unit_id');
 
             $table->unsignedBigInteger('branch_id');
@@ -67,8 +64,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
-            // Unique ensures one row per product+branch+batch
-            $table->unique(['ingredient_id', 'branch_id', 'batch_no']);
+
         });
     
     }

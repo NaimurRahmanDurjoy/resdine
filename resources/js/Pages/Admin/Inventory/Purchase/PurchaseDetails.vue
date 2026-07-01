@@ -65,8 +65,8 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700 dark:text-gray-300">
                             {{ detail.quantity }}
-                            <span class="text-gray-400 text-xs ml-1">{{ detail.inventory_item?.unit?.short_name ||
-                                detail.inventory_item?.unit?.name || '' }}</span>
+                            <span class="text-gray-400 text-xs ml-1">{{ detail.unit?.short_name || detail.unit?.name ||
+                                '' }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700 dark:text-gray-300">
                             {{ currency() }}{{ parseFloat(detail.unit_price).toFixed(2) }}
