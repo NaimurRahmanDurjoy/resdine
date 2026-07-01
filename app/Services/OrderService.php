@@ -6,6 +6,8 @@ use App\Models\OrderMaster;
 use App\Models\OrderItem;
 use App\Models\SalesInvoice;
 use App\Models\RestaurantTable;
+use App\Models\BranchSetting;
+use App\Services\MenuAvailabilityService;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -17,6 +19,11 @@ class OrderService
     {
         $this->recipeService = $recipeService;
         $this->notificationService = $notificationService;
+    }
+
+    public function buildStockUnavailableMessage(array $errors): string
+    {
+        return "We're sorry, this order can't be completed right now because some items are currently unavailable. Please try again shortly or choose a different item.";
     }
 
     /**
@@ -32,7 +39,7 @@ class OrderService
             $discount = $data['discount'] ?? 0;
 
             // Fetch Branch settings for tax calculations
-            $branchSetting = \App\Models\BranchSetting::where('branch_id', $data['branch_id'])->first();
+            $branchSetting = BranchSetting::where('branch_id', $data['branch_id'])->first();
             $vatPercent = $branchSetting ? (float)$branchSetting->vat_percentage : 0;
             $serviceChargePercent = $branchSetting ? (float)$branchSetting->service_charge_percentage : 0;
             $isVatInclusive = $branchSetting ? (bool)$branchSetting->is_vat_inclusive : false;
@@ -62,9 +69,14 @@ class OrderService
             }
 
             if (!empty($allErrors)) {
-                // Group by ingredient to avoid duplicates and join with commas
                 $uniqueErrors = array_unique($allErrors);
-                throw new \Exception("Insufficient stock: " . implode(", ", $uniqueErrors));
+                \Log::warning('Stock validation failed during order creation.', [
+                    'errors' => $uniqueErrors,
+                    'branch_id' => $data['branch_id'],
+                    'items' => $data['items'],
+                ]);
+
+                throw new \Exception($this->buildStockUnavailableMessage($uniqueErrors));
             }
 
             // 2. Create Order Master
@@ -130,6 +142,9 @@ class OrderService
 
             // 6. Notify (e.g., KDS)
             // $this->notificationService->notifyNewOrder($order);
+
+            // 7. Invalidate menu availability cache (stock has changed)
+            MenuAvailabilityService::invalidateCache($data['branch_id']);
 
             return $order;
         });
@@ -199,7 +214,7 @@ class OrderService
             $order->subtotal -= $refundAmount;
 
             // Fetch Branch settings for tax calculations
-            $branchSetting = \App\Models\BranchSetting::where('branch_id', $order->branch_id)->first();
+            $branchSetting = BranchSetting::where('branch_id', $order->branch_id)->first();
             $vatPercent = $branchSetting ? (float)$branchSetting->vat_percentage : 0;
             $serviceChargePercent = $branchSetting ? (float)$branchSetting->service_charge_percentage : 0;
             $isVatInclusive = $branchSetting ? (bool)$branchSetting->is_vat_inclusive : false;

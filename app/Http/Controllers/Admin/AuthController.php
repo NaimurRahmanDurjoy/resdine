@@ -35,9 +35,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             RateLimiter::clear($key); // Clear attempts on successful login
-    
+
+            // Eager-load role.landingMenu to avoid lazy-load queries in redirectToDashboard()
+            $user = Auth::user()->load('role.landingMenu');
+
             // Use intended URL if exists, otherwise role-based dashboard
-            return redirect()->to(Auth::user()->redirectToDashboard());
+            return redirect()->to($user->redirectToDashboard());
         }
         RateLimiter::hit($key, 60); // Block for 60 seconds per attempt
 

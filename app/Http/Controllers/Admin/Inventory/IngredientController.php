@@ -21,6 +21,7 @@ class IngredientController extends Controller
         $ingredients = Ingredient::with('unit')
             ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
             ->orderBy($sort, $direction)
+            ->orderBy('id', 'asc')
             ->paginate($perPage)
             ->withQueryString();
 

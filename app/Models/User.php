@@ -53,9 +53,11 @@ class User extends Authenticatable
      */
     public function redirectToDashboard(): string
     {
-        return route(
-            $this->role?->landingMenu?->route ?? 'home'
-        );
+        $routeName = $this->role?->landingMenu?->route;
+
+        return $routeName && \Illuminate\Support\Facades\Route::has($routeName)
+            ? route($routeName)
+            : route('home');
     }
 
     // Relationship to user-specific permissions

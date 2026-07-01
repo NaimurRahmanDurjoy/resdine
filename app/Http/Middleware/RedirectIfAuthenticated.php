@@ -12,8 +12,9 @@ class RedirectIfAuthenticated
     {
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Redirect based on role if already logged in
-                return redirect()->to(Auth::guard($guard)->user()->redirectToDashboard());
+                // Eager-load to prevent lazy queries in redirectToDashboard()
+                $user = Auth::guard($guard)->user()->load('role.landingMenu');
+                return redirect()->to($user->redirectToDashboard());
             }
         }
 

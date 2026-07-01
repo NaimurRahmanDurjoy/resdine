@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\ProductCategory;
 use App\Models\ProductItem;
 use App\Models\OrderMaster;
 use App\Models\OrderItem;
 use App\Models\MarketingCampaign;
+use App\Models\OrderDelivery;
+use App\Models\RestaurantTable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +94,7 @@ class WebController extends Controller
 
                 // Resolve table number to table_id if it's a dine-in order
                 if ($validated['order_type'] == 1 && !empty($validated['table_number'])) {
-                    $table = \App\Models\RestaurantTable::where('name', $validated['table_number'])->first();
+                    $table = RestaurantTable::where('name', $validated['table_number'])->first();
                     if ($table) {
                         $tableId = $table->id;
                         $branchId = $table->branch_id; // Inherit branch from table
@@ -101,7 +104,7 @@ class WebController extends Controller
                 // Resolve or associate customer profile in CRM
                 $customerId = null;
                 if (!empty($validated['customer_phone'])) {
-                    $customer = \App\Models\Customer::firstOrCreate(
+                    $customer = Customer::firstOrCreate(
                         ['phone' => $validated['customer_phone']],
                         ['name' => $validated['customer_name'], 'status' => 1]
                     );
@@ -131,7 +134,7 @@ class WebController extends Controller
 
                 // If delivery, create delivery record
                 if ($validated['order_type'] == 3) {
-                    \App\Models\OrderDelivery::create([
+                    OrderDelivery::create([
                         'order_id' => $order->id,
                         'delivery_address' => $validated['delivery_address'],
                         'contact_number' => $validated['customer_phone'],
@@ -188,7 +191,7 @@ class WebController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error placing order: ' . $e->getMessage(),
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
