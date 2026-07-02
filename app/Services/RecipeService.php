@@ -9,6 +9,7 @@ use App\Models\StockSummary;
 use App\Models\StockLedger;
 use App\Models\Ingredient;
 use App\Models\PurchaseDetail;
+use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -322,7 +323,7 @@ class RecipeService
 
         // 2. Handle Combo Items (Type 2)
         if ($product->type == 2) {
-            $comboItems = \App\Models\ComboItemDetail::where('combo_id', $productItemId)->get();
+            $comboItems = ComboItemDetail::where('combo_id', $productItemId)->get();
             foreach ($comboItems as $comboItem) {
                 $this->deductStockForProduct(
                     $comboItem->item_id, 
@@ -382,7 +383,7 @@ class RecipeService
 
         // 2. Handle Combo Items (Type 2)
         if ($product->type == 2) {
-            $comboItems = \App\Models\ComboItemDetail::where('combo_id', $productItemId)->get();
+            $comboItems = ComboItemDetail::where('combo_id', $productItemId)->get();
             foreach ($comboItems as $comboItem) {
                 $this->restoreStockForProduct(
                     $comboItem->item_id, 
@@ -438,8 +439,8 @@ class RecipeService
             return $quantity;
         }
 
-        $fromUnit = \App\Models\Unit::find($fromUnitId);
-        $toUnit = \App\Models\Unit::find($toUnitId);
+        $fromUnit = Unit::find($fromUnitId);
+        $toUnit = Unit::find($toUnitId);
 
         if (!$fromUnit || !$toUnit) {
             throw new Exception("Invalid units provided for conversion.");
@@ -471,7 +472,7 @@ class RecipeService
 
         while ($currentUnit->base_unit_id) {
             $currentValue *= (float) $currentUnit->conversion_factor;
-            $nextUnit = \App\Models\Unit::find($currentUnit->base_unit_id);
+            $nextUnit = Unit::find($currentUnit->base_unit_id);
             
             if (!$nextUnit || in_array($nextUnit->id, $visited)) {
                 break; 

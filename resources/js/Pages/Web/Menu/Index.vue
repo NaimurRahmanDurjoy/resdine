@@ -25,7 +25,7 @@
       </div>
 
       <div class="max-w-7xl mx-auto px-4 relative z-10 w-full py-10 md:py-16 text-center">
-        <span class="text-amber-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-3 md:mb-4 block">Welcome to ResDine</span>
+        <span class="text-amber-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-3 md:mb-4 block">Welcome  to ResDine</span>
         <h1 class="text-3xl sm:text-4xl md:text-7xl font-black text-white leading-tight mb-4 md:mb-6 tracking-tighter">
           Taste the <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Extraordinary</span>
@@ -48,8 +48,8 @@
           </button>
         </div>
 
-        <div ref="categoryNav" class="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-6" @wheel.prevent="onCategoryWheel"
-          tabindex="0" role="group" aria-label="Category navigation">
+        <div ref="categoryNav" class="overflow-x-auto no-scrollbar scroll-smooth px-4 md:px-6"
+          @wheel.prevent="onCategoryWheel" tabindex="0" role="group" aria-label="Category navigation">
           <div class="flex space-x-2 w-max py-1">
             <button @click="activeCategory = null"
               :class="[activeCategory === null ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 active:bg-slate-200']"
@@ -104,12 +104,22 @@
                 {{ item.description || 'Deliciously prepared using the freshest ingredients.' }}</p>
             </div>
 
-            <button @click="addToCart(item)"
-              class="w-full bg-slate-50 active:bg-amber-500 md:hover:bg-amber-500 text-slate-900 active:text-white md:hover:text-white border border-slate-200 active:border-amber-500 md:hover:border-amber-500 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-base transition-all duration-300 flex items-center justify-center gap-1.5">
-              <span class="material-symbols-outlined text-base md:text-xl">add_shopping_cart</span>
-              <span class="hidden sm:inline">Add to Order</span>
-              <span class="sm:hidden">Add</span>
-            </button>
+            <template v-if="availabilityMap[item.id]">
+              <button @click="addToCart(item)"
+                class="w-full bg-slate-50 active:bg-amber-500 md:hover:bg-amber-500 text-slate-900 active:text-white md:hover:text-white border border-slate-200 active:border-amber-500 md:hover:border-amber-500 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-base transition-all duration-300 flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-base md:text-xl">add_shopping_cart</span>
+                <span class="hidden sm:inline">Add to Order</span>
+                <span class="sm:hidden">Add</span>
+              </button>
+            </template>
+            <template v-else>
+              <button disabled
+                class="w-full bg-slate-50 text-slate-400 border border-slate-200 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-xs md:text-base cursor-not-allowed flex items-center justify-center gap-1.5 opacity-60">
+                <span class="material-symbols-outlined text-base md:text-xl">inventory_2</span>
+                <span class="hidden sm:inline">Out of Stock</span>
+                <span class="sm:hidden">Sold Out</span>
+              </button>
+            </template>
           </div>
         </div>
 
@@ -128,7 +138,9 @@
         class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900 text-white px-4 py-4 flex items-center justify-between shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.3)]"
         style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
         <span class="flex items-center gap-2 font-bold text-sm">
-          <span class="bg-amber-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black">{{ cartTotalItems }}</span>
+          <span
+            class="bg-amber-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-black">{{
+              cartTotalItems }}</span>
           View Cart
         </span>
         <span class="font-black">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
@@ -153,7 +165,8 @@
                   <span class="material-symbols-outlined">arrow_back</span>
                 </button>
                 <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <span class="material-symbols-outlined text-amber-500">{{ checkoutStep === 1 ? 'shopping_bag' : 'receipt_long' }}</span>
+                  <span class="material-symbols-outlined text-amber-500">{{ checkoutStep === 1 ? 'shopping_bag' :
+                    'receipt_long' }}</span>
                   {{ checkoutStep === 1 ? 'Your Order' : 'Checkout' }}
                 </h2>
               </div>
@@ -176,7 +189,8 @@
                   class="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 md:gap-4 animate-fade-in-up">
                   <img v-if="item.product.image_url" :src="item.product.image_url"
                     class="w-14 h-14 md:w-16 md:h-16 rounded-xl object-cover shadow-inner flex-shrink-0" />
-                  <div v-else class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-slate-100 flex flex-shrink-0 items-center justify-center">
+                  <div v-else
+                    class="w-14 h-14 md:w-16 md:h-16 rounded-xl bg-slate-100 flex flex-shrink-0 items-center justify-center">
                     <span class="material-symbols-outlined text-slate-300">restaurant</span>
                   </div>
 
@@ -312,7 +326,8 @@
               </div>
               <div class="flex justify-between items-center pt-2.5 md:pt-3 border-t border-slate-100 mb-1 md:mb-2">
                 <span class="text-slate-900 font-black text-base md:text-lg">Total Amount</span>
-                <span class="text-xl md:text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
+                <span class="text-xl md:text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2)
+                }}</span>
               </div>
 
               <button v-if="checkoutStep === 1" @click="checkoutStep = 2"
@@ -355,7 +370,8 @@ const props = defineProps({
   categories: Array,
   items: Array,
   activeCampaigns: Array,
-  branchSetting: Object
+  branchSetting: Object,
+  availabilityMap: Object
 })
 
 // State
@@ -594,10 +610,21 @@ onMounted(() => {
 }
 
 @keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
 }
 
 .animate-blob {
@@ -609,8 +636,15 @@ onMounted(() => {
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in-up {
@@ -622,6 +656,7 @@ onMounted(() => {
 .slide-up-leave-active {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
+
 .slide-up-enter-from,
 .slide-up-leave-to {
   transform: translateY(100%);

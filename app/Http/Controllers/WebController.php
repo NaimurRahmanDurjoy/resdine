@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Models\BranchSetting;
 use App\Models\Customer;
 use App\Models\ProductCategory;
 use App\Models\ProductItem;
@@ -10,6 +12,7 @@ use App\Models\OrderItem;
 use App\Models\MarketingCampaign;
 use App\Models\OrderDelivery;
 use App\Models\RestaurantTable;
+use App\Services\MenuAvailabilityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -28,16 +31,17 @@ class WebController extends Controller
     /**
      * Display the digital menu.
      */
-    public function menu()
+    public function menu(MenuAvailabilityService $availabilityService)
     {
         $categories = ProductCategory::where('status', 1)->get();
-        // Return active items
+        $resTables = RestaurantTable::where('status', 1)->get();
         $items = ProductItem::with('variants', 'category')
             ->where('status', 1)
             ->get();
 
-        $defaultBranchId = \App\Models\Branch::first()?->id ?: 1;
-        $settings = \App\Models\BranchSetting::where('branch_id', $defaultBranchId)->first();
+        $defaultBranchId = Branch::first()?->id ?: 1;
+        $availabilityMap = $availabilityService->getAvailabilityMap($items->pluck('id')->all(), $defaultBranchId);
+        $settings = BranchSetting::where('branch_id', $defaultBranchId)->first();
 
         // Fetch active campaigns for the web menu
         $activeCampaigns = MarketingCampaign::where('is_active', true)
@@ -54,7 +58,9 @@ class WebController extends Controller
         return Inertia::render('Web/Menu/Index', [
             'categories' => $categories,
             'items' => $items,
+            'availabilityMap' => $availabilityMap,
             'activeCampaigns' => $activeCampaigns,
+            'resTables' => $resTables,
             'branchSetting' => [
                 'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
                 'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
