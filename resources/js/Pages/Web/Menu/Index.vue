@@ -25,7 +25,9 @@
       </div>
 
       <div class="max-w-7xl mx-auto px-4 relative z-10 w-full py-10 md:py-16 text-center">
-        <span class="text-amber-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-3 md:mb-4 block">Welcome  to ResDine</span>
+        <span class="text-amber-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-3 md:mb-4 block">Welcome
+          to
+          ResDine</span>
         <h1 class="text-3xl sm:text-4xl md:text-7xl font-black text-white leading-tight mb-4 md:mb-6 tracking-tighter">
           Taste the <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Extraordinary</span>
@@ -204,7 +206,7 @@
                     </h4>
                     <div class="text-amber-600 font-black text-sm md:text-base">{{ currency() }}{{ (item.price *
                       item.quantity).toFixed(2)
-                    }}
+                      }}
                     </div>
                   </div>
 
@@ -223,6 +225,19 @@
 
               <!-- STEP 2: Checkout form (separate screen on mobile, less scroll-and-lose-cart-context) -->
               <div v-else class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select
+                    Branch</label>
+                  <select v-model.number="selectedBranch"
+                    @change="form.branch_id = selectedBranch; form.table_number = ''"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                    <option value="">Choose a Branch</option>
+                    <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+                      {{ branch.name }}
+                    </option>
+                  </select>
+                </div>
+
                 <div class="flex p-1 bg-slate-200/50 rounded-xl">
                   <button @click="form.order_type = 1; form.payment_method = null; form.table_number = ''"
                     :class="form.order_type === 1 ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 active:text-slate-800'"
@@ -238,14 +253,19 @@
                 <div v-if="form.order_type === 1">
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Table
                     Number</label>
-                  <input v-model="form.table_number" type="text" placeholder="e.g. 12" inputmode="numeric"
+                  <select v-model="form.table_number"
                     class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+                    <option value="">Select Your Table</option>
+                    <option v-for="table in filteredTables" :key="table.id" :value="table.name">
+                      {{ table.name }}
+                    </option>
+                  </select>
                 </div>
 
                 <div v-if="form.order_type === 3" class="space-y-3">
                   <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Delivery
-                      Address</label>
+                      Address <span class="text-red-500">*</span></label>
                     <textarea v-model="form.delivery_address"
                       placeholder="Enter your full street address, apartment, flat no., etc." rows="2"
                       class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm resize-none"></textarea>
@@ -261,8 +281,7 @@
 
                 <div v-if="form.order_type === 2 || form.order_type === 3">
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment
-                    Method
-                    (Instant Pay)</label>
+                    Method (Instant Pay)</label>
                   <div class="grid grid-cols-2 gap-2">
                     <button @click="form.payment_method = 1" type="button"
                       :class="form.payment_method === 1 ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'"
@@ -289,16 +308,17 @@
 
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your
-                    Name</label>
-                  <input v-model="form.customer_name" type="text" placeholder="John Doe" autocomplete="name"
+                    Name <span class="text-red-500">*</span></label>
+                  <input v-model="form.customer_name" type="text" placeholder="Please enter your name"
+                    autocomplete="name"
                     class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                 </div>
 
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Phone
-                    Number</label>
-                  <input v-model="form.customer_phone" type="tel" placeholder="Phone for updates" autocomplete="tel"
-                    inputmode="tel"
+                    Number <span class="text-red-500">*</span></label>
+                  <input v-model="form.customer_phone" type="tel" placeholder="Please enter your phone number"
+                    autocomplete="tel" inputmode="tel"
                     class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
                 </div>
               </div>
@@ -320,14 +340,14 @@
               <div v-if="cartServiceChargeAmount > 0" class="flex justify-between items-center text-sm">
                 <span class="text-slate-500 font-medium">Service Charge ({{
                   branchSetting.service_charge_percentage
-                }}%)</span>
+                  }}%)</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartServiceChargeAmount.toFixed(2)
-                }}</span>
+                  }}</span>
               </div>
               <div class="flex justify-between items-center pt-2.5 md:pt-3 border-t border-slate-100 mb-1 md:mb-2">
                 <span class="text-slate-900 font-black text-base md:text-lg">Total Amount</span>
                 <span class="text-xl md:text-2xl font-black text-slate-900">{{ currency() }}{{ cartTotal.toFixed(2)
-                }}</span>
+                  }}</span>
               </div>
 
               <button v-if="checkoutStep === 1" @click="checkoutStep = 2"
@@ -371,7 +391,10 @@ const props = defineProps({
   items: Array,
   activeCampaigns: Array,
   branchSetting: Object,
-  availabilityMap: Object
+  availabilityMap: Object,
+  resTables: Array,
+  branches: Array,
+  defaultBranchId: Number
 })
 
 // State
@@ -382,11 +405,13 @@ const cart = ref([])
 const isSubmitting = ref(false)
 const selectedProductForVariant = ref(null)
 const categoryNav = ref(null)
+const selectedBranch = ref(props.defaultBranchId || null)
 
 const form = reactive({
   customer_name: '',
   customer_phone: '',
   order_type: 1,
+  branch_id: props.defaultBranchId || null,
   table_number: '',
   payment_method: null,
   delivery_address: '',
@@ -399,6 +424,11 @@ const filteredItems = computed(() => {
     return props.items.filter(i => i.category_id === activeCategory.value)
   }
   return props.items
+})
+
+const filteredTables = computed(() => {
+  if (!selectedBranch.value) return []
+  return props.resTables.filter(t => t.branch_id === selectedBranch.value)
 })
 
 const cartTotalItems = computed(() => cart.value.reduce((acc, curr) => acc + curr.quantity, 0))
@@ -507,6 +537,11 @@ const onCategoryWheel = (event) => {
 const submitOrder = async () => {
   if (cart.value.length === 0) return
 
+  if (!selectedBranch.value) {
+    Swal.fire('Required Fields', 'Please select a branch.', 'error')
+    return
+  }
+
   if (!form.customer_name || !form.customer_phone) {
     Swal.fire('Required Fields', 'Please enter your name and phone number.', 'error')
     return
@@ -565,6 +600,7 @@ const submitOrder = async () => {
         checkoutStep.value = 1
         form.customer_name = ''
         form.customer_phone = ''
+        form.branch_id = selectedBranch.value
         form.table_number = ''
         form.delivery_address = ''
         form.delivery_instructions = ''
