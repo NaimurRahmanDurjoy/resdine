@@ -34,6 +34,7 @@ class WebController extends Controller
     public function menu(MenuAvailabilityService $availabilityService)
     {
         $categories = ProductCategory::where('status', 1)->get();
+        $branches = Branch::where('status', 1)->get();
         $resTables = RestaurantTable::where('status', 1)->get();
         $items = ProductItem::with('variants', 'category')
             ->where('status', 1)
@@ -60,7 +61,9 @@ class WebController extends Controller
             'items' => $items,
             'availabilityMap' => $availabilityMap,
             'activeCampaigns' => $activeCampaigns,
+            'branches' => $branches,
             'resTables' => $resTables,
+            'defaultBranchId' => $defaultBranchId,
             'branchSetting' => [
                 'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
                 'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
@@ -77,6 +80,7 @@ class WebController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
+            'branch_id' => 'required|exists:branches,id',
             'order_type' => 'required|in:1,2,3', // 1=dine-in, 2=takeaway, 3=delivery
             'table_number' => 'nullable|string', 
             'delivery_address' => 'required_if:order_type,3|string|nullable|max:1000',
@@ -93,17 +97,18 @@ class WebController extends Controller
 
         try {
             return DB::transaction(function () use ($validated) {
-                // Determine a default branch and user for public orders
-                $branchId = 1; 
+                // Use the branch provided by the customer
+                $branchId = $validated['branch_id'];
                 $systemUserId = 1;
                 $tableId = null;
 
                 // Resolve table number to table_id if it's a dine-in order
                 if ($validated['order_type'] == 1 && !empty($validated['table_number'])) {
-                    $table = RestaurantTable::where('name', $validated['table_number'])->first();
+                    $table = RestaurantTable::where('name', $validated['table_number'])
+                        ->where('branch_id', $branchId)
+                        ->first();
                     if ($table) {
                         $tableId = $table->id;
-                        $branchId = $table->branch_id; // Inherit branch from table
                     }
                 }
 
