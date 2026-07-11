@@ -39,12 +39,25 @@ class ReportController extends Controller
             ->take(4)
             ->get();
 
-        // 7-day Sales Trend Matrix
+        // 7-day Sales Trend Matrix - Optimized to a single range query
+        $startDate = Carbon::today()->subDays(6)->startOfDay();
+        $endDate = Carbon::today()->endOfDay();
+
+        $dailySales = OrderMaster::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(total_amount) as total')
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
         $trendData = [];
         $maxSales = 0;
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $dailyTotal = OrderMaster::whereDate('created_at', $date)->sum('total_amount');
+            $dateStr = $date->format('Y-m-d');
+            $dailyTotal = isset($dailySales[$dateStr]) ? (float) $dailySales[$dateStr]->total : 0.0;
             
             if ($dailyTotal > $maxSales) {
                 $maxSales = $dailyTotal;
@@ -53,7 +66,7 @@ class ReportController extends Controller
             $trendData[] = [
                 'day' => $date->format('D'),
                 'date' => $date->format('M d'),
-                'total' => (float) $dailyTotal
+                'total' => $dailyTotal
             ];
         }
 

@@ -47,34 +47,38 @@ class PermissionService
      */
     public function hasRoutePermission($user, string $routeName): bool
     {
-        // 1. Find if this route is defined as an action
-        $action = \App\Models\SoftwareMenuAction::where('route', $routeName)->first();
+        $actionId = Cache::rememberForever("route_action_id:{$routeName}", function () use ($routeName) {
+            // 1. Find if this route is defined as an action
+            $action = \App\Models\SoftwareMenuAction::where('route', $routeName)->first();
 
-        // 2. If it's not found exactly, try mapping it to a base permission (e.g., .store -> .create)
-        if (!$action) {
-            $segments = explode('.', $routeName);
-            if (count($segments) >= 2) {
-                $lastSegment = array_pop($segments);
-                $baseAction = \App\Models\SoftwareMenuAction::getBaseAction($lastSegment);
-                
-                // Reconstruct the route name with the base action suffix (e.g., .index, .create)
-                // Note: getBaseAction maps index->view, destroy->delete, etc.
-                $baseActionSuffix = \App\Models\SoftwareMenuAction::ROUTE_MAP[$baseAction] ?? $baseAction;
-                $baseRouteName = implode('.', $segments) . '.' . $baseActionSuffix;
-                
-                $action = \App\Models\SoftwareMenuAction::where('route', $baseRouteName)->first();
+            // 2. If it's not found exactly, try mapping it to a base permission (e.g., .store -> .create)
+            if (!$action) {
+                $segments = explode('.', $routeName);
+                if (count($segments) >= 2) {
+                    $lastSegment = array_pop($segments);
+                    $baseAction = \App\Models\SoftwareMenuAction::getBaseAction($lastSegment);
+                    
+                    // Reconstruct the route name with the base action suffix (e.g., .index, .create)
+                    // Note: getBaseAction maps index->view, destroy->delete, etc.
+                    $baseActionSuffix = \App\Models\SoftwareMenuAction::ROUTE_MAP[$baseAction] ?? $baseAction;
+                    $baseRouteName = implode('.', $segments) . '.' . $baseActionSuffix;
+                    
+                    $action = \App\Models\SoftwareMenuAction::where('route', $baseRouteName)->first();
+                }
             }
-        }
+
+            return $action ? $action->id : -1;
+        });
 
         // 3. If still no action found, it's either an unrestricted route or handled globally
-        if (!$action) {
+        if ($actionId === -1) {
             return true; 
         }
 
         // 4. Check against allowed action IDs for the user
         $allowedIds = $this->getAllowedActionIds($user);
 
-        return in_array($action->id, $allowedIds);
+        return in_array($actionId, $allowedIds);
     }
 
     /**

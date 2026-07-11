@@ -14,15 +14,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $today = today();
-        $yesterday = today()->subDay();
+        $todayStart = today()->startOfDay();
+        $todayEnd = today()->endOfDay();
+        
+        $yesterdayStart = today()->subDay()->startOfDay();
+        $yesterdayEnd = today()->subDay()->endOfDay();
 
         // 1. Total Sales Today & Trend
-        $todaySales = OrderMaster::whereDate('created_at', $today)
+        $todaySales = OrderMaster::whereBetween('created_at', [$todayStart, $todayEnd])
             ->where('order_status', 4) // Completed
             ->sum('total_amount');
             
-        $yesterdaySales = OrderMaster::whereDate('created_at', $yesterday)
+        $yesterdaySales = OrderMaster::whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])
             ->where('order_status', 4)
             ->sum('total_amount');
 
@@ -37,8 +40,8 @@ class DashboardController extends Controller
         ];
 
         // 2. Orders Today & Trend
-        $todayOrders = OrderMaster::whereDate('created_at', $today)->count();
-        $yesterdayOrders = OrderMaster::whereDate('created_at', $yesterday)->count();
+        $todayOrders = OrderMaster::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+        $yesterdayOrders = OrderMaster::whereBetween('created_at', [$yesterdayStart, $yesterdayEnd])->count();
 
         $ordersDiff = $todayOrders - $yesterdayOrders;
         $ordersTrendVal = $yesterdayOrders > 0 ? round(($ordersDiff / $yesterdayOrders) * 100, 1) : 0;
@@ -67,7 +70,7 @@ class DashboardController extends Controller
         // 4. Top-selling Menu Item (today)
         $topItem = DB::table('order_details')
             ->select('item_id', DB::raw('SUM(quantity) as total_qty'))
-            ->whereDate('created_at', $today)
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
             ->groupBy('item_id')
             ->orderByDesc('total_qty')
             ->first();

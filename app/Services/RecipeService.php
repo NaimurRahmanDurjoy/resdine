@@ -15,6 +15,16 @@ use Exception;
 
 class RecipeService
 {
+    protected static ?array $unitsCache = null;
+
+    protected function getUnitCached(int $id): ?Unit
+    {
+        if (self::$unitsCache === null) {
+            self::$unitsCache = Unit::all()->keyBy('id')->toArray();
+        }
+        return isset(self::$unitsCache[$id]) ? (new Unit())->forceFill(self::$unitsCache[$id]) : null;
+    }
+
     /**
      * Store or update a recipe for a menu item.
      */
@@ -439,8 +449,8 @@ class RecipeService
             return $quantity;
         }
 
-        $fromUnit = Unit::find($fromUnitId);
-        $toUnit = Unit::find($toUnitId);
+        $fromUnit = $this->getUnitCached($fromUnitId);
+        $toUnit = $this->getUnitCached($toUnitId);
 
         if (!$fromUnit || !$toUnit) {
             throw new Exception("Invalid units provided for conversion.");
@@ -472,7 +482,7 @@ class RecipeService
 
         while ($currentUnit->base_unit_id) {
             $currentValue *= (float) $currentUnit->conversion_factor;
-            $nextUnit = Unit::find($currentUnit->base_unit_id);
+            $nextUnit = $this->getUnitCached($currentUnit->base_unit_id);
             
             if (!$nextUnit || in_array($nextUnit->id, $visited)) {
                 break; 

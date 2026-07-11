@@ -33,14 +33,14 @@ class WebController extends Controller
      */
     public function menu(MenuAvailabilityService $availabilityService)
     {
-        $categories = ProductCategory::where('status', 1)->get();
-        $branches = Branch::where('status', 1)->get();
-        $resTables = RestaurantTable::where('status', 1)->get();
-        $items = ProductItem::with('variants', 'category')
+        $categories = ProductCategory::where('status', 1)->get(['id', 'name', 'status']);
+        $branches = Branch::where('status', 1)->get(['id', 'name', 'status']);
+        $resTables = RestaurantTable::where('status', 1)->get(['id', 'name', 'branch_id', 'status']);
+        $items = ProductItem::with(['variants:id,item_id,name,price', 'category:id,name'])
             ->where('status', 1)
             ->get();
 
-        $defaultBranchId = Branch::first()?->id ?: 1;
+        $defaultBranchId = $branches->first()?->id ?: 1;
         $availabilityMap = $availabilityService->getAvailabilityMap($items->pluck('id')->all(), $defaultBranchId);
         $settings = BranchSetting::where('branch_id', $defaultBranchId)->first();
 
