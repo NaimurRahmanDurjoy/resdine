@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mx-auto mb-10">
+    <div class="theme-panel overflow-hidden mx-auto mb-10">
         <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
                 <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>

@@ -1,21 +1,11 @@
 <template>
   <div class="fixed top-6 right-6 z-[9999] flex flex-col space-y-4 w-full max-w-sm pointer-events-none">
-    <TransitionGroup 
-      name="toast-list" 
-      tag="div" 
-      class="flex flex-col space-y-3 w-full"
-    >
-      <div 
-        v-for="toast in toasts" 
-        :key="toast.id"
-        class="pointer-events-auto relative group overflow-hidden"
-        @mouseenter="pauseToast(toast)"
-        @mouseleave="resumeToast(toast)"
-      >
-        <div 
-          class="flex items-start p-4 rounded-xl border shadow-2xl backdrop-blur-md transition-all duration-300"
-          :class="themeClasses(toast.type)"
-        >
+    <TransitionGroup name="toast-list" tag="div" class="flex flex-col space-y-3 w-full">
+      <div v-for="toast in toasts" :key="toast.id" class="pointer-events-auto relative group overflow-hidden"
+        @mouseenter="pauseToast(toast)" @mouseleave="resumeToast(toast)">
+        <div
+          class="flex items-start rounded-xl border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] p-4 shadow-2xl backdrop-blur-md transition-all duration-300"
+          :class="themeClasses(toast.type)">
           <!-- Icon -->
           <div class="flex-shrink-0 mr-3 mt-0.5">
             <span class="material-symbols-outlined text-2xl" :class="iconColor(toast.type)">
@@ -32,20 +22,15 @@
           </div>
 
           <!-- Close Button -->
-          <button 
-            @click="removeToast(toast.id)"
-            class="flex-shrink-0 text-current opacity-50 hover:opacity-100 transition-opacity focus:outline-none"
-          >
+          <button @click="removeToast(toast.id)"
+            class="flex-shrink-0 text-current opacity-50 hover:opacity-100 transition-opacity focus:outline-none">
             <span class="material-symbols-outlined text-lg">close</span>
           </button>
 
           <!-- Progress Bar -->
           <div class="absolute bottom-0 left-0 h-1 w-full bg-black/5 overflow-hidden rounded-b-xl">
-            <div 
-              class="h-full transition-all duration-[50ms] ease-linear"
-              :class="progressClasses(toast.type)"
-              :style="{ width: `${(toast.remaining / toast.duration) * 100}%` }"
-            ></div>
+            <div class="h-full transition-all duration-[50ms] ease-linear" :class="progressClasses(toast.type)"
+              :style="{ width: `${(toast.remaining / toast.duration) * 100}%` }"></div>
           </div>
         </div>
       </div>
@@ -63,10 +48,10 @@ const INTERVAL = 50 // ms for progress bar update
 
 function addToast(type, message) {
   if (!message) return
-  
+
   const id = Date.now() + Math.random()
   const duration = type === 'error' ? 8000 : 5000 // Error toasts stay longer
-  
+
   const toast = {
     id,
     type,
@@ -76,7 +61,7 @@ function addToast(type, message) {
     paused: false,
     timer: null
   }
-  
+
   toasts.value.push(toast)
   startTimer(toast)
 }

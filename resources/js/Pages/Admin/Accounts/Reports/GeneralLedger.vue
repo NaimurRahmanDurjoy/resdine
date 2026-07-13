@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
           <div class="flex justify-between items-center">
             <div>
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Ledger Table -->
-      <div v-if="filters.account_id" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div v-if="filters.account_id" class="theme-panel overflow-hidden">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
@@ -96,7 +96,7 @@
         </table>
       </div>
 
-      <div v-else class="bg-white rounded-xl shadow-sm border border-gray-100 p-20 text-center">
+      <div v-else class="theme-panel p-20 text-center">
         <span class="material-symbols-outlined text-gray-200 text-6xl mb-4">analytics</span>
         <h3 class="text-gray-400 font-bold">Select an account to view the General Ledger</h3>
       </div>

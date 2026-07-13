@@ -2,7 +2,7 @@
 
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex justify-between items-center">
             <div>
@@ -14,7 +14,7 @@
       </div>
 
       <!-- Staff Table -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <ListTable :headers="headers" :items="staff" :loading="loading">
           <template #rows="{ items }">
             <tr v-for="(s, idx) in items" :key="s.user_id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">

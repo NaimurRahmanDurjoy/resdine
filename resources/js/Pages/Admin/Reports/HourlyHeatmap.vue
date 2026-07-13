@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex justify-between items-center">
             <div>
@@ -13,7 +13,7 @@
       </div>
 
       <!-- Heatmap Grid -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-6">
+      <div class="theme-panel overflow-hidden p-6">
         <div class="overflow-x-auto">
           <table class="w-full border-collapse">
             <thead>

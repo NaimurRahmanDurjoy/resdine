@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
           <div class="flex justify-between items-center">
             <div>
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Trial Balance Table -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-0">
+      <div class="theme-panel overflow-hidden print:shadow-none print:border-0">
         <div class="p-6 bg-gray-50/30 border-b border-gray-100 hidden print:block">
            <h2 class="text-xl font-bold text-center uppercase tracking-widest text-gray-800">Trial Balance</h2>
            <p class="text-center text-gray-500 text-sm">As of {{ filters.as_of_date }}</p>

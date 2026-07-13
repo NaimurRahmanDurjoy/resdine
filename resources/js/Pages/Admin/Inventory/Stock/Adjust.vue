@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-3xl mx-auto">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="theme-panel overflow-hidden">
             <!-- Header -->
             <div
                 class="bg-gradient-to-r from-blue-50 to-white dark:from-gray-700 dark:to-gray-800 px-8 py-6 border-b border-gray-200 dark:border-gray-700">

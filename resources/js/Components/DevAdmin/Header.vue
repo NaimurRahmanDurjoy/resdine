@@ -1,6 +1,6 @@
 <template>
   <header
-    class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
+    class="h-16 flex items-center justify-between border-b border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] px-6 shadow-sm sticky top-0 z-20">
     <!-- Left Section -->
     <div class="flex items-center">
       <!-- Mobile menu button -->
@@ -22,8 +22,8 @@
     <!-- Right Section -->
     <div class="flex items-center space-x-2">
       <!-- Theme Toggle -->
-      <button
-        class="p-2 text-gray-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors">
+      <button type="button" @click="$emit('toggleTheme')"
+        class="rounded-lg border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] p-2 text-[color:var(--text-secondary)] transition-all hover:bg-[color:var(--bg-elevated)] hover:text-[color:var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-primary)]">
         <span class="material-symbols-outlined font-icon">dark_mode</span>
       </button>
 
@@ -40,41 +40,47 @@
         </button>
 
         <!-- Dropdown Menu -->
-        <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
+        <transition enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95">
           <div v-if="notifOpen"
             class="absolute right-0 mt-2 w-80 sm:w-96 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50">
-            
-            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/80 flex justify-between items-center">
+
+            <div
+              class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/80 flex justify-between items-center">
               <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                Notifications 
-                <span v-if="localNotifications?.total" class="bg-indigo-100 text-indigo-800 text-xs font-black px-2 py-0.5 rounded-full dark:bg-indigo-900 dark:text-indigo-300">{{ localNotifications.total }}</span>
+                Notifications
+                <span v-if="localNotifications?.total"
+                  class="bg-indigo-100 text-indigo-800 text-xs font-black px-2 py-0.5 rounded-full dark:bg-indigo-900 dark:text-indigo-300">{{
+                  localNotifications.total }}</span>
               </h3>
             </div>
 
             <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
-               <div v-if="!localNotifications?.items || localNotifications.items.length === 0" class="p-8 text-center text-gray-400 dark:text-gray-500">
-                 <span class="material-symbols-outlined text-5xl mb-3 opacity-30 block">notifications_paused</span>
-                 <p class="text-sm font-medium">All caught up!</p>
-               </div>
-               
-               <template v-else>
-                  <Link 
-                    v-for="item in localNotifications.items" 
-                    :key="item.id" 
-                    :href="item.url"
-                    class="flex items-start p-4 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 border-b border-gray-50 dark:border-gray-700/50 transition-all last:border-0 group"
-                  >
-                    <div class="flex-shrink-0 mt-0.5">
-                      <span v-if="item.type === 'system_error'" class="material-symbols-outlined text-red-500 bg-red-50 dark:bg-red-500/10 p-2.5 rounded-xl text-sm shadow-sm">error</span>
-                      <span v-else class="material-symbols-outlined text-blue-500 bg-blue-50 dark:bg-blue-500/10 p-2.5 rounded-xl text-sm shadow-sm">info</span>
-                    </div>
-                    <div class="ml-4 flex-1">
-                      <p class="text-sm rounded text-gray-800 dark:text-gray-200 leading-snug font-medium group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {{ item.message }}
-                      </p>
-                    </div>
-                  </Link>
-               </template>
+              <div v-if="!localNotifications?.items || localNotifications.items.length === 0"
+                class="p-8 text-center text-gray-400 dark:text-gray-500">
+                <span class="material-symbols-outlined text-5xl mb-3 opacity-30 block">notifications_paused</span>
+                <p class="text-sm font-medium">All caught up!</p>
+              </div>
+
+              <template v-else>
+                <Link v-for="item in localNotifications.items" :key="item.id" :href="item.url"
+                  class="flex items-start p-4 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 border-b border-gray-50 dark:border-gray-700/50 transition-all last:border-0 group">
+                  <div class="flex-shrink-0 mt-0.5">
+                    <span v-if="item.type === 'system_error'"
+                      class="material-symbols-outlined text-red-500 bg-red-50 dark:bg-red-500/10 p-2.5 rounded-xl text-sm shadow-sm">error</span>
+                    <span v-else
+                      class="material-symbols-outlined text-blue-500 bg-blue-50 dark:bg-blue-500/10 p-2.5 rounded-xl text-sm shadow-sm">info</span>
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <p
+                      class="text-sm rounded text-gray-800 dark:text-gray-200 leading-snug font-medium group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {{ item.message }}
+                    </p>
+                  </div>
+                </Link>
+              </template>
             </div>
           </div>
         </transition>
@@ -125,6 +131,8 @@
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 
+const emit = defineEmits(['toggleTheme'])
+
 const props = defineProps({
   user: { type: Object, required: true },
   notifications: { type: Object, default: () => ({ total: 0, groups: {}, items: [] }) },
@@ -163,12 +171,12 @@ onMounted(() => {
     window.Echo.private(`App.Models.Admin.${props.user.id}`)
       .notification((notification) => {
         const newNotif = {
-            id: notification.id,
-            type: notification.type || 'info',
-            message: notification.message,
-            url: notification.url || '#'
+          id: notification.id,
+          type: notification.type || 'info',
+          message: notification.message,
+          url: notification.url || '#'
         };
-        
+
         if (!localNotifications.value.items) localNotifications.value.items = [];
         localNotifications.value.items.unshift(newNotif);
         localNotifications.value.total++;

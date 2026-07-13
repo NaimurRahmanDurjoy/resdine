@@ -24,7 +24,7 @@
       </div>
 
       <!-- Main Voucher Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-0">
+      <div class="theme-panel overflow-hidden print:shadow-none print:border-0">
         <div class="p-8 border-b border-gray-50 bg-gray-50/30 grid grid-cols-3 gap-8">
            <div>
              <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Voucher Date</label>

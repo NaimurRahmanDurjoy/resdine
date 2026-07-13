@@ -1,6 +1,6 @@
 <template>
     <AdminLayout :pageTitle="pageTitle">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-2xl mx-auto">
+        <div class="theme-panel overflow-hidden max-w-2xl mx-auto">
             <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>
             </div>

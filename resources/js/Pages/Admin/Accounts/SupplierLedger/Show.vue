@@ -1,8 +1,8 @@
 <template>
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="theme-panel overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-[#121215] dark:to-[#09090b] px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div class="flex justify-between items-center">
             <div>
               <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ pageTitle }}</h1>
@@ -18,7 +18,7 @@
       </div>
 
       <!-- Statement Table -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
@@ -69,7 +69,7 @@
       </div>
 
       <!-- Record Payment Form -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-emerald-50 to-white px-6 py-4 border-b border-gray-200">
           <h2 class="text-lg font-bold text-gray-800">Record Payment</h2>
           <p class="text-gray-500 text-sm">Log a payment against this supplier's balance</p>

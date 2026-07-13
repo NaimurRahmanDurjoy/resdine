@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead
 </head>
-<body class="bg-gray-50 font-sans antialiased text-gray-900">
+
+<body class="min-h-screen bg-[color:var(--bg-app)] font-sans antialiased text-[color:var(--text-primary)]">
     @inertia
 
     <!-- jQuery (required by Select2) -->
@@ -26,4 +28,5 @@
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </body>
+
 </html>

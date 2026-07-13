@@ -9,10 +9,10 @@ const props = defineProps({
 
 <template>
   <aside
-    class="w-64 bg-white dark:bg-gray-900 h-full border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
+    class="w-64 h-full border-r border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] text-[color:var(--text-primary)] flex flex-col overflow-hidden">
     <!-- Logo -->
     <div
-      class="flex-shrink-0 flex items-center h-16 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-indigo-900 dark:to-slate-900">
+      class="flex-shrink-0 flex items-center h-16 border-b border-[color:var(--border-subtle)] bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-transparent dark:to-transparent">
       <Logo is-sidebar />
     </div>
 
@@ -23,7 +23,7 @@ const props = defineProps({
 
     <!-- Footer -->
     <div
-      class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 text-center bg-gray-50 dark:bg-gray-800/50">
+      class="flex-shrink-0 border-t border-[color:var(--border-subtle)] bg-[color:var(--bg-elevated)] p-4 text-center text-xs text-[color:var(--text-muted)]">
       © {{ new Date().getFullYear() }} Resdine POS
     </div>
   </aside>

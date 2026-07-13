@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="theme-panel overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-50 to-white px-6 py-4 border-b border-gray-200">
           <div class="flex justify-between items-center">
             <div>
@@ -39,7 +39,7 @@
 
       <!-- P&L Statement -->
       <div
-        class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto print:max-w-full print:border-0 print:shadow-none">
+        class="theme-panel overflow-hidden max-w-6xl mx-auto print:max-w-full print:border-0 print:shadow-none">
         <div class="p-10 border-b border-gray-50 bg-gray-50/30 text-center">
           <h2 class="text-2xl font-black text-gray-800 uppercase tracking-tighter">Profit & Loss Statement</h2>
           <p class="text-gray-500 text-sm font-bold tracking-widest mt-1 uppercase">{{ filters.from_date }} TO {{

@@ -43,7 +43,7 @@ const getTransactionType = (type) => {
 </script>
 
 <template>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="theme-panel overflow-hidden">
         <!-- Page Header -->
         <div class="bg-white dark:bg-gray-800">
             <div

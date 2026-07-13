@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto">
+    <div class="theme-panel overflow-hidden max-w-6xl mx-auto">
       <!-- Page Header -->
       <div class="bg-white dark:bg-gray-800">
         <div class="bg-gradient-to-r from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
