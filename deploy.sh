@@ -9,5 +9,5 @@ php artisan storage:link --force
 # Run database migrations automatically on every successful deploy
 php artisan migrate --force
 
-# Start Apache web server in the foreground to keep the container running
-apache2-foreground
+# Start Supervisor to run both Apache and Laravel Reverb together
+exec supervisord -c /var/www/html/supervisor.conf

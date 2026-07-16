@@ -8,12 +8,15 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
+// Setup condition for production vs local environment
+const isLocal = import.meta.env.VITE_REVERB_HOST === 'localhost' || !import.meta.env.VITE_REVERB_HOST;
+
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST === 'localhost' ? '127.0.0.1' : import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    wsHost: isLocal ? '127.0.0.1' : import.meta.env.VITE_REVERB_HOST,
+    wsPort: isLocal ? 8080 : 80,
+    wssPort: isLocal ? 8080 : 443,
+    forceTLS: !isLocal,
     enabledTransports: ['ws', 'wss'],
 });
