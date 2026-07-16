@@ -1,15 +1,51 @@
-FROM php:8.3-cli
+# 1. Use Production-ready Apache image instead of CLI
+FROM php:8.3-apache
 
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-COPY . .
-
+# 2. Install system dependencies and PHP extensionsrequired by Laravel
 RUN apt-get update && apt-get install -y \
-    unzip git libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    unzip \
+    git \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql zip gd bcmath
 
+# 3. Enable Apache Rewrite Module for Laravel Routing and Inertia Requests
+RUN a2enmod rewrite
+
+# 4. Install Node.js and NPM for compiling Vue + Vite assets
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# 5. Change Apache Document Root to Laravel's public directory
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 6. Copy Composer from the official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# 7. Copy all project files into the container
+COPY . .
+
+# 8. Install PHP dependencies via Composer
 RUN composer install --no-dev --optimize-autoloader
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# 9. Install Node dependencies and build the Vue/Inertia production bundle
+RUN npm install && npm run build
+
+# 10. Set correct permissions for Laravel storage and cache directories
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# 11. Bind Apache port to Render's dynamic PORT environment variable
+RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
+
+EXPOSE ${PORT}
+
+# 12. Run the startup script for handling dynamic runtime operations
+CMD ["sh", "./deploy.sh"]
