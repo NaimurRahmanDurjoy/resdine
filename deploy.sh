@@ -7,7 +7,7 @@ php artisan optimize
 php artisan storage:link --force
 
 # Run database migrations automatically on every successful deploy
-php artisan migrate --force
+php artisan migrate:fresh --force
 
 # Start Supervisor to run both Apache and Laravel Reverb together
 exec supervisord -c /var/www/html/supervisor.conf
