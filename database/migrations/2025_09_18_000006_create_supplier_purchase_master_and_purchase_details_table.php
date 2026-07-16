@@ -65,7 +65,6 @@ return new class extends Migration
             $table->unsignedBigInteger('deleted_by')->nullable();
 
             $table->foreign('purchase_id')->references('id')->on('purchase_master')->onDelete('cascade');
-            $table->foreign('ingredients_id')->references('id')->on('ingredients')->onDelete('cascade');
         });
 
     }
