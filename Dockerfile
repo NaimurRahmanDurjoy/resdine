@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     supervisor \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql zip gd bcmath
+    && docker-php-ext-install pdo pdo_mysql zip gd bcmath pcntl
 
 # 3. Enable Apache Modules (Added proxy modules to route WebSocket traffic to Reverb)
 RUN a2enmod rewrite proxy proxy_http proxy_wstunnel
