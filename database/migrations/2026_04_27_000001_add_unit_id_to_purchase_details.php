@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchase_details', function (Blueprint $table) {
-            $table->unsignedBigInteger('unit_id')->nullable()->after('ingredients_id');
+            $table->unsignedBigInteger('unit_id')->nullable()->after('id');
             $table->decimal('normalized_quantity', 15, 6)->default(0)->after('quantity');
             
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('set null');
