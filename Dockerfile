@@ -40,6 +40,13 @@ COPY . .
 # 9. Install PHP dependencies via Composer
 RUN composer install --no-dev --optimize-autoloader
 
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ENV VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY
+ENV VITE_REVERB_HOST=$VITE_REVERB_HOST
+ENV VITE_REVERB_PORT=$VITE_REVERB_PORT
+
 # 10. Install Node dependencies and build the Vue/Inertia production bundle
 RUN npm install && npm run build
 
