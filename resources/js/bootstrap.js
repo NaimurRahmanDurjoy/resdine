@@ -15,8 +15,8 @@ window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
     wsHost: isLocal ? '127.0.0.1' : import.meta.env.VITE_REVERB_HOST,
-    wsPort: isLocal ? 8080 : 80,
-    wssPort: isLocal ? 8080 : 443,
+    wsPort: isLocal ? 8080 : undefined,
+    wssPort: isLocal ? 8080 : undefined,
     forceTLS: !isLocal,
     enabledTransports: ['ws', 'wss'],
 });
