@@ -1,9 +1,9 @@
 <template>
   <div
     class="font-outfit bg-slate-50 min-h-screen text-slate-800 transition-colors duration-300 antialiased selection:bg-amber-300 selection:text-amber-900">
-    <!-- Navbar -->
+    <!-- Navbar (Fixed contrast & visibility on scroll) -->
     <nav
-      class="fixed w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100">
+      class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-lg shadow-md border-b border-slate-200/80">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-14 md:h-16 items-center">
 
@@ -22,20 +22,20 @@
           </div>
 
           <!-- Desktop -->
-          <div class=" hidden md:flex space-x-8 items-center">
-            <Link :href="route('web.menu')" class="text-sm font-bold">
+          <div class="hidden md:flex space-x-8 items-center">
+            <Link :href="route('web.menu')" class="text-sm font-bold text-slate-700 hover:text-slate-950 transition-colors">
               Menu
             </Link>
 
-            <button @click="promptTrackOrder">
+            <button @click="promptTrackOrder" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               Track Order
             </button>
 
-            <button @click="showAboutModal = true">
+            <button @click="showAboutModal = true" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               About
             </button>
 
-            <button @click="showContactModal = true">
+            <button @click="showContactModal = true" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               Contact
             </button>
 
@@ -44,10 +44,9 @@
 
           <!-- Mobile -->
           <div class="flex md:hidden items-center gap-2">
-
             <slot name="nav-actions"></slot>
 
-            <button @click="mobileMenuOpen = true" class="p-2 rounded-xl bg-slate-100 active:bg-slate-200">
+            <button @click="mobileMenuOpen = true" class="p-2 rounded-xl bg-slate-100 active:bg-slate-200 text-slate-700">
               <span class="material-symbols-outlined">
                 menu
               </span>
@@ -70,7 +69,7 @@
       </div>
     </footer>
 
-    <!-- Mobile Menu: now slides in/out instead of just appearing -->
+    <!-- Mobile Menu -->
     <Transition name="fade">
       <div v-if="mobileMenuOpen" class="fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/40" @click="mobileMenuOpen = false"></div>
@@ -85,7 +84,6 @@
             </div>
 
             <div class="p-4 space-y-2 overflow-y-auto flex-1">
-
               <Link :href="route('web.menu')" @click="mobileMenuOpen = false"
                 class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 active:bg-amber-50 border border-slate-100 transition">
                 <span class="material-symbols-outlined text-amber-500">
@@ -117,7 +115,6 @@
                 </span>
                 <span class="font-semibold">Contact Us</span>
               </button>
-
             </div>
           </div>
         </Transition>
@@ -147,8 +144,7 @@
               <div
                 class="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-4 rounded-2xl border border-slate-100/50 dark:border-slate-800">
                 <span class="material-symbols-outlined text-amber-500 mb-1 block">schedule</span>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Opening Hours
-                </h4>
+                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Opening Hours</h4>
                 <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Daily: 11:00 AM - 10:00 PM</p>
               </div>
               <div
@@ -207,8 +203,7 @@
                 </div>
                 <div>
                   <h4 class="font-bold text-xs uppercase text-slate-400 tracking-wider">Address</h4>
-                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">123 Gourmet Boulevard,
-                    Food District, Dhaka.</p>
+                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">123 Gourmet Boulevard, Food District, Dhaka.</p>
                 </div>
               </div>
             </div>
@@ -272,7 +267,6 @@ body {
   font-family: 'Outfit', sans-serif;
 }
 
-/* Modal/menu transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.25s ease;

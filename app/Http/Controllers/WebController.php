@@ -16,6 +16,7 @@ use App\Services\MenuAvailabilityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class WebController extends Controller
 {
@@ -31,23 +32,47 @@ class WebController extends Controller
     /**
      * Display the digital menu.
      */
-    public function menu(MenuAvailabilityService $availabilityService)
+public function menu(MenuAvailabilityService $availabilityService)
     {
-        $categories = ProductCategory::where('status', 1)->get(['id', 'name', 'status']);
-        $branches = Branch::where('status', 1)->get(['id', 'name', 'status']);
+        // 1. Active product categories cached for 1 hour
+        $categories = Cache::remember('web_categories', 3600, function () {
+            return ProductCategory::where('status', 1)->get(['id', 'name', 'status']);
+        });
+
+        // 2. Active branches cached for 1 hour
+        $branches = Cache::remember('web_branches', 3600, function () {
+            return Branch::where('status', 1)->get(['id', 'name', 'status']);
+        });
+
+        // ৩. রেস্তোরাঁ টেবিল লিস্ট (শুধুমাত্র প্রয়োজনীয় কলাম সহ)
         $resTables = RestaurantTable::where('status', 1)->get(['id', 'name', 'branch_id', 'status']);
-        $items = ProductItem::with(['variants:id,item_id,name,price', 'category:id,name'])
+        
+        // 4. Main menu Optimization (Eager Loading + Specific Columns)
+        $items = ProductItem::with(['variants:id,item_id,name,price','category:id,name'])
             ->where('status', 1)
+            ->select('id', 'category_id', 'name', 'description', 'menu_img', 'price', 'type', 'unit_id', 'status', 'is_featured')
+            ->get();
+
+        // 5. Featured optimization (Eager Loading + Limit 6)
+        $featuredItems = ProductItem::with(['variants:id,item_id,name,price','category:id,name'])
+            ->where('status', 1)
+            ->where('is_featured', 1)
+            ->select('id', 'category_id', 'name', 'description', 'menu_img', 'price', 'type', 'unit_id', 'status', 'is_featured')
+            ->take(6)
             ->get();
 
         $defaultBranchId = $branches->first()?->id ?: 1;
+        
+        // ৬. ইন-মেমরি রিয়েল-টাইম স্টক ও ইনগ্রেডিয়েন্ট অ্যাভেইল্যাবিলিটি ম্যাপ জেনারেট করা
+        // এটি সরাসরি MenuAvailabilityService-এর ইন্টারনাল ৬০ সেকেন্ডের ক্যাশিং ব্যবহার করবে
         $availabilityMap = $availabilityService->getAvailabilityMap($items->pluck('id')->all(), $defaultBranchId);
+
+        // ৭. ব্রাঞ্চ সেটিংস রিড করা
         $settings = BranchSetting::where('branch_id', $defaultBranchId)->first();
 
-        // Fetch active campaigns for the web menu
+        // ৮. একটিভ মার্কেটিং ক্যাম্পেইন লোড করা (টাইম-উইন্ডো এবং প্রায়োরিটি লজিক সহ)
         $activeCampaigns = MarketingCampaign::where('is_active', true)
             ->where(function($query) {
-                // If starts_at is in the next 12 hours, show it anyway to handle timezone offsets
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', now()->addHours(12));
             })
             ->where(function($query) {
@@ -59,6 +84,7 @@ class WebController extends Controller
         return Inertia::render('Web/Menu/Index', [
             'categories' => $categories,
             'items' => $items,
+            'featuredItems' => $featuredItems, 
             'availabilityMap' => $availabilityMap,
             'activeCampaigns' => $activeCampaigns,
             'branches' => $branches,
@@ -71,8 +97,7 @@ class WebController extends Controller
             ]
         ]);
     }
-
-    /**
+/**
      * Process customer guest order.
      */
     public function submitOrder(Request $request)
@@ -129,11 +154,11 @@ class WebController extends Controller
                     $notes .= " - [Delivery Order]";
                 }
 
-                // 1. Create Order
+                // 1. Create Order (এর ভেতরেই তোমার RecipeService স্টক ডিডাক্ট করে নিচ্ছে)
                 $order = $this->orderService->createOrder([
                     'user_id' => $systemUserId,
                     'branch_id' => $branchId,
-                    'customer_id' => $customerId, // Links order to CRM Customer profile
+                    'customer_id' => $customerId,
                     'table_id' => $tableId,
                     'order_type' => $validated['order_type'],
                     'items' => $validated['items'],
@@ -189,6 +214,10 @@ class WebController extends Controller
                         ]);
                     }
                 }
+
+                // ⚡ [CRITICAL FIX] স্টক পরিবর্তন হওয়ার সাথে সাথে এই ব্রাঞ্চের মেনু অ্যাভেইল্যাবিলিটি ক্যাশ ক্লিয়ার করা
+                // এর ফলে ফ্রন্টএন্ডে নেক্সট হিটেই রিয়েল-টাইম স্টক আপডেট রিফ্লেক্ট করবে।
+                MenuAvailabilityService::invalidateCache($branchId);
 
                 \App\Events\OrderCreated::dispatch($order);
 
