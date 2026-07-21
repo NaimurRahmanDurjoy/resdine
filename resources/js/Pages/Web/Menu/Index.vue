@@ -25,14 +25,18 @@
       <div class="max-w-7xl mx-auto px-4 relative z-10 w-full py-16 md:py-24 text-center">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 font-bold tracking-widest uppercase text-xs mb-6 animate-fade-in">
           <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
-          The Ultimate Culinary Experience
+          Freshly Prepared • Fast Delivery 
         </div>
-        <h1 class="text-4xl sm:text-5xl md:text-8xl font-black text-white leading-none mb-6 tracking-tighter max-w-5xl mx-auto">
-          Crafting Moments <br class="hidden md:block" />
-          Tasting <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 selection:bg-amber-500">Memories</span>
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-black leading-[0.95] tracking-tight text-white max-w-6xl mx-auto">
+            Experience
+            <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300">
+                Delicious Food & Fresh Flavors.
+            </span>
         </h1>
-        <p class="text-slate-400 max-w-2xl mx-auto text-base md:text-xl font-normal mb-8 leading-relaxed">
-          Welcome to ResDine. Indulge in an extraordinary symphony of flavors crafted by master chefs, delivered or served right to your table.
+
+        <p class="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 my-7">
+            Discover handcrafted dishes, reserve your table, or order your favorites—all in just a few clicks.
         </p>
         <div class="flex flex-wrap justify-center gap-4">
           <a href="#menu-section" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-8 py-4 rounded-full shadow-xl shadow-amber-500/10 hover:shadow-amber-500/30 transition-all transform hover:-translate-y-0.5">
