@@ -258,8 +258,8 @@ resdine/
 -->
 ## Access the application
 
-*   Customer Menu: `https://resdine.up.railway.app/menu`
-*   Admin Portal: `https://resdine.up.railway.app/admin/login`
+*   Customer Menu: `https://resdine.onrender.com`
+*   Admin Portal: `https://resdine.up.onrender.com/admin/login`
 
 ---
 
