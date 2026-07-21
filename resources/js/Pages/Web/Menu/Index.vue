@@ -308,9 +308,6 @@
           <div class="text-amber-400 font-bold">support@resdine.com</div>
         </div>
       </div>
-      <div class="max-w-7xl mx-auto px-4 pt-6 border-t border-slate-800 text-center text-xs text-slate-600">
-        &copy; 2026 ResDine Cloud. All rights reserved. Crafted for extraordinary experiences.
-      </div>
     </footer>
 
     <!-- Sticky bottom Mobile View Cart Bar -->

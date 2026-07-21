@@ -13,6 +13,7 @@ use App\Http\Controllers\DevAdmin\UserController;
 use App\Http\Controllers\DevAdmin\AdminMenuController;
 use App\Http\Controllers\DevAdmin\AdminInternalLinkController;
 use App\Http\Controllers\DevAdmin\AdminMenuSortingController;
+use App\Models\DatabaseBackup;
 
 // ----------------------
 // devAdmin Panel Routes
@@ -59,6 +60,10 @@ Route::middleware('web')->name('devAdmin.')->group(function () {
         Route::post('clear-cache', [SystemController::class, 'clearCache'])->name('cache.clear');
         Route::get('logs', [SystemController::class, 'viewLogs'])->name('logs.view');
         Route::get('database', [SystemController::class, 'databaseInfo'])->name('database.info');
+        Route::post('database/test-connection', [SystemController::class, 'testDatabaseConnection'])->name('database.testConnection');
+        Route::post('database/backup', [SystemController::class, 'backupDatabase'])->name('database.backup');
+        Route::get('database/backup/{backup}/download', [SystemController::class, 'downloadBackup'])->name('database.backup.download');
+        Route::delete('database/backup/{backup}', [SystemController::class, 'deleteBackup'])->name('database.backup.delete');
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
     });
 });
