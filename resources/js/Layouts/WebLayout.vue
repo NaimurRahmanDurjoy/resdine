@@ -1,4 +1,25 @@
 <template>
+
+  <Head>
+    <!-- Default SEO Tags for ResDine -->
+    <title>ResDine - Gourmet Fine Dining & Restaurant Management</title>
+    <meta name="description"
+      content="Welcome to ResDine, where culinary passion meets exceptional service. The ultimate restaurant experience and management system." />
+    <meta name="keywords" content="restaurant, fine dining, resdine, gourmet, food delivery, restaurant management" />
+
+    <!-- Open Graph for Social Sharing -->
+    <meta property="og:title" content="ResDine - Gourmet Fine Dining & Restaurant Management" />
+    <meta property="og:description" content="Discover exquisite dishes and exceptional service at ResDine." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://resdine.onrender.com" />
+    <meta property="og:site_name" content="ResDine" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ResDine - Gourmet Fine Dining" />
+    <meta name="twitter:description" content="Experience the finest culinary creations at ResDine." />
+  </Head>
+
   <div
     class="font-outfit bg-slate-50 min-h-screen text-slate-800 transition-colors duration-300 antialiased selection:bg-amber-300 selection:text-amber-900">
     <!-- Navbar (Fixed contrast & visibility on scroll) -->
@@ -23,19 +44,23 @@
 
           <!-- Desktop -->
           <div class="hidden md:flex space-x-8 items-center">
-            <Link :href="route('web.menu')" class="text-sm font-bold text-slate-700 hover:text-slate-950 transition-colors">
+            <Link :href="route('web.menu')"
+              class="text-sm font-bold text-slate-700 hover:text-slate-950 transition-colors">
               Menu
             </Link>
 
-            <button @click="promptTrackOrder" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
+            <button @click="promptTrackOrder"
+              class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               Track Order
             </button>
 
-            <button @click="showAboutModal = true" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
+            <button @click="showAboutModal = true"
+              class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               About
             </button>
 
-            <button @click="showContactModal = true" class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
+            <button @click="showContactModal = true"
+              class="text-sm font-bold text-slate-600 hover:text-slate-950 transition-colors">
               Contact
             </button>
 
@@ -46,7 +71,8 @@
           <div class="flex md:hidden items-center gap-2">
             <slot name="nav-actions"></slot>
 
-            <button @click="mobileMenuOpen = true" class="p-2 rounded-xl bg-slate-100 active:bg-slate-200 text-slate-700">
+            <button @click="mobileMenuOpen = true"
+              class="p-2 rounded-xl bg-slate-100 active:bg-slate-200 text-slate-700">
               <span class="material-symbols-outlined">
                 menu
               </span>
@@ -144,7 +170,8 @@
               <div
                 class="bg-slate-50 dark:bg-slate-950/50 p-3 md:p-4 rounded-2xl border border-slate-100/50 dark:border-slate-800">
                 <span class="material-symbols-outlined text-amber-500 mb-1 block">schedule</span>
-                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Opening Hours</h4>
+                <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wide">Opening Hours
+                </h4>
                 <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Daily: 11:00 AM - 10:00 PM</p>
               </div>
               <div
@@ -177,7 +204,8 @@
             <div class="space-y-3">
               <a href="tel:+88012345678"
                 class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/50 dark:border-slate-800 active:bg-amber-50">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <div
+                  class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-lg">call</span>
                 </div>
                 <div>
@@ -187,7 +215,8 @@
               </a>
               <a href="mailto:support@resdine.com"
                 class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/50 dark:border-slate-800 active:bg-amber-50">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <div
+                  class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                   <span class="material-symbols-outlined text-lg">mail</span>
                 </div>
                 <div>
@@ -203,7 +232,8 @@
                 </div>
                 <div>
                   <h4 class="font-bold text-xs uppercase text-slate-400 tracking-wider">Address</h4>
-                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">123 Gourmet Boulevard, Food District, Dhaka.</p>
+                  <p class="text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">123 Gourmet Boulevard,
+                    Food District, Dhaka.</p>
                 </div>
               </div>
             </div>
@@ -216,7 +246,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, Head } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 
@@ -271,6 +301,7 @@ body {
 .fade-leave-active {
   transition: opacity 0.25s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -280,6 +311,7 @@ body {
 .slide-in-leave-active {
   transition: transform 0.3s ease;
 }
+
 .slide-in-enter-from,
 .slide-in-leave-to {
   transform: translateX(100%);

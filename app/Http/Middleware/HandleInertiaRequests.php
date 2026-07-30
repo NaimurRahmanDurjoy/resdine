@@ -131,7 +131,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'business' => [
-                'currency_symbol' => $branchSetting->currency?->symbol ?? '$',
+                'currency_symbol' => $branchSetting->currency?->symbol ?? '৳',
                 'active_branch_id' => $activeBranchId,
                 'can_select_branch' => $canSelectBranch,
                 'branches' => $branches,
