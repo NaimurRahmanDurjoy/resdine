@@ -163,8 +163,8 @@
                 {{ item.name }}
               </h3>
               <p class="text-slate-400 text-[11px] md:text-xs mt-1 line-clamp-2 leading-relaxed font-light">
-                {{ item.description || 'Experience a unique fusion of premium ingredients engineered for culinary
-                excellence.' }}
+                {{ item.description || `Experience a unique fusion of premium ingredients engineered for culinary
+                excellence.` }}
               </p>
             </div>
 
@@ -379,7 +379,7 @@
         <span class="flex items-center gap-2.5 font-black text-sm">
           <span
             class="bg-amber-500 text-slate-950 text-xs w-6 h-6 rounded-full flex items-center justify-center font-black">{{
-            cartTotalItems }}</span>
+              cartTotalItems }}</span>
           View Basket
         </span>
         <span class="font-black text-amber-400 text-base">{{ currency() }}{{ cartTotal.toFixed(2) }}</span>
@@ -437,7 +437,7 @@
                       {{ item.product.name }}
                       <span v-if="item.variant_name"
                         class="text-xs text-slate-500 font-normal ml-1 border-l pl-1 border-slate-300">{{
-                        item.variant_name
+                          item.variant_name
                         }}</span>
                     </h4>
                     <div class="text-amber-600 font-black text-sm md:text-base">{{ currency() }}{{ (item.price *
@@ -559,7 +559,7 @@
               </div>
               <div v-show="cartVatAmount > 0" class="flex justify-between items-center text-xs text-slate-500">
                 <span>VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.'
-                  }})</span>
+                }})</span>
                 <span class="font-bold text-slate-800">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
               </div>
               <div v-show="cartServiceChargeAmount > 0"
