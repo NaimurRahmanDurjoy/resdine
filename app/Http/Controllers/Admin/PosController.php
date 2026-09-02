@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
+use App\Models\PosRegister;
 use App\Models\ProductItem;
 use App\Models\Customer;
 use App\Models\RestaurantTable;
 use App\Models\OrderMaster;
 use App\Models\OrderItem;
 use App\Models\OrderPayment;
+use App\Models\BranchSetting;
 use App\Services\OrderService;
+use App\Services\MenuAvailabilityService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,7 +33,7 @@ class PosController extends Controller
     public function index()
     {
         // 0. Inform frontend if there's an active register
-        $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
+        $activeRegister = PosRegister::where('user_id', auth()->id())
             ->where('branch_id', auth()->user()->branch_id)
             ->where('status', 1)
             ->first();
@@ -46,7 +49,26 @@ class PosController extends Controller
         $tables = RestaurantTable::where('status', 1)->get(); 
 
         $activeBranchId = auth()->user()->getActiveBranchId();
-        $settings = \App\Models\BranchSetting::where('branch_id', $activeBranchId)->first();
+        $settings = BranchSetting::where('branch_id', $activeBranchId)->first();
+
+        // Calculate Stock Availability
+        $availabilityService = app(MenuAvailabilityService::class);
+        $availabilityMap = $availabilityService->getAvailabilityMap($items->pluck('id')->toArray(), $activeBranchId);
+        
+        $items->transform(function ($item) use ($availabilityMap) {
+            $item->is_available = $availabilityMap['products'][$item->id] ?? false;
+            if ($item->variants) {
+                $item->variants->transform(function ($variant) use ($availabilityMap) {
+                    $variant->is_available = $availabilityMap['variants'][$variant->id] ?? false;
+                    return $variant;
+                });
+            }
+            return $item;
+        });
+
+        $isStoreOpen = PosRegister::where('branch_id', $activeBranchId)
+            ->where('status', 1)
+            ->exists();
 
         return Inertia::render('Admin/Pos/Index', [
             'categories' => $categories,
@@ -54,6 +76,7 @@ class PosController extends Controller
             'customers' => $customers,
             'tables' => $tables,
             'activeRegister' => $activeRegister,
+            'isStoreOpen' => $isStoreOpen,
             'branchSetting' => [
                 'vat_percentage' => $settings ? (float) $settings->vat_percentage : 0.00,
                 'service_charge_percentage' => $settings ? (float) $settings->service_charge_percentage : 0.00,
@@ -87,7 +110,7 @@ class PosController extends Controller
                 // 0. Conditionally require a register only if payment is being processed
                 $registerId = null;
                 if (!empty($validated['payment_method'])) {
-                    $activeRegister = \App\Models\PosRegister::where('user_id', auth()->id())
+                    $activeRegister = PosRegister::where('user_id', auth()->id())
                         ->where('branch_id', $branchId)
                         ->where('status', 1)
                         ->first();

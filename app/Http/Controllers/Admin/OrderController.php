@@ -12,6 +12,7 @@ use App\Services\LoyaltyService;
 use App\Services\RecipeService;
 use App\Http\Requests\Admin\Order\StoreOrderRequest;
 use App\Services\OrderService;
+use App\Services\MenuAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -50,11 +51,28 @@ class OrderController extends Controller {
 
     public function create()
     {
+        $activeBranchId = auth()->user()->getActiveBranchId();
+        $products = ProductItem::with('variants')->get();
+
+        $availabilityService = app(MenuAvailabilityService::class);
+        $availabilityMap = $availabilityService->getAvailabilityMap($products->pluck('id')->toArray(), $activeBranchId);
+
+        $products->transform(function ($item) use ($availabilityMap) {
+            $item->is_available = $availabilityMap['products'][$item->id] ?? false;
+            if ($item->variants) {
+                $item->variants->transform(function ($variant) use ($availabilityMap) {
+                    $variant->is_available = $availabilityMap['variants'][$variant->id] ?? false;
+                    return $variant;
+                });
+            }
+            return $item;
+        });
+
         return Inertia::render('Admin/Orders/Create', [
             'customers' => Customer::where('status', 1)->get(),
             'tables' => RestaurantTable::where('status', 1)->get(),
-            'branches' => \App\Models\Branch::all(),
-            'products' => \App\Models\ProductItem::with('variants')->get(),
+            'branches' => Branch::all(),
+            'products' => $products,
             'pageTitle' => 'Create Order'
         ]);
     }
@@ -74,7 +92,7 @@ class OrderController extends Controller {
         $order = OrderMaster::with(['items.product', 'customer', 'table', 'payments', 'invoice', 'delivery.driver'])
             ->findOrFail($id);
 
-        $drivers = \App\Models\User::whereHas('role', function ($query) {
+        $drivers = User::whereHas('role', function ($query) {
             $query->where('name', 'driver')->orWhere('name', 'Delivery Driver');
         })->get();
 

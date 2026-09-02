@@ -23,7 +23,7 @@ trait HasImage
 
         // Try the configured disk; fall back to local storage for legacy images
         try {
-            return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->$field);
+            return Storage::disk(config('filesystems.default', 'public'))->url($this->$field);
         } catch (\Exception $e) {
             return asset('storage/' . $this->$field);
         }

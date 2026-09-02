@@ -41,6 +41,7 @@
               :key="product.id"
               @click="addItem(product)"
               class="group relative bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-3 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-2 border-transparent hover:border-indigo-400/50 transition-all duration-300 flex flex-col items-center text-center shadow-sm"
+              :class="{'opacity-75 pointer-events-none': !product.is_available}"
             >
               <div class="relative w-full aspect-square mb-3 overflow-hidden rounded-xl">
                  <img v-if="product.image_url" :src="product.image_url" :alt="product.name" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
@@ -50,11 +51,15 @@
                  <div class="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-indigo-600 shadow-sm border border-indigo-100 dark:border-indigo-900/50">
                     {{ currency() }}{{ product.price }}
                  </div>
+                 <!-- Out of Stock Badge -->
+                 <div v-if="!product.is_available" class="absolute inset-0 bg-white/20 dark:bg-black/20 flex items-center justify-center pointer-events-none z-20">
+                     <span class="bg-red-500 text-white font-black uppercase tracking-widest text-[10px] px-2 py-1 shadow shadow-red-500/50 transform -rotate-12 rounded">Out of Stock</span>
+                 </div>
               </div>
               <span class="font-bold text-sm text-gray-800 dark:text-gray-200 line-clamp-1 truncate w-full">{{ product.name }}</span>
               
               <!-- Add overlay on hover -->
-              <div class="absolute inset-x-0 bottom-3 px-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+              <div v-if="product.is_available" class="absolute inset-x-0 bottom-3 px-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 z-10">
                   <div class="bg-indigo-600 text-white text-[10px] font-bold py-1 rounded-lg shadow-lg">ADD TO ORDER</div>
               </div>
             </div>
@@ -282,6 +287,8 @@ const total = computed(() => {
 const selectedProductForVariant = ref(null);
 
 const addItem = (product) => {
+    if (!product.is_available) return;
+
     if (product.variants && product.variants.length > 0) {
         selectedProductForVariant.value = product;
         return;

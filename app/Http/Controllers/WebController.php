@@ -85,7 +85,7 @@ public function menu(MenuAvailabilityService $availabilityService)
             'categories' => $categories,
             'items' => $items,
             'featuredItems' => $featuredItems, 
-            'availabilityMap' => $availabilityMap,
+            'availabilityMap' => $availabilityMap['products'],
             'activeCampaigns' => $activeCampaigns,
             'branches' => $branches,
             'resTables' => $resTables,

@@ -36,8 +36,8 @@ class MenuAvailabilityService
             function () use ($productItemIds, $branchId, $variantId, $quantity) {
                 // ── BULK LOAD PHASE (5 queries total) ──
 
-                // 1. Load ALL products with their inventory items (1 query + 1 eager load)
-                $products = ProductItem::with('inventoryItem')
+                // 1. Load ALL products with their inventory items AND variants (1 query + eager loads)
+                $products = ProductItem::with(['inventoryItem', 'variants'])
                     ->whereIn('id', $productItemIds)
                     ->get()
                     ->keyBy('id');
@@ -52,18 +52,12 @@ class MenuAvailabilityService
                     ->whereIn('menu_item_id', $productItemIds)
                     ->get();
 
-                // Index recipes: prefer variant-specific, fallback to general
+                // Index recipes by product_id and then variant_id (0 for general)
                 $recipeMap = [];
                 foreach ($recipes as $recipe) {
-                    $key = $recipe->menu_item_id;
-                    // If we already have a variant-specific recipe for this product, skip general ones
-                    if (isset($recipeMap[$key]) && $recipeMap[$key]->variant_id !== null) {
-                        continue;
-                    }
-                    // Prefer variant-specific over general
-                    if ($recipe->variant_id === ($variantId ?? null) || !isset($recipeMap[$key])) {
-                        $recipeMap[$key] = $recipe;
-                    }
+                    $prodId = $recipe->menu_item_id;
+                    $varId = $recipe->variant_id ?: 0;
+                    $recipeMap[$prodId][$varId] = $recipe;
                 }
 
                 // 4. Load ALL combo item details (1 query)
@@ -73,16 +67,51 @@ class MenuAvailabilityService
 
                 // ── VALIDATION PHASE (pure in-memory, zero queries) ──
 
-                $availability = [];
+                $availability = [
+                    'products' => [],
+                    'variants' => []
+                ];
+                
                 foreach ($productItemIds as $productItemId) {
-                    $availability[(int) $productItemId] = $this->checkAvailabilityInMemory(
-                        (int) $productItemId,
-                        $products,
-                        $stockMap,
-                        $recipeMap,
-                        $comboItems,
-                        $quantity
-                    );
+                    $product = $products[$productItemId] ?? null;
+                    if (!$product) {
+                        $availability['products'][(int) $productItemId] = false;
+                        continue;
+                    }
+                    
+                    $productStockStatus = false;
+                    
+                    if ($product->variants && $product->variants->isNotEmpty()) {
+                        $hasAvailableVariant = false;
+                        foreach ($product->variants as $variant) {
+                            $varAvailable = $this->checkAvailabilityInMemory(
+                                (int) $productItemId,
+                                $products,
+                                $stockMap,
+                                $recipeMap,
+                                $comboItems,
+                                $quantity,
+                                $variant->id
+                            );
+                            $availability['variants'][$variant->id] = $varAvailable;
+                            if ($varAvailable) {
+                                $hasAvailableVariant = true;
+                            }
+                        }
+                        $productStockStatus = $hasAvailableVariant;
+                    } else {
+                        $productStockStatus = $this->checkAvailabilityInMemory(
+                            (int) $productItemId,
+                            $products,
+                            $stockMap,
+                            $recipeMap,
+                            $comboItems,
+                            $quantity,
+                            null
+                        );
+                    }
+                    
+                    $availability['products'][(int) $productItemId] = $productStockStatus;
                 }
 
                 return $availability;
@@ -100,7 +129,8 @@ class MenuAvailabilityService
         $stockMap,
         $recipeMap,
         $comboItems,
-        float $quantity
+        float $quantity,
+        ?int $variantId = null
     ): bool {
         $product = $products[$productItemId] ?? null;
         if (!$product) return false;
@@ -129,7 +159,8 @@ class MenuAvailabilityService
                     $stockMap,
                     $recipeMap,
                     $comboItems,
-                    $comboItem->quantity * $quantity
+                    $comboItem->quantity * $quantity,
+                    null
                 );
                 if (!$subAvailable) return false;
             }
@@ -137,7 +168,14 @@ class MenuAvailabilityService
         }
 
         // 3. Fallback to recipe validation (Ingredients)
-        $recipe = $recipeMap[$productItemId] ?? null;
+        $recipesForProduct = $recipeMap[$productItemId] ?? [];
+        $recipe = null;
+        if ($variantId && isset($recipesForProduct[$variantId])) {
+            $recipe = $recipesForProduct[$variantId];
+        } elseif (isset($recipesForProduct[0])) {
+            $recipe = $recipesForProduct[0];
+        }
+
         if (!$recipe) return false; // No stock and no recipe = unavailable
 
         foreach ($recipe->recipeItems as $recipeItem) {

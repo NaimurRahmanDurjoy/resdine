@@ -1,5 +1,24 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-50 flex-1 overflow-hidden font-sans">
+  <div class="h-screen flex flex-col bg-gray-50 flex-1 overflow-hidden font-sans relative">
+
+    <!-- Store Closed Lockdown Overlay -->
+    <div v-if="!isStoreOpen"
+      class="absolute inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center text-white">
+      <span
+        class="material-symbols-outlined text-[80px] text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">store_closed</span>
+      <h1 class="text-3xl md:text-5xl font-black mb-4 tracking-tight">The POS is Locked</h1>
+      <p class="text-base md:text-lg text-slate-400 mb-10 max-w-md text-center leading-relaxed font-medium">There are
+        currently no active registers open for this branch. Please open a shift to resume POS operations.</p>
+
+      <Link :href="route('admin.pos.register.open')"
+        class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-8 py-4 rounded-full text-sm font-black uppercase tracking-widest transition-transform hover:scale-105 active:scale-95 shadow-xl flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-lg">login</span> Open New Shift
+      </Link>
+
+      <Link :href="route('admin.dashboard')"
+        class="text-slate-500 hover:text-slate-300 underline font-medium text-sm transition-colors mt-2">Return to
+        Dashboard</Link>
+    </div>
 
     <!-- Top Bar -->
     <header
@@ -66,15 +85,24 @@
         <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             <div v-for="item in filteredItems" :key="item.id" @click="addToCart(item)"
-              class="bg-white rounded-xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-indigo-300 transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1 group flex flex-col active:scale-95 duration-200">
+              class="bg-white rounded-xl shadow-sm border border-gray-100 transition-all overflow-hidden flex flex-col duration-200"
+              :class="item.is_available ? 'hover:shadow-xl hover:border-indigo-300 cursor-pointer transform hover:-translate-y-1 active:scale-95 group' : 'opacity-60 cursor-not-allowed grayscale'">
               <div class="aspect-square bg-gray-100 relative overflow-hidden flex items-center justify-center">
                 <img v-if="item.image_url" :src="item.image_url"
-                  class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500">
+                  class="object-cover w-full h-full transition-transform duration-500"
+                  :class="item.is_available ? 'group-hover:scale-105' : ''">
                 <span v-else class="material-symbols-outlined text-4xl text-gray-300">restaurant_menu</span>
                 <!-- Price Badge overlay -->
                 <div
-                  class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-sm font-bold shadow-lg">
+                  class="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-sm font-bold shadow-lg z-20">
                   {{ currency() }}{{ item.price }}
+                </div>
+                <!-- Out of Stock Badge -->
+                <div v-if="!item.is_available"
+                  class="absolute inset-0 bg-gray-900/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                  <span
+                    class="bg-gray-900/80 text-white font-bold uppercase tracking-widest text-xs px-3 py-1.5 rounded-full border border-gray-500/30 shadow-lg">Out
+                    of Stock</span>
                 </div>
               </div>
               <div class="p-3 text-center flex-1 flex flex-col justify-center bg-gradient-to-t from-gray-50 to-white">
@@ -182,7 +210,8 @@
             </div>
             <!-- Dynamic VAT row -->
             <div v-if="cartVatAmount > 0" class="flex justify-between text-gray-600">
-              <span>VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.' }})</span>
+              <span>VAT ({{ branchSetting.vat_percentage }}%{{ branchSetting.is_vat_inclusive ? ' Incl.' : ' Excl.'
+                }})</span>
               <span class="font-semibold">{{ currency() }}{{ cartVatAmount.toFixed(2) }}</span>
             </div>
             <!-- Dynamic Service Charge row -->
@@ -211,8 +240,10 @@
                 <span v-else class="material-symbols-outlined text-sm">payments</span>
                 <span class="text-xs">Pay & Complete</span>
               </button>
-              <div v-else class="bg-gray-100 rounded-xl flex flex-col items-center justify-center p-2 border border-gray-200">
-                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tight text-center">Open register to enable payments</span>
+              <div v-else
+                class="bg-gray-100 rounded-xl flex flex-col items-center justify-center p-2 border border-gray-200">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tight text-center">Open register to
+                  enable payments</span>
               </div>
             </div>
 
@@ -221,11 +252,13 @@
               <button @click="submitOrder(true, 5)" :disabled="isSubmitting"
                 class="w-full py-3 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition active:scale-95 shadow-md flex items-center justify-center space-x-2">
                 <span class="material-symbols-outlined text-sm">redeem</span>
-                <span class="text-xs">Pay with {{ cartTotal.toFixed(0) }} Points (Bal: {{ activeCustomerPoints }})</span>
+                <span class="text-xs">Pay with {{ cartTotal.toFixed(0) }} Points (Bal: {{ activeCustomerPoints
+                  }})</span>
               </button>
             </div>
             <div v-else-if="activeRegister && selectedCustomerId" class="text-center">
-               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Points Balance: {{ activeCustomerPoints }} (Insufficient for this order)</span>
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Points Balance: {{
+                activeCustomerPoints }} (Insufficient for this order)</span>
             </div>
             <button @click="cart = []" :disabled="cart.length === 0"
               class="py-2 px-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 w-full">
@@ -259,7 +292,8 @@ const props = defineProps({
   customers: Array,
   tables: Array,
   branchSetting: Object,
-  activeRegister: Object
+  activeRegister: Object,
+  isStoreOpen: Boolean
 })
 
 // UI State
@@ -314,7 +348,7 @@ const cartDiscount = computed(() => {
 const cartVatAmount = computed(() => {
   const vatPercent = parseFloat(props.branchSetting?.vat_percentage || 0)
   if (vatPercent <= 0) return 0
-  
+
   if (props.branchSetting?.is_vat_inclusive) {
     return cartSubtotal.value - (cartSubtotal.value / (1 + vatPercent / 100))
   } else {
@@ -348,6 +382,8 @@ const selectedProductForVariant = ref(null)
 
 // Methods
 const addToCart = (product) => {
+  if (!product.is_available) return
+
   if (product.variants && product.variants.length > 0) {
     selectedProductForVariant.value = product
     return
